@@ -32,3 +32,17 @@ export const postBySlugQuery = groq`
     body
   }
 `
+
+export const experiencesQuery = groq`
+  *[_type == "experience"] | order(startDate desc) {
+    _id,
+    company,
+    role,
+    location,
+    isCurrentJob,
+    startDate,
+    endDate,
+    description,
+    skills
+  }
+`

@@ -35,7 +35,14 @@ export const postSchema = defineType({
       name: "body",
       title: "Content",
       type: "array",
-      of: [{ type: "block" }],
+      of: [
+        {
+          type: 'block'
+        },
+        {
+          type: 'image'
+        }
+      ],
       validation: (rule) => rule.required(),
     }),
   ],

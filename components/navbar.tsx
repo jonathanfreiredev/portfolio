@@ -16,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { usePathname } from "next/navigation"
 
 export function Navbar() {
   const isProduction = process.env.NODE_ENV === "production";
@@ -28,6 +29,10 @@ export function Navbar() {
     setCompact(current > 24)
     setHidden(current > 140 && current > previous)
   })
+
+  const isStudio = usePathname().includes("/studio");
+
+  if (isStudio) return null;
 
   return (
     <motion.header

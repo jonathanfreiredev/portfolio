@@ -1,18 +1,18 @@
 type PortableTextChild = {
-  text?: string
-}
+  text?: string;
+};
 
 type PortableTextBlockLike = {
-  _type?: string
-  style?: string
-  children?: PortableTextChild[]
-}
+  _type?: string;
+  style?: string;
+  children?: PortableTextChild[];
+};
 
 export function getBlockText(block: PortableTextBlockLike): string {
   return (block.children || [])
     .map((child) => child.text || "")
     .join("")
-    .trim()
+    .trim();
 }
 
 export function headingIdFromText(text: string): string {
@@ -22,5 +22,5 @@ export function headingIdFromText(text: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-")
+    .replace(/\s+/g, "-");
 }
