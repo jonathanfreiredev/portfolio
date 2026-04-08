@@ -34,7 +34,9 @@ export const postSchema = defineType({
     defineField({
       name: "body",
       title: "Content",
-      type: "portableText",
+      type: "array",
+      of: [{ type: "block" }],
+      validation: (rule) => rule.required(),
     }),
   ],
   preview: {

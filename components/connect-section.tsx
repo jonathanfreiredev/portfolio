@@ -1,13 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { Github, Linkedin, Mail } from "lucide-react"
+import {  MailIcon } from "lucide-react"
+
+import { SiGithub } from '@icons-pack/react-simple-icons';
 import { motion, useMotionValue, useSpring } from "motion/react"
 
 const links = [
-  { href: "https://github.com", label: "GitHub", icon: Github },
-  { href: "https://linkedin.com", label: "LinkedIn", icon: Linkedin },
-  { href: "mailto:hello@example.com", label: "Email", icon: Mail },
+  { href: "https://github.com", label: "GitHub", icon: SiGithub },
+  { href: "https://linkedin.com", label: "LinkedIn", icon: MailIcon },
+  { href: "mailto:hello@example.com", label: "Email", icon: MailIcon },
 ]
 
 function MagneticLink({
@@ -17,7 +19,7 @@ function MagneticLink({
 }: {
   href: string
   label: string
-  Icon: typeof Github
+  Icon: typeof SiGithub
 }) {
   const x = useMotionValue(0)
   const y = useMotionValue(0)
