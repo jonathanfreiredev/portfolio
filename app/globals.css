@@ -119,12 +119,29 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-primary/10 outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at 15% 20%, color-mix(in oklab, var(--color-primary) 11%, transparent) 0, transparent 35%),
+      radial-gradient(circle at 85% 0%, color-mix(in oklab, var(--color-primary) 8%, transparent) 0, transparent 28%),
+      linear-gradient(to right, color-mix(in oklab, var(--color-foreground) 4%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-foreground) 4%, transparent) 1px, transparent 1px);
+    background-size: auto, auto, 36px 36px, 36px 36px;
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-bold tracking-tighter;
+  }
+  code,
+  pre,
+  time,
+  .font-mono {
+    font-family: var(--font-geist-mono), monospace;
   }
 }
