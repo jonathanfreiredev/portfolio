@@ -1,32 +1,41 @@
-import Image from "next/image"
-import Link from "next/link"
-import { format } from "date-fns"
+import Image from "next/image";
+import Link from "next/link";
+import { format } from "date-fns";
 
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { client } from "@/sanity/lib/client"
-import { urlFor } from "@/sanity/lib/image"
-import { postsQuery } from "@/sanity/lib/queries"
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { client } from "@/sanity/lib/client";
+import { urlFor } from "@/sanity/lib/image";
+import { postsQuery } from "@/sanity/lib/queries";
 
 type Post = {
-  _id: string
-  title: string
-  slug?: { current?: string }
-  date: string
-  image?: unknown
-  excerpt?: string
-}
+  _id: string;
+  title: string;
+  slug?: { current?: string };
+  date: string;
+  image?: unknown;
+  excerpt?: string;
+};
 
 function readingTimeFromText(text: string) {
-  const words = text.trim().split(/\s+/).filter(Boolean).length
-  return Math.max(1, Math.ceil(words / 180))
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 180));
 }
 
 export default async function BlogPage() {
-  let posts: Post[] = []
+  let posts: Post[] = [];
   try {
-    posts = await client.fetch<Post[]>(postsQuery, {}, { next: { revalidate: 60 } })
+    posts = await client.fetch<Post[]>(
+      postsQuery,
+      {},
+      { next: { revalidate: 60 } },
+    );
   } catch {
-    posts = []
+    posts = [];
   }
 
   return (
@@ -44,10 +53,10 @@ export default async function BlogPage() {
       ) : null}
       <div className="space-y-4">
         {posts.map((post) => {
-          const slug = post.slug?.current
-          if (!slug) return null
+          const slug = post.slug?.current;
+          if (!slug) return null;
 
-          const readingTime = readingTimeFromText(post.excerpt || post.title)
+          const readingTime = readingTimeFromText(post.excerpt || post.title);
 
           return (
             <Link
@@ -67,18 +76,21 @@ export default async function BlogPage() {
                 ) : null}
                 <div className="space-y-2">
                   <p className="font-mono text-xs text-muted-foreground">
-                    {format(new Date(post.date), "MMMM dd, yyyy")} · {readingTime} min read
+                    {format(new Date(post.date), "MMMM dd, yyyy")} ·{" "}
+                    {readingTime} min read
                   </p>
-                  <h2 className="text-2xl group-hover:text-primary">{post.title}</h2>
+                  <h2 className="text-2xl group-hover:text-primary">
+                    {post.title}
+                  </h2>
                   <p className="line-clamp-2 text-sm text-muted-foreground">
                     {(post.excerpt || "").slice(0, 160)}
                   </p>
                 </div>
               </article>
             </Link>
-          )
+          );
         })}
       </div>
     </main>
-  )
+  );
 }

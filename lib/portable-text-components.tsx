@@ -3,6 +3,8 @@ import Image from "next/image";
 import { getBlockText, headingIdFromText } from "@/lib/portable-text";
 import { urlFor } from "@/sanity/lib/image";
 import { JSX } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const Heading = ({ level, children, value }: any) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
@@ -127,5 +129,29 @@ export const portableTextComponents: PortableTextComponents = {
         )}
       </figure>
     ),
+    code: ({ value }) => {
+      return (
+        <div className="my-6 rounded-lg overflow-hidden text-sm border border-zinc-200 dark:border-zinc-800 shadow-sm">
+          <div className="bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 px-4 py-2 flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800">
+            <span className="font-mono text-xs">
+              {value.filename || value.language || "code"}
+            </span>
+          </div>
+
+          <SyntaxHighlighter
+            language={value.language || "javascript"}
+            style={vscDarkPlus}
+            customStyle={{
+              margin: 0,
+              padding: "1.25rem",
+              fontSize: "14px",
+              lineHeight: "1.5",
+            }}
+          >
+            {value.code || ""}
+          </SyntaxHighlighter>
+        </div>
+      );
+    },
   },
 };

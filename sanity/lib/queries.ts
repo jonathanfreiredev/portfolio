@@ -1,4 +1,4 @@
-import { groq } from "next-sanity"
+import { groq } from "next-sanity";
 
 export const projectsQuery = groq`
   *[_type == "project"] | order(_createdAt desc) {
@@ -9,7 +9,7 @@ export const projectsQuery = groq`
     url,
     techStack
   }
-`
+`;
 
 export const postsQuery = groq`
   *[_type == "post"] | order(date desc) {
@@ -20,7 +20,7 @@ export const postsQuery = groq`
     image,
     "excerpt": coalesce(pt::text(body), "")
   }
-`
+`;
 
 export const postBySlugQuery = groq`
   *[_type == "post" && slug.current == $slug][0] {
@@ -29,9 +29,21 @@ export const postBySlugQuery = groq`
     "slug": slug.current,
     date,
     image,
-    body
+    body[] {
+      ...,
+      _type == "image" => {
+        ...,
+        "url": asset->url
+      },
+      _type == "code" => {
+        ...,
+        "language": language,
+        "code": code,
+        "filename": coalesce(filename, "code-snippet")
+      }
+    }
   }
-`
+`;
 
 export const experiencesQuery = groq`
   *[_type == "experience"] | order(startDate desc) {
@@ -45,4 +57,4 @@ export const experiencesQuery = groq`
     description,
     skills
   }
-`
+`;

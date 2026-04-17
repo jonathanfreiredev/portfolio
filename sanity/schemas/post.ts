@@ -1,4 +1,4 @@
-import { defineField, defineType } from "sanity"
+import { defineField, defineType } from "sanity";
 
 export const postSchema = defineType({
   name: "post",
@@ -37,11 +37,17 @@ export const postSchema = defineType({
       type: "array",
       of: [
         {
-          type: 'block'
+          type: "block",
         },
         {
-          type: 'image'
-        }
+          type: "image",
+        },
+        {
+          type: "code",
+          options: {
+            withFilename: true,
+          },
+        },
       ],
       validation: (rule) => rule.required(),
     }),
@@ -53,4 +59,4 @@ export const postSchema = defineType({
       media: "image",
     },
   },
-})
+});
