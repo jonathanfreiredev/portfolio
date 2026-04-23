@@ -131,9 +131,9 @@ export const portableTextComponents: PortableTextComponents = {
     ),
     code: ({ value }) => {
       return (
-        <div className="my-6 rounded-lg overflow-hidden text-sm border border-zinc-200 dark:border-zinc-800 shadow-sm">
+        <div className="my-6 max-w-full rounded-lg overflow-hidden text-sm border border-zinc-200 dark:border-zinc-800 shadow-sm">
           <div className="bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 px-4 py-2 flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800">
-            <span className="font-mono text-xs">
+            <span className="block max-w-full truncate font-mono text-xs">
               {value.filename || value.language || "code"}
             </span>
           </div>
@@ -141,11 +141,23 @@ export const portableTextComponents: PortableTextComponents = {
           <SyntaxHighlighter
             language={value.language || "javascript"}
             style={vscDarkPlus}
+            wrapLongLines
+            codeTagProps={{
+              style: {
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                overflowWrap: "anywhere",
+              },
+            }}
             customStyle={{
               margin: 0,
               padding: "1.25rem",
               fontSize: "14px",
               lineHeight: "1.5",
+              width: "100%",
+              boxSizing: "border-box",
+              maxWidth: "100%",
+              overflowX: "auto",
             }}
           >
             {value.code || ""}
