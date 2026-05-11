@@ -83,14 +83,14 @@ export function ProjectCards({ projects }: ProjectCardsProps) {
                 className="h-48 w-full border-b border-primary/10 object-top object-cover"
               />
             ) : null}
-            <CardHeader className="pb-2 flex-1">
+            <CardHeader className="pb-2 flex-1 flex flex-col">
               <CardTitle>{project.title}</CardTitle>
               <CardDescription>
                 {project.description ||
                   "Case study focused on performance, reliability, and measurable product outcomes."}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex  flex-wrap items-center gap-2 border-t border-primary/10 pt-4">
+            <CardContent className="flex flex-wrap items-center gap-2 border-t border-primary/10 pt-4">
               {(project.techStack || []).map((tech) => (
                 <Badge
                   key={tech}
