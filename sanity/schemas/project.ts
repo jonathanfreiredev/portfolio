@@ -1,4 +1,4 @@
-import { defineField, defineType } from "sanity"
+import { defineField, defineType } from "sanity";
 
 export const projectSchema = defineType({
   name: "project",
@@ -17,6 +17,12 @@ export const projectSchema = defineType({
       type: "text",
       rows: 4,
       validation: (rule) => rule.required().min(20),
+    }),
+    defineField({
+      name: "order",
+      title: "Order",
+      type: "number",
+      validation: (rule) => rule.required().integer().positive(),
     }),
     defineField({
       name: "image",
@@ -45,4 +51,4 @@ export const projectSchema = defineType({
       media: "image",
     },
   },
-})
+});
