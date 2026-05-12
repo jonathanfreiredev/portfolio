@@ -74,8 +74,9 @@ export function ConnectSection() {
     <section className="space-y-4 rounded-2xl border border-primary/15 bg-card/40 p-6 backdrop-blur-xl">
       <h2 className="text-2xl">Connect</h2>
       <p className="text-sm text-muted-foreground">
-        Let&apos;s collaborate on product design systems, frontend architecture,
-        and polished user experiences.
+        Open to full-time roles and interesting projects. If you're building
+        something with a strong technical foundation or exploring what AI can do
+        in your product, I'd like to hear about it.
       </p>
       <div className="flex flex-wrap gap-3">
         {links.map((link) => (

@@ -97,9 +97,9 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
                   <span>{experience.location}</span>
                 </div>
 
-                {/* <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                   {experience.description}
-                </div> */}
+                </div>
 
                 <div className="flex flex-wrap gap-2 pt-1">
                   {(experience.skills || []).map((skill) => (
