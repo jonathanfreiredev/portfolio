@@ -43,7 +43,7 @@ type Experience = {
   isCurrentJob?: boolean;
   startDate: string;
   endDate?: string;
-  description?: PortableBlock[];
+  description: string;
   skills?: string[];
 };
 
@@ -75,16 +75,16 @@ export default async function Home() {
         <div className="grid gap-4 md:grid-cols-3">
           {[
             {
-              title: "Full-Stack Reliability",
-              desc: "Type-safe architectures built with Next.js, Nest.js, and GraphQL. Focused on high-performance systems and long-term maintainability.",
+              title: "Full-Stack Development",
+              desc: "TypeScript across the entire stack — Next.js and Nest.js on the frontend and backend, GraphQL and REST for APIs, with a focus on type safety and long-term maintainability.",
             },
             {
-              title: "Complex Integrations",
-              desc: "Seamless synchronization of business-critical data, from bi-directional CRM engines to production-ready AI implementations.",
+              title: "Third-Party Integrations",
+              desc: "From bi-directional CRM sync to payment providers and AI services. I've built and maintained production integrations that keep business data consistent across platforms.",
             },
             {
-              title: "Scalable Systems",
-              desc: "Design and deployment of resilient backend infrastructures using PostgreSQL, TypeORM, and cloud-native strategies on Azure/AWS.",
+              title: "Cloud Infrastructure & Databases",
+              desc: "Database design with PostgreSQL and TypeORM, containerization with Docker, and cloud deployment on Azure and AWS — with an eye on security and cost efficiency.",
             },
           ].map((item) => (
             <Card

@@ -22,7 +22,7 @@ type Experience = {
   isCurrentJob?: boolean;
   startDate: string;
   endDate?: string;
-  description?: PortableBlock[];
+  description: string;
   skills?: string[];
 };
 
@@ -97,11 +97,8 @@ export function ExperienceTimeline({ experiences }: ExperienceTimelineProps) {
                   <span>{experience.location}</span>
                 </div>
 
-                <div className="prose prose-zinc max-w-none dark:prose-invert prose-p:my-2 prose-ul:my-2 prose-li:my-1">
-                  <PortableText
-                    value={experience.description || []}
-                    components={portableTextComponents}
-                  />
+                <div className="text-sm text-muted-foreground">
+                  {experience.description}
                 </div>
 
                 <div className="flex flex-wrap gap-2 pt-1">

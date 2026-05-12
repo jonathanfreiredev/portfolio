@@ -22,13 +22,12 @@ export function Hero() {
         </Badge>
 
         <h1 className="text-4xl leading-tight md:text-5xl">
-          Building scalable systems with architectural integrity.
+          Building full-stack systems made to last.
         </h1>
 
         <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-          Software Engineer and ex-Founder specializing in robust full-stack
-          solutions. I bridge the gap between complex technical challenges and
-          high-performance SaaS products.
+          Software Engineer and ex-Founder with a focus on TypeScript across the
+          entire stack — from database architecture to cloud deployment.
         </p>
       </div>
 
@@ -37,13 +36,21 @@ export function Hero() {
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -left-8 -top-8 size-32 rounded-full bg-emerald-500/25 blur-3xl"
-            animate={{ x: [0, 16, -8, 0], y: [0, -10, 12, 0], scale: [1, 1.08, 0.96, 1] }}
+            animate={{
+              x: [0, 16, -8, 0],
+              y: [0, -10, 12, 0],
+              scale: [1, 1.08, 0.96, 1],
+            }}
             transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -bottom-10 -right-8 size-36 rounded-full bg-sky-500/20 blur-3xl"
-            animate={{ x: [0, -14, 10, 0], y: [0, 12, -10, 0], scale: [1, 0.94, 1.06, 1] }}
+            animate={{
+              x: [0, -14, 10, 0],
+              y: [0, 12, -10, 0],
+              scale: [1, 0.94, 1.06, 1],
+            }}
             transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
@@ -59,7 +66,7 @@ export function Hero() {
             width={720}
             height={900}
             priority
-            className="relative z-10 h-[300px] w-full rounded-xl border border-white/25 object-cover object-top md:h-auto"
+            className="relative z-10 h-[300px] w-full rounded-xl border border-white/25 object-cover object-top md:h-auto md:max-h-[430px]"
           />
         </div>
       </div>

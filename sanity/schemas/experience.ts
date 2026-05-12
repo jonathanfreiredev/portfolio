@@ -45,7 +45,8 @@ export const experienceSchema = defineType({
       title: "End Date",
       type: "date",
       options: { dateFormat: "YYYY-MM" },
-      hidden: ({ parent }) => Boolean((parent as ExperienceParent | undefined)?.isCurrentJob),
+      hidden: ({ parent }) =>
+        Boolean((parent as ExperienceParent | undefined)?.isCurrentJob),
       validation: (rule) =>
         rule.custom((value, context) => {
           const parent = context.parent as ExperienceParent | undefined;
@@ -58,8 +59,8 @@ export const experienceSchema = defineType({
     defineField({
       name: "description",
       title: "Description",
-      type: "array",
-      of: [{ type: "block" }],
+      type: "text",
+      rows: 4,
       validation: (rule) => rule.required(),
     }),
     defineField({
