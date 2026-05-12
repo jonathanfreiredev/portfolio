@@ -27,7 +27,7 @@ export function Hero() {
 
         <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
           Software Engineer and ex-Founder with a focus on TypeScript across the
-          entire stack — from database architecture to cloud deployment.
+          entire stack, from database architecture to cloud deployment.
         </p>
       </div>
 
