@@ -1,13 +1,9 @@
 import type { MetadataRoute } from "next"
 
-import { client } from "@/sanity/lib/client"
-import { postsQuery } from "@/sanity/lib/queries"
-
-type PostSlugItem = {
-  slug?: { current?: string }
-}
+import { getAllPosts } from "@/lib/posts"
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"
+const LOCALE = "en"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -16,16 +12,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   try {
-    const posts = await client.fetch<PostSlugItem[]>(postsQuery, {}, { next: { revalidate: 3600 } })
+    const posts = await getAllPosts(LOCALE)
 
-    const postRoutes: MetadataRoute.Sitemap = posts
-      .map((post) => post.slug?.current)
-      .filter((slug): slug is string => Boolean(slug))
-      .map((slug) => ({
-        url: `${siteUrl}/blog/${slug}`,
-        changeFrequency: "weekly",
-        priority: 0.7,
-      }))
+    const postRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
+      url: `${siteUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }))
 
     return [...staticRoutes, ...postRoutes]
   } catch {

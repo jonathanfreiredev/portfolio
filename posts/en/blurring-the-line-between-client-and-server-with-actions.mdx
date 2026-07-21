@@ -1,0 +1,895 @@
+---
+title: "Blurring the Line Between Client and Server with Server Actions"
+date: "2026-05-05"
+slug: "blurring-the-line-between-client-and-server-with-actions"
+description: "A practical guide to architecting Next.js server actions with procedures, cache revalidation, and optimistic updates for clean client-server communication."
+tags: ["nextjs", "server-actions", "react", "typescript", "prisma", "architecture"]
+---
+
+![Blurring the Line Between Client and Server with Server Actions](https://cdn.sanity.io/images/4g99o1oi/production/b60068d1a846e99bae985d7a2cee3dfb6d3952dc-1200x655.png?rect=27,0,1146,655&w=1400&h=800)
+
+This article shows how to streamline your architecture using **server actions**. I won't be explaining the pros and cons of using them in detail. I consider it a mature tool already, and it is an amazing way to manage communication between client and server.
+
+Server actions are a way to run server-side code in your React components. Next.js manage this action as a POST request serialising the data before the request. Then, it deserialises the data on the server side and runs the code of the action. Finally, Next.js serialises the response on the server side, and then it deserialises it on the client side.
+
+A server action looks like a normal function, which you can call directly on a React component, so it is very common to end up with messy code. It goes worse if you include your business logic directly in your server action on the same file.
+
+There are 3 important parts of your code: React components, the tool to make requests to your server from the client side and the business logic running on the server side. Server actions are the second one, so you can see this as an alternative to using tRPC or "fetch/axios + API Routes". If you combine all of these parts in the same file, you'll run into many gotchas, like a hard-to-maintain codebase or strong coupling.
+
+To avoid these drawbacks, it's worth taking a moment to focus on your architecture. I prepared this blog post to help you to implement the best practices, including procedures, cache revalidation, optimistic updates and more.
+
+We are going to create **a small app for book recommendations**. To focus only on server actions, we will start the project using a template I have created, which utilises Next.js, Prisma, Shadcn and Better Auth. You can create a new project on GitHub using this template by going to [this repository](https://github.com/jonathanfreiredev/modern-nextjs-stack).
+
+## What is this guide covering
+
+1. Setting up the project
+2. Modelling the database
+3. Folders structure
+4. Input validation
+5. Services
+6. Queries & Cache
+7. Public and protected procedures
+8. Server actions & Cache revalidation
+9. React hook form and actions
+10. Book reviews
+11. Giving a like
+12. Conclusion
+
+## Setting up the project
+
+As we touched upon, we'll begin this project using [this repository](https://github.com/jonathanfreiredev/modern-nextjs-stack) as a template. If you prefer to start the project from scratch and configure all the technologies we are going to use by yourself, I recommend following my last [article](https://jonathanfreire.com/blog/how-i-ship-fast-in-2026-my-modern-nextjs-stack).
+
+To set up the project, you have to follow the Getting Started section of the **README.md** file included in the template, so I won't write it again here.
+
+Once you have completed the steps, you'll see that not only is your app running, but you also have a **local database** set up. Moreover, this template already includes basic **email and password authentication**.
+
+## Modelling the database
+
+The main goal of this app is to have a public book review board. However, only logged-in users can create a book review or give a like to reviews. This last requirement forces us to have a protected procedure for making requests to the backend.
+
+The authentication system is already implemented in the template, so we only need to create 2 models in our current Prisma Schema: `BookReview` and `Like`.
+
+```prisma prisma/schema.prisma
+model User {
+  ...otherProperties
+
+  bookReviews   BookReview[]
+  likes         Like[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model BookReview {
+  id         String   @id @default(cuid())
+  title      String
+  author     String
+  buyUrl     String?
+  content    String   @db.Text
+  likesCount Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  likes      Like[]
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  @@map("book_review")
+}
+
+model Like {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  bookReview   BookReview @relation(fields: [bookReviewId], references: [id], onDelete: Cascade)
+  bookReviewId String
+
+  @@id([userId, bookReviewId])
+  @@map("like")
+}
+```
+
+Then, run a new migration and regenerate the Prisma Client on your terminal:
+
+```bash
+pnpm dlx prisma migrate dev --name add-book-reviews-and-likes
+pnpm dlx prisma generate
+```
+
+## Folders structure
+
+Aside from the rest of the folders of the project, we'll create a new folder `/server` in the root. Remember that the `/app` folder is specifically for routing and layouts, so I don't recommend having this new folder inside the /app folder. Inside the `/server` folder, we'll have the same folder structure organised per entity. I'm going to show you an initial structure, but you can go more detailed.
+
+```text
+/server
+  ├── book-reviews
+    ├── book-reviews.actions.ts
+    ├── book-reviews.queries.ts
+    ├── book-reviews.service.ts
+    ├── book-reviews.schema.ts
+  ├── likes
+    ├── likes.actions.ts
+    ├── likes.queries.ts
+    ├── likes.service.ts
+    ├── likes.schema.ts
+```
+
+Following the **Single Responsibility Principle (SRP)**, my suggestion is to have these 3 files per entity:
+
+- The `actions` file will have the directive `"use server"` to show Next.js that this file will be executed on the server side. Every function in this file is a server action and is responsible for the input validation, user authentication, etc. Remember, server actions are basically mutations.
+- The `queries` file can be used directly in a server component to get data. Unlike Server Actions, they are a streamlined, read-only layer that leverages Next.js `"use cache"` and `cacheTag` for high-performance delivery while keeping your core business logic decoupled and portable. Remember, if you need to call a query from a client component using, for example `fetch` or `react-query`, you have to create an action, which call this query.
+- The `service` file is where your business logic lives. The functions inside this file are reusable in different actions or queries. It doesn't change if the communication with the client changes.
+- The `schema` file contains the Zod schemas to validate the inputs for your actions or service functions.
+
+## Input validation
+
+We have to create the CRUD functions for book reviews, but we'll focus only on creating and reading reviews. Additionally, we need to manage the review likes and update their counter. Therefore, we first need to create the `zod` schemas to validate the inputs for these actions.
+
+Starting with the book reviews, we need a validation schema for the creation input. But also, we need another one for querying reviews to specify how many we want to receive.
+
+```typescript server/book-reviews/book-reviews.schema.ts
+import { z } from "zod";
+
+export const createBookReviewSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  author: z.string().min(1, "Author is required"),
+  buyUrl: z.url("URL must be a valid URL").nullable(),
+  content: z.string().min(1, "Content is required"),
+});
+
+export const getAllBookReviewsSchema = z.object({
+  skip: z.number().min(0).default(0),
+  take: z.number().min(1).max(100).default(10),
+});
+```
+
+Then, as we mentioned, we need an action to toggle the like button of a book review, but also a query to get the status of the like button by the user. So, let's create the validation schemas for the input.
+
+```typescript server/likes/likes.schema.ts
+import { z } from "zod";
+
+export const getLikesStatusSchema = z.object({
+  bookReviewId: z.cuid("Invalid book review ID"),
+  userId: z.string().min(1, "User ID is required"),
+});
+
+export const toogleLikeSchema = z.object({
+  bookReviewId: z.cuid("Invalid book review ID"),
+});
+```
+
+## Services
+
+It's time to create the services where the business logic lives. To prevent functions from being accidentally used directly in a client component, it's a good practice to declare these files as server-only. To do that, we have to install the following dependency:
+
+```bash
+pnpm add server-only
+```
+
+Importing it at the top of these files, it will throw a build error if you use a function of these files in the client side.
+
+Starting with the book reviews service, we have to create a function to create a book review and a function to get all book reviews. Notice that the input types of every function are inferred from the schemas created previously. The data is already validated, either in the actions or in the queries. Inside these functions, we use the database client, which is actually the Prisma Client.
+
+```typescript server/book-reviews/book-reviews.service.ts
+import "server-only";
+import { z } from "zod";
+import { db } from "@/lib/db";
+import {
+  createBookReviewSchema,
+  getAllBookReviewsSchema,
+} from "./book-reviews.schema";
+
+export const createBookReview = async (
+  input: z.infer<typeof createBookReviewSchema> & { userId: string },
+) => {
+  const bookReview = await db.bookReview.create({
+    data: input,
+  });
+
+  return bookReview;
+};
+
+export const getAllBookReviews = async (
+  input: z.infer<typeof getAllBookReviewsSchema>,
+) => {
+  const { skip, take } = input;
+  const bookReviews = await db.bookReview.findMany({
+    skip,
+    take,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const total = await db.bookReview.count();
+
+  return {
+    data: bookReviews,
+    hasNextPage: skip + take < total,
+  };
+};
+```
+
+Then, we apply the same logic to create the likes service. It's important to mention that the creation or deletion of a like and the update of the book review are in the same transaction, so we make sure that either both are done or neither is.
+
+```typescript server/likes/likes.service.ts
+import "server-only";
+import { db } from "@/lib/db";
+import { z } from "zod";
+import { getLikesStatusSchema, toogleLikeSchema } from "./likes.schema";
+
+export const getLikesStatus = async ({
+  bookReviewId,
+  userId,
+}: z.infer<typeof getLikesStatusSchema>) => {
+  const userLike = await db.like.findFirst({
+    where: {
+      userId,
+      bookReviewId,
+    },
+  });
+
+  return !!userLike;
+};
+
+export const toogleLike = async (
+  input: z.infer<typeof toogleLikeSchema> & { userId: string },
+) => {
+  const { userId, bookReviewId } = input;
+
+  const existingLike = await db.like.findFirst({
+    where: {
+      userId,
+      bookReviewId,
+    },
+  });
+
+  if (existingLike) {
+    await db.$transaction([
+      db.like.delete({
+        where: {
+          userId_bookReviewId: {
+            userId,
+            bookReviewId,
+          },
+        },
+      }),
+      db.bookReview.update({
+        where: {
+          id: bookReviewId,
+        },
+        data: {
+          likesCount: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
+
+    return { liked: false };
+  } else {
+    await db.$transaction([
+      db.like.create({
+        data: {
+          userId,
+          bookReviewId,
+        },
+      }),
+      db.bookReview.update({
+        where: {
+          id: bookReviewId,
+        },
+        data: {
+          likesCount: {
+            increment: 1,
+          },
+        },
+      }),
+    ]);
+
+    return { liked: true };
+  }
+};
+```
+
+## Queries & Cache
+
+Once the business logic is created, we can focus on the next layer. These functions wrap our core services to manage data fetching and performance by leveraging Next.js `"use cache"` and `cacheTag`.
+
+```typescript server/book-reviews/book-reviews.queries.ts
+import "server-only";
+import { getAllBookReviews } from "./book-reviews.service";
+import { getAllBookReviewsSchema } from "./book-reviews.schema";
+import { z } from "zod";
+import { cacheTag } from "next/cache";
+
+export const getAllBookReviewsQuery = async (
+  input: z.infer<typeof getAllBookReviewsSchema>,
+) => {
+  "use cache";
+  cacheTag("reviews-list");
+
+  const parsedInput = getAllBookReviewsSchema.parse(input);
+
+  return getAllBookReviews(parsedInput);
+};
+```
+
+As you can see, we validate the input in these functions because queries are used directly in server components. If you need to create a server action using a query, you have to decide whether to validate the input in the query or in your server action, bearing in mind that server actions are one layer higher.
+
+```typescript server/likes/likes.queries.ts
+import "server-only";
+import { cacheTag } from "next/cache";
+import { getLikesStatusSchema } from "./likes.schema";
+import { z } from "zod";
+import { getSession } from "@/lib/better-auth/server";
+import { getLikesStatus } from "./likes.service";
+
+export const getLikesStatusQuery = async ({
+  bookReviewId,
+}: {
+  bookReviewId: string;
+}) => {
+  const session = await getSession();
+
+  if (!session) return null;
+
+  const parsedInput = getLikesStatusSchema.parse({
+    bookReviewId,
+    userId: session.user.id,
+  });
+
+  return getCachedLikesStatus(parsedInput);
+};
+
+const getCachedLikesStatus = async ({
+  bookReviewId,
+  userId,
+}: z.infer<typeof getLikesStatusSchema>) => {
+  "use cache";
+  cacheTag(`like-status-${bookReviewId}-${userId}`);
+
+  return getLikesStatus({
+    bookReviewId,
+    userId,
+  });
+};
+```
+
+## Public and protected procedures
+
+When you create server actions, you'll mostly run into the need to add **middlewares**. In our case, we have to add 2 of them. One for user authentication and another for input validation using the schemas we created before. But, in the future, you'll need to add more middlewares for logging, adding metadata, etc. To achieve that, you have to add the next dependency:
+
+```bash
+pnpm add next-safe-action
+```
+
+Then, we create an action client to handle the errors and add a delay to simulate network latency in development mode. In this way, we'll create both procedures using this action client.
+
+```typescript lib/safe-action.ts
+import { createSafeActionClient } from "next-safe-action";
+import { getSession } from "@/lib/better-auth/server";
+
+/**
+ * Helper to simulate network latency in development mode
+ */
+const simulateDelay = async () => {
+  if (process.env.NODE_ENV === "development") {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+};
+
+/**
+ * Base client with global middleware for logging and delay
+ */
+export const actionClient = createSafeActionClient({
+  // Global error handler
+  handleServerError: (error) => {
+    console.error("Server Error:", error);
+    return error.message || "An unexpected error occurred";
+  },
+}).use(async ({ next }) => {
+  await simulateDelay();
+  return next();
+});
+
+/**
+ * Procedure: Public Action
+ * Available for everyone, but includes the global delay and validation
+ */
+export const publicProcedure = actionClient;
+
+/**
+ * Procedure: Protected Action
+ * Verifies the user session before executing the action logic
+ */
+export const protectedProcedure = actionClient.use(async ({ next }) => {
+  const session = await getSession();
+
+  if (!session?.user) {
+    throw new Error(
+      "Unauthorized: You must be logged in to perform this action",
+    );
+  }
+
+  // Inject the user session into the context (ctx)
+  return next({
+    ctx: {
+      user: session.user,
+      session: session,
+    },
+  });
+});
+```
+
+## Server actions & Cache revalidation
+
+We need a server action to create book reviews and another one to toggle the like button. For both actions, we'll use the protected procedure, validate the input and use the functions of the corresponding service.
+
+```typescript server/book-reviews/book-reviews.actions.ts
+"use server";
+import { protectedProcedure } from "@/lib/safe-action";
+import { createBookReview } from "./book-reviews.service";
+import { createBookReviewSchema } from "./book-reviews.schema";
+import { updateTag } from "next/cache";
+
+export const createBookReviewAction = protectedProcedure
+  .inputSchema(createBookReviewSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+
+    const bookReview = await createBookReview({
+      ...parsedInput,
+      userId: user.id,
+    });
+
+    updateTag("reviews-list");
+
+    return bookReview;
+  });
+```
+
+```typescript server/likes/likes.actions.ts
+"use server";
+import { protectedProcedure } from "@/lib/safe-action";
+import { toogleLike } from "./likes.service";
+import { toogleLikeSchema } from "./likes.schema";
+import { updateTag } from "next/cache";
+
+export const toogleLikeAction = protectedProcedure
+  .inputSchema(toogleLikeSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { user } = ctx;
+    const { bookReviewId } = parsedInput;
+
+    const res = await toogleLike({
+      userId: user.id,
+      bookReviewId,
+    });
+
+    updateTag(`like-status-${bookReviewId}-${user.id}`);
+    updateTag(`reviews-list`);
+
+    return res;
+  });
+```
+
+As you may have noticed, we are updating the cached data by specifying the cache tags. I personally prefer to use this strategy instead of using `revalidatePath` which invalidates cached data for a specific path. It is an interesting approach, and I also use it sometimes, but it's very common to fetch the same data in different pages. For example, if you use the query `getAllBookReviewsQuery` in a new page, you'll have to remember to invalidate the cached data also for this new page. Using updateTag, you ensure that the cached data will be updated in the entire app.
+
+## React hook form and actions
+
+On the client side, the first page we are creating is the one to create a book review. It contains a form which uses **React Hook Form**, which allows you to validate the data on the client side and show feedback to the user. When submitting the validated form, we are going to call our **server action** `createBookReviewAction`.
+
+```tsx components/create-review-form.tsx
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { createBookReviewAction } from "@/server/book-reviews/book-reviews.actions";
+import { createBookReviewSchema } from "@/server/book-reviews/book-reviews.schema";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+
+type CreateReviewFormValues = z.input<typeof createBookReviewSchema>;
+
+export function CreateReviewForm() {
+  const router = useRouter();
+
+  const form = useForm<CreateReviewFormValues>({
+    resolver: zodResolver(createBookReviewSchema),
+    defaultValues: {
+      title: "",
+      author: "",
+      buyUrl: null,
+      content: "",
+    },
+  });
+
+  const isSubmitting = form.formState.isSubmitting;
+
+  async function onSubmit(values: CreateReviewFormValues) {
+    const result = await createBookReviewAction({
+      ...values,
+      buyUrl: values.buyUrl || null,
+    });
+
+    if (result?.data) {
+      toast.success("Book review created successfully!", {
+        position: "bottom-right",
+      });
+      form.reset();
+      router.push("/");
+      return;
+    }
+
+    const errorMessage =
+      result?.serverError || "Failed to create book review. Please try again.";
+
+    toast.error("Failed to create review", {
+      description: errorMessage,
+      position: "bottom-right",
+    });
+  }
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle>Create Book Review</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Book title"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="author"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Author</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Author name"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="buyUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Buy URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/book"
+                      autoComplete="off"
+                      value={field.value ?? ""}
+                      onChange={(event) => {
+                        const value = event.target.value.trim();
+                        field.onChange(value === "" ? null : value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Provide a valid URL where this book can be purchased.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Review Content</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Write your review..."
+                      className="min-h-40"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto"
+            >
+              {isSubmitting ? "Creating..." : "Create Review"}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+```tsx app/(root)/book-review/create/page.tsx
+import { redirect } from "next/navigation"
+import { CreateReviewForm } from "@/components/create-review-form"
+import { getSession } from "@/lib/better-auth/server"
+
+export default async function CreateBookReviewPage() {
+  const session = await getSession()
+
+  const isLoggedIn = !!session?.session
+
+  if (!isLoggedIn) {
+    redirect("/auth/login")
+  }
+
+  return (
+    <div className="flex flex-1 items-center justify-center">
+      <CreateReviewForm />
+    </div>
+  )
+}
+```
+
+## Book reviews
+
+Once we have a way to create book reviews, we can create the reviews board. Considering that we could have hundreds of reviews, we could show a paginated list of reviews.
+
+```tsx app/(root)/page.tsx
+import { ReviewCard } from "@/components/review-card";
+import { ReviewsBoardShell } from "@/components/reviews-board-shell";
+import { ReviewsPagination } from "@/components/reviews-pagination";
+import { getAllBookReviewsQuery } from "@/server/book-reviews/book-reviews.queries";
+
+const TAKE = 3;
+
+interface HomePageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const resolvedSearchParams = await searchParams;
+  const pageParam = Number.parseInt(resolvedSearchParams.page ?? "1", 10);
+  const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+  const skip = (page - 1) * TAKE;
+
+  const reviews = await getAllBookReviewsQuery({ skip, take: TAKE });
+
+  return (
+    <ReviewsBoardShell>
+      <section className="mb-10">
+        <h1 className="text-4xl tracking-tight text-zinc-950 sm:text-5xl">
+          The library card
+        </h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-600">
+          A curated stream of book reflections from readers, thinkers, and
+          storytellers.
+        </p>
+      </section>
+
+      {reviews.data.length === 0 ? (
+        <div className="flex min-h-64 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50">
+          <p className="text-zinc-600">
+            No reviews yet. Be the first to write one.
+          </p>
+        </div>
+      ) : (
+        <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {reviews.data.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </section>
+      )}
+
+      <ReviewsPagination currentPage={page} hasNextPage={reviews.hasNextPage} />
+    </ReviewsBoardShell>
+  );
+}
+```
+
+Note that we have a skip-and-take strategy to get a list of 3 reviews. The search parameter **page** determines the skip value. We could also implement the same logic totally on the client side using states, but it's a better practise to handle pagination using the URL. It allows search engines to index all your review pages, but we can also implement it directly in the server component using the query `getAllBookReviewsQuery`. Only the pagination buttons are client-side, allowing you to switch pages by clicking on them. These buttons are included in the `ReviewsPagination` component available in the repository of this project, but they're not relevant to this article. So let's jump into the next section.
+
+## Giving a like
+
+First up, we need to show the status of a like button by using the query `getLikesStatusQuery` on the server component `ReviewCard` and passing the value to the like button `ReviewLike`.
+
+```tsx components/review-card.tsx
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookReview } from "@/lib/generated/prisma/client";
+import { getLikesStatusQuery } from "@/server/likes/likes.queries";
+import { ReviewCardMotion } from "./review-card-motion";
+import { ReviewLike } from "./review-like";
+
+interface ReviewCardProps {
+  review: BookReview;
+}
+
+export async function ReviewCard({ review }: ReviewCardProps) {
+  const isLiked = await getLikesStatusQuery({ bookReviewId: review.id });
+
+  return (
+    <ReviewCardMotion>
+      <Card className="border-zinc-200 bg-white/70 backdrop-blur-sm">
+        <CardHeader className="space-y-2">
+          <p className="text-xs tracking-[0.22em] text-zinc-500 uppercase">
+            {review.author}
+          </p>
+          <CardTitle className="text-xl leading-tight text-zinc-950">
+            {review.title}
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="space-y-5">
+          <p className="line-clamp-6 text-sm leading-7 text-zinc-700">
+            {review.content}
+          </p>
+
+          <div className="flex items-center justify-between border-t border-zinc-200 pt-4">
+            <ReviewLike
+              bookReviewId={review.id}
+              isLiked={!!isLiked}
+              likesCount={review.likesCount}
+              isAuthenticated={isLiked !== null}
+            />
+
+            {review.buyUrl ? (
+              <a
+                href={review.buyUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="text-xs font-medium tracking-wide text-zinc-600 underline-offset-4 hover:text-zinc-900 hover:underline"
+              >
+                Buy Book
+              </a>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
+    </ReviewCardMotion>
+  );
+}
+```
+
+Now, we have to create the `ReviewLike` component, which is responsible for showing the value of the like, but also for toggling it. Focusing on the last task, we need first to bear in mind that `ReviewLike` is a client component, because it has to listen to the click on the button. Therefore, we have several ways to call the server action.
+
+The simple way to toggle the like value is to use the `toogleLikeAction` directly. However, it's a good practise to disable the button while the mutation is executing. This is why I recommend using the `useAction` hook from **next-safe-action**.
+
+However, there is another pitfall. On production, there will be a little delay while changing the status of the like. The user might see this as a bug and try to press the button again. A like button needs to be changed instantly and fluently. The library **next-safe-action** also has the hook `useOptimisticAction`, which we'll be using in this case.
+
+```tsx components/review-like.tsx
+"use client";
+
+import { toogleLikeAction } from "@/server/likes/likes.actions";
+import { HeartIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { useOptimisticAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
+import { Button } from "./ui/button";
+
+interface ReviewLikeProps {
+  bookReviewId: string;
+  isLiked: boolean;
+  likesCount: number;
+  isAuthenticated: boolean;
+}
+
+export function ReviewLike({
+  bookReviewId,
+  isLiked,
+  likesCount,
+  isAuthenticated,
+}: ReviewLikeProps) {
+  const router = useRouter();
+
+  const { execute, optimisticState, isExecuting } = useOptimisticAction(
+    toogleLikeAction,
+    {
+      currentState: {
+        isLiked,
+        likesCount,
+      },
+      updateFn: (state) => {
+        if (state.isLiked) {
+          return {
+            isLiked: false,
+            likesCount: likesCount - 1,
+          };
+        } else {
+          return {
+            isLiked: true,
+            likesCount: likesCount + 1,
+          };
+        }
+      },
+    },
+  );
+
+  const handleToggleLike = async () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+      return;
+    }
+
+    execute({ bookReviewId });
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      className="text-muted-foreground hover:text-foreground h-auto px-0"
+      onClick={handleToggleLike}
+      disabled={isExecuting}
+      aria-label={optimisticState.isLiked ? "Unlike review" : "Like review"}
+    >
+      <motion.span
+        key={optimisticState.isLiked ? "liked" : "unliked"}
+        initial={{ scale: 1 }}
+        animate={
+          optimisticState.isLiked
+            ? { scale: [1, 1.25, 1] }
+            : { scale: [1, 0.9, 1] }
+        }
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="mr-2 inline-flex"
+      >
+        <HeartIcon
+          className={`size-4 ${optimisticState.isLiked ? "fill-foreground text-foreground" : ""}`}
+        />
+      </motion.span>
+      <span className="text-sm">{optimisticState.likesCount}</span>
+    </Button>
+  );
+}
+```
+
+By using this hook, we are defining a default behaviour of the server action `toogleLikeAction` modifying the default state. So, the user see the optimistic value instantly. Then, if the response is successful, the new value will be refreshed on the server side for all pages, so the user will see the same value as the optimistic one. Nevertheless, if the server action throws an error, the hook will change the value to the previous one.
+
+## Conclusion
+
+Server actions are a step forward by Next.js. The guidance principle is to serve your components from the server by default and the client when necessary. I recommend encouraging the integration of them in your app as long as you are using Next.js's app router.
+
+Of course, there are a lot of things to bear in mind to implement a good architecture to use server actions. But, as with React Query you need to do the same, for example, to manage the cache and revalidations correctly on the client side. Then, tRPC came to give us a better architecture to call the same queries and mutations from both client and server sides safely.
+
+The architecture I've shown you in this article covers the same capabilities as tRPC, but on the server side, since tRPC is built over React Query. I share with you the link to [the repository](https://github.com/jonathanfreiredev/the-library-card) so you can deep dive into it.

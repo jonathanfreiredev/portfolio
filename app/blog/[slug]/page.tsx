@@ -1,149 +1,102 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { groq } from "next-sanity";
-import { PortableText } from "@portabletext/react";
 import { format } from "date-fns";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import rehypePrettyCode from "rehype-pretty-code";
 
 import { TableOfContents } from "@/components/table-of-contents";
-import { portableTextComponents } from "@/lib/portable-text-components";
-import { client } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
-import { postBySlugQuery, postsQuery } from "@/sanity/lib/queries";
-
-type PostDetail = {
-  _id: string;
-  title: string;
-  slug: string;
-  date: string;
-  image?: unknown;
-  body?: Array<{
-    _key: string;
-    _type: string;
-    style?: string;
-    children?: Array<{ _key: string; _type: string; text?: string }>;
-  }>;
-};
+import { mdxComponents, rehypePrettyCodeOptions } from "@/lib/mdx-components";
+import { remarkUnwrapImages } from "@/lib/mdx-plugins";
+import {
+  extractHeadings,
+  extractHeroImage,
+  getPostBySlug,
+  getPostSlugs,
+} from "@/lib/posts";
 
 type BlogDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-type PostSlugItem = {
-  slug?: { current?: string };
-};
-
-type PostSeo = {
-  title: string;
-  excerpt?: string;
-  image?: unknown;
-};
-
-const postSeoBySlugQuery = groq`
-  *[_type == "post" && slug.current == $slug][0] {
-    title,
-    "excerpt": coalesce(pt::text(body)[0...160], ""),
-    image
-  }
-`;
+const LOCALE = "en";
 
 export async function generateStaticParams() {
-  let posts: PostSlugItem[] = [];
-  try {
-    posts = await client.fetch<PostSlugItem[]>(
-      postsQuery,
-      {},
-      { next: { revalidate: 60 } },
-    );
-  } catch {
-    posts = [];
-  }
-
-  return posts
-    .map((post) => post.slug?.current)
-    .filter((slug): slug is string => Boolean(slug))
-    .map((slug) => ({ slug }));
+  const slugs = await getPostSlugs(LOCALE);
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
   params,
 }: BlogDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-  let post: PostSeo | null = null;
-  try {
-    post = await client.fetch<PostSeo | null>(
-      postSeoBySlugQuery,
-      { slug },
-      { next: { revalidate: 60 } },
-    );
-  } catch {
-    post = null;
-  }
+  const post = await getPostBySlug(slug, LOCALE);
 
   if (!post) {
     return {
-      title: "Post no encontrado",
-      description: "El artículo solicitado no existe.",
+      title: "Post not found",
+      description: "The requested article does not exist.",
     };
   }
 
   return {
     title: post.title,
-    description: post.excerpt,
+    description: post.description,
     openGraph: {
       title: post.title,
-      description: post.excerpt,
+      description: post.description,
       type: "article",
-      images: post.image
-        ? [urlFor(post.image).width(1200).height(630).url()]
-        : [],
+      images: (() => {
+        const hero = extractHeroImage(post.content).hero;
+        return hero ? [{ url: hero }] : [];
+      })(),
     },
   };
 }
 
 export default async function PostPage({ params }: BlogDetailPageProps) {
   const { slug } = await params;
-  let post: PostDetail | null = null;
-  try {
-    post = await client.fetch<PostDetail | null>(
-      postBySlugQuery,
-      { slug },
-      { next: { revalidate: 60 } },
-    );
-  } catch {
-    post = null;
-  }
+  const post = await getPostBySlug(slug, LOCALE);
 
   if (!post) notFound();
 
+  const { hero, content } = extractHeroImage(post.content);
+  const headings = extractHeadings(content);
+
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 md:py-20">
-      <div className="grid gap-10 lg:grid-cols-[1fr_250px]">
-        <article className="space-y-6">
-          <p className="font-mono text-sm text-muted-foreground">
+    <main className="mx-auto w-full max-w-[1440px] flex-1 px-5 py-12 md:px-12 md:py-16 lg:px-20 lg:py-24">
+      <div className="grid gap-12 lg:grid-cols-[1fr_220px]">
+        <article className="mx-auto w-full max-w-[680px] space-y-6">
+          <p className="text-eyebrow text-muted-foreground">
             {format(new Date(post.date), "MMMM dd, yyyy")}
           </p>
-          <h1 className="text-3xl md:text-4xl">{post.title}</h1>
+          <h1>{post.title}</h1>
 
-          {post.image ? (
+          {hero ? (
             <Image
-              src={urlFor(post.image).width(1400).height(800).url()}
+              src={hero}
               alt={post.title}
               width={1400}
               height={800}
               loading="eager"
-              className="rounded-xl border border-primary/10 object-cover"
+              className="border border-primary/10 object-cover"
             />
           ) : null}
 
-          <section className="px-4 py-2 max-w-none">
-            <PortableText
-              value={post.body || []}
-              components={portableTextComponents}
+          <section className="max-w-none">
+            <MDXRemote
+              source={content}
+              components={mdxComponents}
+              options={{
+                mdxOptions: {
+                  remarkPlugins: [remarkUnwrapImages],
+                  rehypePlugins: [[rehypePrettyCode, rehypePrettyCodeOptions]],
+                },
+              }}
             />
           </section>
         </article>
-        <TableOfContents body={post.body || []} />
+        <TableOfContents headings={headings} />
       </div>
     </main>
   );

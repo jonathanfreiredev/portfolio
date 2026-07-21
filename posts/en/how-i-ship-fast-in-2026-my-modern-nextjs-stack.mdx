@@ -1,0 +1,432 @@
+---
+title: "How I Ship Fast in 2026: My Modern Next.js Stack"
+date: "2026-04-19"
+slug: "how-i-ship-fast-in-2026-my-modern-nextjs-stack"
+description: "An opinionated 2026 starter stack for shipping fast with Next.js, TypeScript, Tailwind, Shadcn, Prisma, and Better-Auth, with a guided setup."
+tags: ["nextjs", "typescript", "tailwindcss", "shadcn", "prisma", "better-auth"]
+---
+
+![How I Ship Fast in 2026: My Modern Next.js Stack](https://cdn.sanity.io/images/4g99o1oi/production/c54ad59c5c8d86e4e225898fd3abd7e25b1f39eb-1200x673.png?rect=11,0,1178,673&w=1400&h=800)
+
+This article tries to explain the stack I use as a baseline for nearly every project, but not for all. It is an opinionated approach that I recommend using in 2026. Additionally, it provides an overview of each part of the stack, and I'll guide you through its development.
+
+This stack is based on the [T3 Stack](https://create.t3.gg), which I strongly recommend, since it was my go-to for many projects. However, I've developed a customised configuration that reflects the state of the web this year, including some key modern additions that I consider essential.
+
+If you have already read this article and want to start using this stack, you can directly to this [repository.](https://github.com/jonathanfreiredev/modern-nextjs-stack)
+
+## What is this guide covering
+
+1. Reasons to choose this stack
+2. Next.js setup
+3. Pagination and layout groups
+4. Validation for environmental variables
+5. Styles
+   1. Shadcn
+6. Animations and Transitions
+7. Database and ORM
+8. Authentication
+9. Deployment
+10. Wrapping Up
+
+## Reasons to choose this stack
+
+The approaches of this stack are AI-first, modern UI, full ownership, and Production-Ready. With this in mind, we are going to be using Next.js and TypeScript, which provide a robust foundation and rapid development. It is worth noting that AI works better with contracts, highlighting the importance of using TS.
+
+Additionally, I have chosen technologies that are well-documented, widely used and IA-friendly. AI agents are more precise when the context is more accessible. So, for example, using TailwindCSS, the AI agent doesn't have to look for `.css` files outside the component, since it has inline styles. Another example is Prisma, which requires defining the models in a unique file, so the AI agent has to inspect just one file to get the context of the entire database.
+
+As for the editor I use, I've recently started using Cursor instead of Visual Studio Code, because it is built on it, and it helps me with AI agents. However, you can also use Claude Code with VS Code or whatever you prefer.
+
+In 2026, it is not only important to get more confident with your code skills and expand your stack, but also to learn to delegate some tasks to AI and be able to review and correct the results.
+
+So, let's start setting up our project.
+
+## Next.js setup
+
+First, create a **Next.js** app named `modern-nextjs-stack`. Then, you can go into this new folder and open it with your code editor.
+
+```bash
+pnpm create next-app@latest modern-nextjs-stack --yes
+cd modern-nextjs-stack
+```
+
+Next.js has already set up most of the necessary technologies.
+
+## Routing and layout groups
+
+We are using the Next.js **App Router**, and here the structure of the folders is important. I recommend that you have the `./app` folder only for routing, layouts, groups, api routes, loadings and errors. Other folders have to be outside the `./app` folder. An example of this folder's organisation is the following:
+
+```text
+/app              <-- Only for routing, api routes
+  ├── api
+    ├── route.ts
+  ├── auth
+    ├── layout.ts <-- Group layout
+    ├── page.ts
+  ├── (root)
+    ├── layout.ts <-- Group layout
+    ├── page.ts   <-- Home page
+  ├── layout.ts   <-- Main layout
+/components       <-- Reusable components
+/actions          <-- Server Actions
+/lib              <-- Clients of DB (Prisma), utilities, env.ts
+/services         <-- Business logic
+```
+
+As you may have noticed, there are many layouts inside the app folder. This approach enables you to have different styles per group of pages. The main layout includes the fonts, global styles and providers. Additionally, I created a group named `(root)`, which provides new styles to the pages within this group, like the Home, About or Contact pages.
+
+Later, I will provide you with a better explanation about the rest of the folders.
+
+## Validation for environmental variables
+
+Inside the project, we have to install the following packages:
+
+```bash
+pnpm install @t3-oss/env-nextjs zod
+```
+
+The package `@t3-oss/env-nextjs` is preconfigured for Next.js and allows you to create a client that separates your environment variables by server and client sides. In this case, I'm using `zod` to validate these variables.
+
+The configuration of this envs client is the next one:
+
+```javascript ./lib/env.js
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  /**
+   * Specify your server-side environment variables schema here. This way you can ensure the app
+   * isn't built with invalid env vars.
+   */
+  server: {
+    BETTER_AUTH_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string()
+        : z.string().optional(),
+    BETTER_AUTH_URL: z.string(),
+    DATABASE_URL: z.string().url(),
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
+  },
+
+  /**
+   * Specify your client-side environment variables schema here. This way you can ensure the app
+   * isn't built with invalid env vars. To expose them to the client, prefix them with
+   * `NEXT_PUBLIC_`.
+   */
+  client: {
+    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+  },
+
+  /**
+   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
+   * middlewares) or client-side so we need to destruct manually.
+   */
+  runtimeEnv: {
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    DATABASE_URL: process.env.DATABASE_URL,
+    NODE_ENV: process.env.NODE_ENV,
+  },
+  /**
+   * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
+   * useful for Docker builds.
+   */
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  /**
+   * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
+   * `SOME_VAR=''` will throw an error.
+   */
+  emptyStringAsUndefined: true,
+});
+```
+
+## Styles
+
+In this project, we are using **TailwindCSS** as our utility-first CSS framework. As you know, the order of utilities is relevant; it is necessary that you first install Esben Petersen's **Prettier - Code formatter** extension to VS Code and set it up as your formatter by default. This setup is done with the following `settings.json` file:
+
+```json ./settings.json
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "prettier.documentSelectors": ["**/*.{js,jsx,ts,tsx,html,css,scss}"]
+}
+```
+
+Then, we have to add **Prettier** and the plugin for TailwindCSS to this project:
+
+```bash
+pnpm add prettier prettier-plugin-tailwindcss
+```
+
+Now, we only need to add Prettier's configuration:
+
+```javascript ./prettier.config.js
+/** @type {import('prettier').Config & import('prettier-plugin-tailwindcss').PluginOptions} */
+export default {
+  plugins: ["prettier-plugin-tailwindcss"],
+};
+```
+
+### Shadcn
+
+Shadcn is not only open source, but also open code. I see Shadcn as a modern set of rules and a baseline to build your own component library.
+
+Under the hood, Shadcn uses a **primitives** library of your choice, like **Radix UI**, to handle the heavy lifting. By providing unstyled, accessible foundations along with their core functionality, allowing Shadcn to focus on the design layer.
+
+Every time you need a component, Shadcn hands you a great-designed component out of the box. These components are open for modification, so if you need to change their behaviour or style, you only have to override or extend the component code.
+
+Last but not least, the principles on which Shadcn is based enable AI to assist you in editing or creating components, because AI has access to the component code, but also because they are composable, predictable and have a common style.
+
+To start using Shadcn, you need to run the next command within this project:
+
+```bash
+pnpm dlx shadcn@latest init --template next
+```
+
+You will need to choose a component library and a preset of your preference. In my case, I selected Radix and Nova, respectively.
+
+The final step of our styling is to set up the **fonts** correctly. Next.js has already configured them into the root layout. However, we need to fix the name variable to the one used in the global.css file, for example, like this:
+
+```tsx ./app/layout.tsx
+const geistSans = Geist({
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+```
+
+## Animations and Transitions
+
+Even if you don't know how to use animations, I encourage you to install 2 packages for this project. In this way, you can specify the packages you want to use when you ask an AI agent to animate your components.
+
+The first one is **Motion** (previously Framer Motion), which hands you a simple-to-use animations API. A non-animated website might seem boring, so I recommend you use some animations.
+
+The second one is up to you. [Next Transition Router](https://next-transition-router.vercel.app/demo) has a simple API to create animated transitions between pages.
+
+Finally, I would like to recommend **Next Themes** if you want to provide a **dark mode** on your website.
+
+## Database and ORM
+
+To this stack I'll be using **PostgreSQL**. This project includes a file `./start-database.sh` , which runs a PostgreSQL database within a **Docker** container. You must set up the next env variable:
+
+```dotenv .env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/modern-nextjs-stack"
+```
+
+Once you have your database running, you can set up your favourite ORM. In this case, I will be using **Prisma**. To get started with Prisma, you have to install the following dependencies:
+
+```bash
+pnpm add prisma @types/pg --save-dev
+```
+
+```bash
+pnpm add @prisma/client @prisma/adapter-pg dotenv pg
+```
+
+Then we can initialise Prisma in the project:
+
+```bash
+pnpm dlx prisma init
+```
+
+This last command generates the `prisma.config.ts` file and the `./prisma` folder. This last folder contains the `schema.prisma` file, where you have to define the models of the database. Now, we can generate the Prisma client:
+
+```bash
+pnpm dlx prisma generate
+```
+
+This command will generate the folder `./lib/generated/prisma`. It contains both the Prisma client and the models, types, etc. So, you need to run this command each time you make changes to your database, especially when running migrations.
+
+Now, it is time to configure this Prisma client for the project:
+
+```typescript ./lib/db.ts
+import "dotenv/config";
+
+import { PrismaClient } from "./generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+export const pgAdapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const createPrismaClient = () =>
+  new PrismaClient({
+    adapter: pgAdapter,
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
+  });
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<typeof createPrismaClient> | undefined;
+};
+
+export const db = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+```
+
+From now on, you can add your database models to the `schema.prisma`. Then, you only need to run a migration and generate the Prisma client, like this:
+
+```bash
+pnpm dlx prisma migrate dev --name name-of-the-migration
+pnpm dlx prisma generate
+```
+
+It is worth noting that Prisma is already connected to your database running on Docker.
+
+## Authentication
+
+To manage the authentication, I prefer to use **Better-Auth**. This library is **intrinsically type-safe**, includes a comprehensive set of features out of the box and offers plugins that save you days of development. Moreover, it runs on your own infrastructure, and you have full control over the auth system.
+
+Don't worry about setup or maintenance because it is very simple. Better-Auth integrates incredibly with **Prisma**, and its **CLI** can generate the basic models you need for authentication directly on your Prisma schema. Furthermore, if you need a dashboard to manage your users in the future, you can have one in the Better-Auth infrastructure.
+
+Let's start by adding Better-Auth to the project:
+
+```bash
+pnpm add better-auth
+```
+
+Now, you need to add the following environmental variables to your `.env` file:
+
+```bash
+# Better Auth
+# Secret used by Better Auth. You can generate a new secret using the following command:
+# openssl rand -base64 32
+BETTER_AUTH_SECRET=""
+
+# Base URL of your app
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+Let's configure Better-Auth, creating the following file:
+
+```typescript lib/auth.ts
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { db } from "./db";
+
+export const auth = betterAuth({
+  baseURL: {
+    allowedHosts: ["localhost:3000", "*.vercel.app"],
+    protocol: process.env.NODE_ENV === "development" ? "http" : "https",
+  },
+  database: prismaAdapter(db, {
+    provider: "postgresql", // or "sqlite" or "mysql"
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+});
+
+export type Session = typeof auth.$Infer.Session;
+```
+
+Additionally, create an auth client:
+
+```typescript lib/better-auth/client.ts
+import { createAuthClient } from "better-auth/react";
+
+export const authClient = createAuthClient();
+
+export type Session = typeof authClient.$Infer.Session;
+```
+
+So, on the client side, you can use the authClient directly. On the server side, I would recommend creating the next function, which includes the headers:
+
+```typescript lib/better-auth/server.ts
+import { auth } from "./auth";
+import { headers } from "next/headers";
+
+export const getSession = async () =>
+  auth.api.getSession({ headers: await headers() });
+```
+
+Better Auth requires an API endpoint to handle authentication requests like sign-in, sign-up, and sign-out. This is why we need to create the next file:
+
+```typescript app/api/auth/[...all]/route.ts
+import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
+export const { POST, GET } = toNextJsHandler(auth);
+```
+
+After this configuration, it is necessary to add the **authentication models** (`User`, `Session`, `Account`, and `Verification`) to your `schema.prisma` file. Let's do it using Better-Auth's CLI:
+
+```bash
+pnpm dlx auth generate
+```
+
+Finally, we only need to generate the first migration of the database:
+
+```bash
+pnpm dlx prisma migrate dev --name init
+pnpm dlx prisma generate
+```
+
+At this point, the related tables are created in your database.
+
+This project will include examples for the pages: sign-up and sign-in. So, I suggest reviewing the project repository.
+
+## Deployment
+
+There are many options to deploy your web app. One of my favourites is **Vercel**, because you only have to connect your **GitHub** account, select the correct repository and add the environment variables for production. Then, Vercel will automatically manage the CI/CD, so you don't have to think about it.
+
+However, there is one more important thing to solve. When you generate a new migration locally, the change will not be directly reflected to your production database. You must create, for example, a **Github action** for it. This is why I added a Github workflow, which will run each time you push a migration to your **main branch**. This workflow will not run until you configure the secret DATABASE_URL with the production database URL to the github repository.
+
+```yaml .github/workflows/prisma-postgres-management.yml
+name: Prisma Migrate on Push
+
+on:
+  push:
+    paths:
+      - prisma/migrations/**
+    branches:
+      - main
+
+jobs:
+  migrate:
+    if: "${{ secrets.DATABASE_URL != '' }}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply Prisma migrations
+        run: pnpm dlx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: production
+```
+
+## Wrapping Up
+
+This year has shown us that we have new team members, AI Agents. We need to evaluate not only the team's capabilities to decide the technologies and architecture, but also we have to understand how an AI Agent works better to take more advantage of it.
+
+This project tries to collect the best practices and integrate technologies that are more relevant in 2026. Remember, it is an opinionated stack, so every step depends on your requirements or use cases. For example, I am a huge fan of **TRPC**. However, I didn't consider it to shape this stack because it is helpful when requests are made from both the client side and server side. Currently, it is possible to create a complete web app using only **server actions**, so you decide to integrate it.
+
+In an upcoming blog post, I will create a web app using this stack, leveraging server actions that can drastically boost the performance of your apps.
+
+This stack is available as a template that you can use directly from my [GitHub repository](https://github.com/jonathanfreiredev/modern-nextjs-stack). See the image to find the button "Use this template".
+
+![Article visual content](https://cdn.sanity.io/images/4g99o1oi/production/5bb9dec501e2263e6894aa1d0911bc28e65ccfd2-2060x1102.png?rect=173,0,1714,1102&w=1400&h=900)
