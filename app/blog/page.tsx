@@ -8,82 +8,52 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { client } from "@/sanity/lib/client";
-import { urlFor } from "@/sanity/lib/image";
-import { postsQuery } from "@/sanity/lib/queries";
+import { getAllPosts } from "@/lib/posts";
 
-type Post = {
-  _id: string;
-  title: string;
-  slug?: { current?: string };
-  date: string;
-  image?: unknown;
-  excerpt?: string;
-};
-
-function readingTimeFromText(text: string) {
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / 180));
-}
+const LOCALE = "en";
 
 export default async function BlogPage() {
-  let posts: Post[] = [];
-  try {
-    posts = await client.fetch<Post[]>(
-      postsQuery,
-      {},
-      { next: { revalidate: 60 } },
-    );
-  } catch {
-    posts = [];
-  }
+  const posts = await getAllPosts(LOCALE);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-12 md:py-20">
-      <h1 className="text-3xl font-semibold tracking-tight">Blog</h1>
+    <main className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col gap-12 px-5 py-12 md:px-12 md:py-16 lg:px-20 lg:py-24">
+      <h1>Blog</h1>
       {!posts.length ? (
         <Card>
           <CardHeader>
             <CardTitle>No posts yet</CardTitle>
             <CardDescription>
-              Add your first post in Sanity Studio to publish it here.
+              Add your first post in <code>posts/{LOCALE}/</code> to publish it here.
             </CardDescription>
           </CardHeader>
         </Card>
       ) : null}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {posts.map((post) => {
-          const slug = post.slug?.current;
-          if (!slug) return null;
-
-          const readingTime = readingTimeFromText(post.excerpt || post.title);
-
           return (
             <Link
-              key={post._id}
-              href={`/blog/${slug}`}
-              className="group block rounded-2xl border border-primary/15 bg-card/55 p-4 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_20px_60px_-35px_color-mix(in_oklab,var(--color-primary)_50%,transparent)]"
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="group block border border-primary/10 bg-card p-6 transition-colors hover:border-primary/20"
             >
-              <article className="grid gap-4 md:grid-cols-[220px_1fr] md:items-center">
-                {post.image ? (
+              <article className="grid gap-6 md:grid-cols-[220px_1fr] md:items-center">
+                {post.hero ? (
                   <Image
-                    src={urlFor(post.image).width(1000).height(600).url()}
+                    src={post.hero}
                     alt={post.title}
                     width={1000}
                     height={600}
-                    className="h-36 w-full rounded-xl border border-primary/10 object-cover"
+                    className="h-36 w-full border border-primary/10 object-cover"
                   />
                 ) : null}
                 <div className="space-y-2">
-                  <p className="font-mono text-xs text-muted-foreground">
+                  <p className="text-eyebrow text-muted-foreground">
                     {format(new Date(post.date), "MMMM dd, yyyy")} ·{" "}
-                    {readingTime} min read
+                    {post.readingTime} min read
                   </p>
-                  <h2 className="text-2xl group-hover:text-primary">
-                    {post.title}
-                  </h2>
-                  <p className="line-clamp-2 text-sm text-muted-foreground">
-                    {(post.excerpt || "").slice(0, 160)}
+                  <h2 className="text-2xl">{post.title}</h2>
+                  <p className="line-clamp-2 text-body-s text-muted-foreground">
+                    {post.description.slice(0, 160)}
                   </p>
                 </div>
               </article>

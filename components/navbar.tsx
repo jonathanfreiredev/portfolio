@@ -1,13 +1,10 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { MenuIcon } from "lucide-react"
-import { motion, useMotionValueEvent, useScroll } from "motion/react"
-import { useState } from "react"
+import Link from "next/link";
+import { MenuIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 
-import { ModeToggle } from "@/components/mode-toggle"
-import { ReadingProgress } from "@/components/reading-progress"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetClose,
@@ -15,89 +12,68 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import { usePathname } from "next/navigation"
+} from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const isProduction = process.env.NODE_ENV === "production";
-  const { scrollY } = useScroll()
-  const [hidden, setHidden] = useState(false)
-  const [compact, setCompact] = useState(false)
+  const pathname = usePathname();
 
-  useMotionValueEvent(scrollY, "change", (current) => {
-    const previous = scrollY.getPrevious() ?? 0
-    setCompact(current > 24)
-    setHidden(current > 140 && current > previous)
-  })
+  if (pathname.includes("/studio")) return null;
 
-  const isStudio = usePathname().includes("/studio");
-
-  if (isStudio) return null;
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   return (
-    <motion.header
-      initial={false}
-      animate={{
-        y: hidden ? -84 : 0,
-        scale: compact ? 0.97 : 1,
-      }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="sticky top-3 z-50 mx-auto w-[min(980px,calc(100%-1rem))] rounded-2xl border border-primary/15 bg-background/65 shadow-lg backdrop-blur-xl"
-    >
-      <ReadingProgress />
-      <div className="mx-auto flex h-14 w-full items-center justify-between px-4">
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Link href="/" className="text-sm font-semibold tracking-wide">
-            Jonathan Freire
+    <header className="sticky top-0 z-50 w-full bg-background">
+      <div className="mx-auto flex h-12 w-full max-w-[1440px] items-center justify-between">
+        <Link href="/" className="text-wordmark text-foreground">
+          JONATHAN FREIRE
+        </Link>
+        <nav className="hidden items-center gap-1 md:flex">
+          <Link
+            href="/blog"
+            className={cn(
+              "px-3 py-2 text-body-s transition-colors",
+              isActive("/blog")
+                ? "text-muted-foreground"
+                : "text-foreground hover:text-muted-foreground",
+            )}
+          >
+            Blog
           </Link>
-        </motion.div>
-        <nav className="hidden items-center gap-2 md:flex">
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              href="/"
-              className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Home
-            </Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Link
-              href="/blog"
-              className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Blog
-            </Link>
-          </motion.div>
           {!isProduction && (
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/studio"
-                className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Studio
-              </Link>
-            </motion.div>
+            <Link
+              href="/studio"
+              className={cn(
+                "px-3 py-2 text-body-s transition-colors",
+                isActive("/studio")
+                  ? "text-muted-foreground"
+                  : "text-foreground hover:text-muted-foreground",
+              )}
+            >
+              Studio
+            </Link>
           )}
-          <ModeToggle />
         </nav>
-        <div className="flex items-center gap-2 md:hidden">
-          <ModeToggle />
+        <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="secondary" size="icon-lg" aria-label="Open menu">
                 <MenuIcon />
-                Menu
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[82%] max-w-sm">
               <SheetHeader>
-                <SheetTitle>Navegación</SheetTitle>
+                <SheetTitle></SheetTitle>
               </SheetHeader>
-              <div className="flex flex-col gap-3 px-4 py-2">
+              <div className="flex flex-col">
                 <SheetClose asChild>
                   <Link
                     href="/"
-                    className="rounded-lg border px-4 py-4 text-lg font-medium"
+                    className="border-b border-border px-4 py-4 text-base text-foreground"
                   >
                     Home
                   </Link>
@@ -105,7 +81,7 @@ export function Navbar() {
                 <SheetClose asChild>
                   <Link
                     href="/blog"
-                    className="rounded-lg border px-4 py-4 text-lg font-medium"
+                    className="border-b border-border px-4 py-4 text-base text-foreground"
                   >
                     Blog
                   </Link>
@@ -115,6 +91,6 @@ export function Navbar() {
           </Sheet>
         </div>
       </div>
-    </motion.header>
-  )
+    </header>
+  );
 }
