@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { motion } from "motion/react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import type { PostHeading } from "@/lib/posts"
@@ -11,6 +12,7 @@ type TableOfContentsProps = {
 }
 
 export function TableOfContents({ headings }: TableOfContentsProps) {
+  const t = useTranslations("tableOfContents")
   const items = useMemo(() => headings.filter((h) => Boolean(h.text)), [headings])
   const [activeId, setActiveId] = useState<string>("")
 
@@ -45,7 +47,7 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
 
   return (
     <aside className="sticky top-24 hidden h-fit lg:block">
-      <p className="mb-4 pl-4 text-eyebrow text-muted-foreground">Contents</p>
+      <p className="mb-4 pl-4 text-eyebrow text-muted-foreground">{t("title")}</p>
       <nav className="relative">
         {items.map((heading) => (
           <a

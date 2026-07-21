@@ -1,8 +1,9 @@
-import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { cookies } from "next/headers";
+import "./[locale]/globals.css";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -21,22 +22,23 @@ export const metadata: Metadata = {
   description: "Your product, built right from the start.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
+  const locale = routing.locales.includes(cookieLocale as (typeof routing.locales)[number])
+    ? cookieLocale
+    : routing.defaultLocale;
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col px-5 md:px-6 lg:px-8">
-        <ThemeProvider>
-          <Navbar />
-          <main className="">{children}</main>
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

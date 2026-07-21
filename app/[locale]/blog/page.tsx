@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { format } from "date-fns";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import {
   Card,
@@ -8,22 +8,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 import { getAllPosts } from "@/lib/posts";
 
-const LOCALE = "en";
+type BlogPageProps = {
+  params: Promise<{ locale: string }>;
+};
 
-export default async function BlogPage() {
-  const posts = await getAllPosts(LOCALE);
+export async function generateMetadata({ params }: BlogPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "blog" });
+  return {
+    title: t("title"),
+  };
+}
+
+export default async function BlogPage({ params }: BlogPageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("blog");
+  const posts = await getAllPosts(locale);
 
   return (
     <main className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col gap-12 px-5 py-12 md:px-12 md:py-16 lg:px-20 lg:py-24">
-      <h1>Blog</h1>
+      <h1>{t("title")}</h1>
       {!posts.length ? (
         <Card>
           <CardHeader>
-            <CardTitle>No posts yet</CardTitle>
+            <CardTitle>{t("empty")}</CardTitle>
             <CardDescription>
-              Add your first post in <code>posts/{LOCALE}/</code> to publish it here.
+              {t("emptyDescription", { folder: `posts/${locale}/` })}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -49,7 +63,7 @@ export default async function BlogPage() {
                 <div className="space-y-2">
                   <p className="text-eyebrow text-muted-foreground">
                     {format(new Date(post.date), "MMMM dd, yyyy")} ·{" "}
-                    {post.readingTime} min read
+                    {post.readingTime} {t("readingTime")}
                   </p>
                   <h2 className="text-2xl">{post.title}</h2>
                   <p className="line-clamp-2 text-body-s text-muted-foreground">

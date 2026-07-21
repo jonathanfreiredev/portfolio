@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { hasLocale } from "next-intl";
 
 import { TableOfContents } from "@/components/table-of-contents";
 import { mdxComponents, rehypePrettyCodeOptions } from "@/lib/mdx-components";
@@ -14,28 +16,37 @@ import {
   getPostBySlug,
   getPostSlugs,
 } from "@/lib/posts";
+import { routing } from "@/i18n/routing";
 
 type BlogDetailPageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
-const LOCALE = "en";
-
 export async function generateStaticParams() {
-  const slugs = await getPostSlugs(LOCALE);
-  return slugs.map((slug) => ({ slug }));
+  const params: Array<{ locale: string; slug: string }> = [];
+  for (const locale of routing.locales) {
+    const slugs = await getPostSlugs(locale);
+    for (const slug of slugs) {
+      params.push({ locale, slug });
+    }
+  }
+  return params;
 }
 
 export async function generateMetadata({
   params,
 }: BlogDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug, LOCALE);
+  const { locale, slug } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    return {};
+  }
+  const post = await getPostBySlug(slug, locale);
 
   if (!post) {
+    const t = await getTranslations({ locale, namespace: "blog" });
     return {
-      title: "Post not found",
-      description: "The requested article does not exist.",
+      title: t("postNotFoundTitle"),
+      description: t("postNotFoundDescription"),
     };
   }
 
@@ -55,9 +66,11 @@ export async function generateMetadata({
 }
 
 export default async function PostPage({ params }: BlogDetailPageProps) {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug, LOCALE);
+  const { locale, slug } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  setRequestLocale(locale);
 
+  const post = await getPostBySlug(slug, locale);
   if (!post) notFound();
 
   const { hero, content } = extractHeroImage(post.content);

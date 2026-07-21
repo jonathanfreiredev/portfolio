@@ -2,9 +2,12 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 
+import { routing, type AppLocale } from "@/i18n/routing";
+
 const POSTS_DIR = path.join(process.cwd(), "posts");
-const SUPPORTED_LOCALES = ["en"] as const;
-type Locale = (typeof SUPPORTED_LOCALES)[number];
+const FALLBACK_LOCALE: AppLocale = routing.defaultLocale;
+
+export type Locale = AppLocale;
 
 export type PostFrontmatter = {
   title: string;
@@ -29,8 +32,8 @@ export type PostHeading = {
   level: 2 | 3;
 };
 
-function isLocale(value: string): value is Locale {
-  return (SUPPORTED_LOCALES as readonly string[]).includes(value);
+function isLocale(value: string): value is AppLocale {
+  return (routing.locales as readonly string[]).includes(value);
 }
 
 function postsDir(locale: string): string {
@@ -59,7 +62,6 @@ function normaliseFrontmatter(data: Record<string, unknown>, fallbackSlug: strin
 }
 
 async function listMdxFiles(locale: string): Promise<string[]> {
-  if (!isLocale(locale)) return [];
   let entries: string[] = [];
   try {
     const files = await fs.readdir(postsDir(locale));
@@ -70,13 +72,7 @@ async function listMdxFiles(locale: string): Promise<string[]> {
   return entries;
 }
 
-export async function getPostSlugs(locale: string): Promise<string[]> {
-  const files = await listMdxFiles(locale);
-  return files.map((file) => file.replace(/\.mdx?$/, ""));
-}
-
-export async function getPostBySlug(slug: string, locale: string): Promise<Post | null> {
-  if (!isLocale(locale)) return null;
+async function readPostFile(slug: string, locale: string): Promise<Post | null> {
   for (const ext of [".mdx", ".md"]) {
     const filePath = path.join(postsDir(locale), `${slug}${ext}`);
     try {
@@ -93,7 +89,27 @@ export async function getPostBySlug(slug: string, locale: string): Promise<Post 
   return null;
 }
 
+export async function getPostSlugs(locale: string): Promise<string[]> {
+  if (!isLocale(locale)) return [];
+  const files = await listMdxFiles(locale);
+  return files.map((file) => file.replace(/\.mdx?$/, ""));
+}
+
+export async function getPostBySlug(
+  slug: string,
+  locale: string,
+): Promise<Post | null> {
+  if (!isLocale(locale)) return null;
+  const primary = await readPostFile(slug, locale);
+  if (primary) return primary;
+  if (locale !== FALLBACK_LOCALE) {
+    return readPostFile(slug, FALLBACK_LOCALE);
+  }
+  return null;
+}
+
 export async function getAllPosts(locale: string): Promise<PostSummary[]> {
+  if (!isLocale(locale)) return [];
   const slugs = await getPostSlugs(locale);
   const posts: PostSummary[] = [];
   for (const slug of slugs) {

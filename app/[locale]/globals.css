@@ -92,6 +92,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-feature-settings: "cv03", "cv04", "cv09", "cv11", "blwf";
+    scroll-behavior: smooth;
   }
   body {
     background-color: var(--background);
@@ -165,6 +166,10 @@
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+  section[id],
+  div[id] {
+    scroll-margin-top: 5rem;
   }
   code,
   pre,
