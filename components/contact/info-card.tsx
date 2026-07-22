@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 
 import { Reveal } from "@/components/motion/reveal";
 
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import("@/components/map"), { ssr: false });
+
 export function InfoCard() {
   const t = useTranslations("contact.info");
 
@@ -46,18 +50,7 @@ export function InfoCard() {
         className="relative w-full flex-1 overflow-hidden border border-border bg-muted"
         style={{ minHeight: "260px" }}
       >
-        {/* TODO: reemplazar con embed real de Google Maps (Berlin, Germany) */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.85),rgba(0,0,0,0.95))]" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2 text-background">
-            <span className="text-tag-bold uppercase">
-              {t("locationValue")}
-            </span>
-            <span className="text-caption text-background/60">
-              {t("mapAlt")}
-            </span>
-          </div>
-        </div>
+        <Map />
       </div>
     </Reveal>
   );
