@@ -7,6 +7,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { SectionHeader } from "@/components/home/section-header";
 import { ImagePlaceholder } from "@/components/home/image-placeholder";
 import { cn } from "@/lib/utils";
+import { Progress } from "../ui/progress";
 
 const STEP_COUNT = 4;
 
@@ -17,23 +18,6 @@ function StepMeta({ label, value }: { label: string; value: string }) {
     <div className="flex items-center gap-1">
       <span className="text-tag text-muted-foreground uppercase">{label}</span>
       <span className="text-tag-bold text-foreground uppercase">{value}</span>
-    </div>
-  );
-}
-
-function ProgressBar({ percent }: { percent: number }) {
-  return (
-    <div
-      role="progressbar"
-      aria-valuenow={percent}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      className="relative h-px w-full bg-border"
-    >
-      <div
-        className="absolute top-0 left-0 h-px bg-foreground"
-        style={{ width: `${percent}%` }}
-      />
     </div>
   );
 }
@@ -58,14 +42,22 @@ function StepCard({ index }: { index: number }) {
       <div className="flex w-full flex-col gap-4">
         <h3 className="text-h4 text-foreground uppercase">{t("title")}</h3>
         <p className="text-body-m text-foreground">{t("text")}</p>
-        <ProgressBar percent={percent} />
+        <Progress value={percent} />
       </div>
     </Reveal>
   );
 }
 
-function StepDivider() {
-  return <div aria-hidden="true" className="h-px w-full bg-border md:h-auto md:w-px md:self-stretch" />;
+function StepDivider({ className }: React.ComponentProps<"div">) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "h-px w-full my-10 bg-border md:h-auto md:w-px md:self-stretch md:my-0",
+        className,
+      )}
+    />
+  );
 }
 
 export function Workflow() {
@@ -77,16 +69,20 @@ export function Workflow() {
 
       <Reveal y={30} className="flex w-full flex-wrap items-center gap-2.5">
         <StepMeta label={t("processLabel")} value={t("processValue")} />
-        <span aria-hidden="true" className="hidden h-3 w-px bg-border md:block" />
+        <span
+          aria-hidden="true"
+          className="hidden h-3 w-px bg-border md:block"
+        />
         <StepMeta label={t("durationLabel")} value={t("durationValue")} />
       </Reveal>
 
       <div className="flex flex-col md:flex-row md:items-stretch">
-        <StepDivider />
+        <StepDivider className="hidden md:flex" />
+
         {Array.from({ length: STEP_COUNT }).map((_, i) => (
           <Fragment key={i}>
             <StepCard index={i} />
-            <StepDivider />
+            {i < STEP_COUNT - 1 && <StepDivider />}
           </Fragment>
         ))}
       </div>

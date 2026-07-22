@@ -3,14 +3,14 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AboutIntro } from "@/components/home/about-intro";
 import { Cta } from "@/components/home/cta";
-import { Divider } from "@/components/home/divider";
-import { Faq } from "@/components/home/faq";
+import { Faq } from "@/components/faq";
 import { Hero } from "@/components/home/hero";
 import { Pricing } from "@/components/home/pricing";
 import { Projects } from "@/components/home/projects";
 import { Services } from "@/components/home/services";
-import { TheStudio } from "@/components/home/the-studio";
+import { MoreAboutMe } from "@/components/home/more-about-me";
 import { Workflow } from "@/components/home/workflow";
+import { Separator } from "@/components/ui/separator";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -32,23 +32,23 @@ export default async function Home({ params }: HomePageProps) {
   setRequestLocale(locale);
 
   return (
-    <div className="mx-auto w-full max-w-[1440px]">
+    <main className="flex flex-col w-full items-center">
       <Hero />
-      <div className="flex flex-col gap-12 px-5 py-12 md:gap-24 md:px-12 md:py-16 lg:gap-40 lg:px-20 lg:py-24">
-        <AboutIntro />
-        <Divider />
+      <div className="flex flex-col gap-20 py-12 max-w-380 md:gap-24 md:py-16 lg:gap-40 lg:py-24 px-5 md:px-6 lg:px-8">
+        <AboutIntro translations="home.aboutIntro" />
         <Projects />
-        <Divider />
-        <TheStudio />
-        <Divider />
+        <Separator />
+        <MoreAboutMe />
+        <Separator />
         <Services />
-        <Divider />
+        <Separator />
         <Workflow />
-        <Divider />
+        <Separator />
         <Pricing />
         <Faq />
+        <Separator />
         <Cta />
       </div>
-    </div>
+    </main>
   );
 }

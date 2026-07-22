@@ -8,14 +8,18 @@ type ImagePlaceholderProps = {
   children?: ReactNode;
 };
 
-export function ImagePlaceholder({ className, label, children }: ImagePlaceholderProps) {
+export function ImagePlaceholder({
+  className,
+  label,
+  children,
+}: ImagePlaceholderProps) {
   return (
     <div
       // TODO: reemplazar imagen
       role="img"
       aria-label={label ?? "Image placeholder"}
       className={cn(
-        "flex items-center justify-center border border-border bg-muted",
+        "flex items-center justify-center bg-neutral-200",
         className,
       )}
     >

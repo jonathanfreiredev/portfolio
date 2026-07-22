@@ -66,7 +66,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background">
-      <div className="mx-auto flex h-12 w-full max-w-[1440px] items-center justify-between">
+      <div className="mx-auto flex h-12 w-full max-w-380 items-center justify-between px-5 md:px-6 lg:px-8">
         <Link href="/" className="text-wordmark text-foreground">
           JONATHAN FREIRE
         </Link>
@@ -91,7 +91,11 @@ export function Navbar() {
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="secondary" size="icon-lg" aria-label={t("openMenu")}>
+                <Button
+                  variant="secondary"
+                  size="icon-lg"
+                  aria-label={t("openMenu")}
+                >
                   <MenuIcon />
                 </Button>
               </SheetTrigger>
@@ -113,10 +117,7 @@ export function Navbar() {
                         </SheetClose>
                       ))}
                       {groupIndex < SHEET_GROUPS.length - 1 ? (
-                        <div
-                          aria-hidden="true"
-                          className="h-2 bg-muted"
-                        />
+                        <div aria-hidden="true" className="h-2 bg-muted" />
                       ) : null}
                     </div>
                   ))}

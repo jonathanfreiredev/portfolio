@@ -13,7 +13,7 @@ export function InfoCard() {
       className="flex h-full w-full flex-col gap-6 border border-border bg-card p-6 md:p-8"
     >
       <div className="flex w-full flex-col gap-6">
-        <div className="flex w-full items-center justify-between gap-1">
+        <div className="flex w-full items-center justify-between gap-1 overflow-clip">
           <span className="text-tag text-muted-foreground uppercase">
             {t("emailLabel")}
           </span>
@@ -27,7 +27,10 @@ export function InfoCard() {
           </a>
         </div>
 
-        <hr className="w-full border-0 border-t border-border" aria-hidden="true" />
+        <hr
+          className="w-full border-0 border-t border-border"
+          aria-hidden="true"
+        />
 
         <div className="flex w-full items-center justify-between gap-1">
           <span className="text-tag text-muted-foreground uppercase">
@@ -47,7 +50,9 @@ export function InfoCard() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.85),rgba(0,0,0,0.95))]" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex flex-col items-center gap-2 text-background">
-            <span className="text-tag-bold uppercase">{t("locationValue")}</span>
+            <span className="text-tag-bold uppercase">
+              {t("locationValue")}
+            </span>
             <span className="text-caption text-background/60">
               {t("mapAlt")}
             </span>

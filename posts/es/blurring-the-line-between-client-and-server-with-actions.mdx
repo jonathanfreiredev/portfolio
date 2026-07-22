@@ -1,53 +1,54 @@
 ---
-title: "Blurring the Line Between Client and Server with Server Actions"
+title: "Difuminando la línea entre cliente y servidor con Server Actions"
 date: "2026-05-05"
 slug: "blurring-the-line-between-client-and-server-with-actions"
-description: "A practical guide to architecting Next.js server actions with procedures, cache revalidation, and optimistic updates for clean client-server communication."
-tags: ["nextjs", "server-actions", "react", "typescript", "prisma", "architecture"]
+description: "Una guía práctica para arquitectar server actions de Next.js con procedures, revalidación de caché y actualizaciones optimistas para una comunicación limpia entre cliente y servidor."
+tags:
+  ["nextjs", "server-actions", "react", "typescript", "prisma", "architecture"]
 ---
 
-![Blurring the Line Between Client and Server with Server Actions](https://cdn.sanity.io/images/4g99o1oi/production/b60068d1a846e99bae985d7a2cee3dfb6d3952dc-1200x655.png?rect=27,0,1146,655&w=1400&h=800)
+![Difuminando la línea entre cliente y servidor con Server Actions](https://cdn.sanity.io/images/4g99o1oi/production/b60068d1a846e99bae985d7a2cee3dfb6d3952dc-1200x655.png?rect=27,0,1146,655&w=1400&h=800)
 
-This article shows how to streamline your architecture using **server actions**. I won't be explaining the pros and cons of using them in detail. I consider it a mature tool already, and it is an amazing way to manage communication between client and server.
+Este artículo muestra cómo simplificar tu arquitectura usando **server actions**. No voy a explicar en detalle sus pros y contras. Las considero una herramienta ya madura, y son una forma excelente de gestionar la comunicación entre cliente y servidor.
 
-Server actions are a way to run server-side code in your React components. Next.js manage this action as a POST request serialising the data before the request. Then, it deserialises the data on the server side and runs the code of the action. Finally, Next.js serialises the response on the server side, and then it deserialises it on the client side.
+Las server actions son una forma de ejecutar código del lado del servidor en tus componentes de React. Next.js gestiona esta acción como una petición POST serializando los datos antes de la request. Después, deserializa los datos en el lado del servidor y ejecuta el código de la acción. Por último, Next.js serializa la respuesta en el servidor y la deserializa en el cliente.
 
-A server action looks like a normal function, which you can call directly on a React component, so it is very common to end up with messy code. It goes worse if you include your business logic directly in your server action on the same file.
+Una server action se parece a una función normal que puedes llamar directamente en un componente de React, por lo que es muy habitual acabar con código desordenado. La situación empeora si incluyes la lógica de negocio directamente en la server action, en el mismo archivo.
 
-There are 3 important parts of your code: React components, the tool to make requests to your server from the client side and the business logic running on the server side. Server actions are the second one, so you can see this as an alternative to using tRPC or "fetch/axios + API Routes". If you combine all of these parts in the same file, you'll run into many gotchas, like a hard-to-maintain codebase or strong coupling.
+Hay 3 partes importantes en tu código: los componentes de React, la herramienta para hacer peticiones al servidor desde el cliente y la lógica de negocio que se ejecuta en el servidor. Las server actions son la segunda, así que puedes verlas como una alternativa a usar tRPC o «fetch/axios + API Routes». Si combinas todas estas partes en el mismo archivo, te encontrarás con muchos problemas, como una base de código difícil de mantener o un acoplamiento fuerte.
 
-To avoid these drawbacks, it's worth taking a moment to focus on your architecture. I prepared this blog post to help you to implement the best practices, including procedures, cache revalidation, optimistic updates and more.
+Para evitar estos inconvenientes, merece la pena dedicar un momento a pensar en tu arquitectura. He preparado este artículo para ayudarte a implementar las mejores prácticas, incluyendo procedures, revalidación de caché, actualizaciones optimistas y más.
 
-We are going to create **a small app for book recommendations**. To focus only on server actions, we will start the project using a template I have created, which utilises Next.js, Prisma, Shadcn and Better Auth. You can create a new project on GitHub using this template by going to [this repository](https://github.com/jonathanfreiredev/modern-nextjs-stack).
+Vamos a crear **una pequeña app de recomendaciones de libros**. Para centrarnos únicamente en las server actions, empezaremos el proyecto usando una plantilla que he creado, que utiliza Next.js, Prisma, Shadcn y Better Auth. Puedes crear un nuevo proyecto en GitHub usando esta plantilla accediendo a [este repositorio](https://github.com/jonathanfreiredev/modern-nextjs-stack).
 
-## What is this guide covering
+## Qué cubre esta guía
 
-1. Setting up the project
-2. Modelling the database
-3. Folders structure
-4. Input validation
+1. Configuración del proyecto
+2. Modelado de la base de datos
+3. Estructura de carpetas
+4. Validación de inputs
 5. Services
-6. Queries & Cache
-7. Public and protected procedures
-8. Server actions & Cache revalidation
-9. React hook form and actions
-10. Book reviews
-11. Giving a like
-12. Conclusion
+6. Queries y caché
+7. Procedures públicos y protegidos
+8. Server actions y revalidación de caché
+9. React Hook Form y actions
+10. Reseñas de libros
+11. Dar un like
+12. Conclusión
 
-## Setting up the project
+## Configuración del proyecto
 
-As we touched upon, we'll begin this project using [this repository](https://github.com/jonathanfreiredev/modern-nextjs-stack) as a template. If you prefer to start the project from scratch and configure all the technologies we are going to use by yourself, I recommend following my last [article](https://jonathanfreire.com/blog/how-i-ship-fast-in-2026-my-modern-nextjs-stack).
+Como ya hemos mencionado, empezaremos el proyecto usando [este repositorio](https://github.com/jonathanfreiredev/modern-nextjs-stack) como plantilla. Si prefieres comenzar desde cero y configurar tú mismo todas las tecnologías que vamos a usar, te recomiendo seguir mi último [artículo](https://jonathanfreire.com/blog/how-i-ship-fast-in-2026-my-modern-nextjs-stack).
 
-To set up the project, you have to follow the Getting Started section of the **README.md** file included in the template, so I won't write it again here.
+Para configurar el proyecto, debes seguir la sección Getting Started del archivo **README.md** incluido en la plantilla, así que no la repetiré aquí.
 
-Once you have completed the steps, you'll see that not only is your app running, but you also have a **local database** set up. Moreover, this template already includes basic **email and password authentication**.
+Una vez completados los pasos, verás que no solo está corriendo tu app, sino que también tienes una **base de datos local** configurada. Además, esta plantilla ya incluye autenticación básica por **correo electrónico y contraseña**.
 
-## Modelling the database
+## Modelado de la base de datos
 
-The main goal of this app is to have a public book review board. However, only logged-in users can create a book review or give a like to reviews. This last requirement forces us to have a protected procedure for making requests to the backend.
+El objetivo principal de esta app es tener un tablón público de reseñas de libros. Sin embargo, solo los usuarios autenticados pueden crear una reseña o dar un like. Este último requisito nos obliga a tener un procedure protegido para hacer peticiones al backend.
 
-The authentication system is already implemented in the template, so we only need to create 2 models in our current Prisma Schema: `BookReview` and `Like`.
+El sistema de autenticación ya está implementado en la plantilla, así que solo necesitamos crear 2 modelos en nuestro Prisma Schema actual: `BookReview` y `Like`.
 
 ```prisma prisma/schema.prisma
 model User {
@@ -91,16 +92,16 @@ model Like {
 }
 ```
 
-Then, run a new migration and regenerate the Prisma Client on your terminal:
+Después, ejecuta una nueva migración y regenera el Prisma Client en tu terminal:
 
 ```bash
 pnpm dlx prisma migrate dev --name add-book-reviews-and-likes
 pnpm dlx prisma generate
 ```
 
-## Folders structure
+## Estructura de carpetas
 
-Aside from the rest of the folders of the project, we'll create a new folder `/server` in the root. Remember that the `/app` folder is specifically for routing and layouts, so I don't recommend having this new folder inside the /app folder. Inside the `/server` folder, we'll have the same folder structure organised per entity. I'm going to show you an initial structure, but you can go more detailed.
+Además del resto de carpetas del proyecto, crearemos una nueva carpeta `/server` en la raíz. Recuerda que la carpeta `/app` es específicamente para el routing y los layouts, así que no recomiendo tener esta nueva carpeta dentro de `/app`. Dentro de la carpeta `/server`, tendremos la misma estructura de carpetas organizada por entidad. Voy a mostrarte una estructura inicial, aunque puedes ir más al detalle.
 
 ```text
 /server
@@ -116,27 +117,27 @@ Aside from the rest of the folders of the project, we'll create a new folder `/s
     ├── likes.schema.ts
 ```
 
-Following the **Single Responsibility Principle (SRP)**, my suggestion is to have these 3 files per entity:
+Siguiendo el **Single Responsibility Principle (SRP)**, mi sugerencia es tener estos 3 archivos por entidad:
 
-- The `actions` file will have the directive `"use server"` to show Next.js that this file will be executed on the server side. Every function in this file is a server action and is responsible for the input validation, user authentication, etc. Remember, server actions are basically mutations.
-- The `queries` file can be used directly in a server component to get data. Unlike Server Actions, they are a streamlined, read-only layer that leverages Next.js `"use cache"` and `cacheTag` for high-performance delivery while keeping your core business logic decoupled and portable. Remember, if you need to call a query from a client component using, for example `fetch` or `react-query`, you have to create an action, which call this query.
-- The `service` file is where your business logic lives. The functions inside this file are reusable in different actions or queries. It doesn't change if the communication with the client changes.
-- The `schema` file contains the Zod schemas to validate the inputs for your actions or service functions.
+- El archivo `actions` tendrá la directiva `"use server"` para indicarle a Next.js que este archivo se ejecutará en el servidor. Cada función de este archivo es una server action y se encarga de la validación del input, la autenticación del usuario, etc. Recuerda: las server actions son básicamente mutaciones.
+- El archivo `queries` puede usarse directamente en un server component para obtener datos. A diferencia de las Server Actions, son una capa de solo lectura que aprovecha `"use cache"` y `cacheTag` de Next.js para un alto rendimiento, manteniendo la lógica de negocio desacoplada y portable. Recuerda: si necesitas llamar a una query desde un client component usando, por ejemplo, `fetch` o `react-query`, tienes que crear una action que llame a esa query.
+- El archivo `service` es donde vive la lógica de negocio. Las funciones de este archivo son reutilizables en distintas actions o queries. No cambia si cambia la comunicación con el cliente.
+- El archivo `schema` contiene los schemas de Zod para validar los inputs de tus actions o funciones de servicio.
 
-## Input validation
+## Validación de inputs
 
-We have to create the CRUD functions for book reviews, but we'll focus only on creating and reading reviews. Additionally, we need to manage the review likes and update their counter. Therefore, we first need to create the `zod` schemas to validate the inputs for these actions.
+Tenemos que crear las funciones CRUD para las reseñas de libros, pero nos centraremos únicamente en crear y leer reseñas. Además, necesitamos gestionar los likes de las reseñas y actualizar su contador. Por ello, primero hay que crear los schemas de `zod` para validar los inputs de estas actions.
 
-Starting with the book reviews, we need a validation schema for the creation input. But also, we need another one for querying reviews to specify how many we want to receive.
+Empezando con las reseñas de libros, necesitamos un schema de validación para el input de creación. Pero también necesitamos otro para consultar reseñas y especificar cuántas queremos recibir.
 
 ```typescript server/book-reviews/book-reviews.schema.ts
 import { z } from "zod";
 
 export const createBookReviewSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  author: z.string().min(1, "Author is required"),
-  buyUrl: z.url("URL must be a valid URL").nullable(),
-  content: z.string().min(1, "Content is required"),
+  title: z.string().min(1, "El título es obligatorio"),
+  author: z.string().min(1, "El autor es obligatorio"),
+  buyUrl: z.url("La URL debe ser válida").nullable(),
+  content: z.string().min(1, "El contenido es obligatorio"),
 });
 
 export const getAllBookReviewsSchema = z.object({
@@ -145,32 +146,32 @@ export const getAllBookReviewsSchema = z.object({
 });
 ```
 
-Then, as we mentioned, we need an action to toggle the like button of a book review, but also a query to get the status of the like button by the user. So, let's create the validation schemas for the input.
+A continuación, como hemos mencionado, necesitamos una action para alternar el botón de like de una reseña, pero también una query para obtener el estado del botón de like por parte del usuario. Creemos los schemas de validación para el input.
 
 ```typescript server/likes/likes.schema.ts
 import { z } from "zod";
 
 export const getLikesStatusSchema = z.object({
-  bookReviewId: z.cuid("Invalid book review ID"),
-  userId: z.string().min(1, "User ID is required"),
+  bookReviewId: z.cuid("ID de reseña no válido"),
+  userId: z.string().min(1, "El ID de usuario es obligatorio"),
 });
 
 export const toogleLikeSchema = z.object({
-  bookReviewId: z.cuid("Invalid book review ID"),
+  bookReviewId: z.cuid("ID de reseña no válido"),
 });
 ```
 
 ## Services
 
-It's time to create the services where the business logic lives. To prevent functions from being accidentally used directly in a client component, it's a good practice to declare these files as server-only. To do that, we have to install the following dependency:
+Es el momento de crear los services donde vive la lógica de negocio. Para evitar que las funciones se usen accidentalmente directamente en un client component, es una buena práctica declarar estos archivos como server-only. Para ello, hay que instalar la siguiente dependencia:
 
 ```bash
 pnpm add server-only
 ```
 
-Importing it at the top of these files, it will throw a build error if you use a function of these files in the client side.
+Al importarla al principio de estos archivos, se producirá un error de compilación si usas alguna función de estos archivos en el cliente.
 
-Starting with the book reviews service, we have to create a function to create a book review and a function to get all book reviews. Notice that the input types of every function are inferred from the schemas created previously. The data is already validated, either in the actions or in the queries. Inside these functions, we use the database client, which is actually the Prisma Client.
+Empezando con el service de reseñas de libros, tenemos que crear una función para crear una reseña y otra para obtener todas las reseñas. Observa que los tipos de input de cada función se infieren a partir de los schemas creados anteriormente. Los datos ya están validados, bien en las actions o en las queries. Dentro de estas funciones, usamos el cliente de base de datos, que en este caso es el Prisma Client.
 
 ```typescript server/book-reviews/book-reviews.service.ts
 import "server-only";
@@ -212,7 +213,7 @@ export const getAllBookReviews = async (
 };
 ```
 
-Then, we apply the same logic to create the likes service. It's important to mention that the creation or deletion of a like and the update of the book review are in the same transaction, so we make sure that either both are done or neither is.
+Después, aplicamos la misma lógica para crear el service de likes. Es importante mencionar que la creación o eliminación de un like y la actualización de la reseña se realizan en la misma transacción, asegurándonos de que ambas operaciones se completan o ninguna lo hace.
 
 ```typescript server/likes/likes.service.ts
 import "server-only";
@@ -294,9 +295,9 @@ export const toogleLike = async (
 };
 ```
 
-## Queries & Cache
+## Queries y caché
 
-Once the business logic is created, we can focus on the next layer. These functions wrap our core services to manage data fetching and performance by leveraging Next.js `"use cache"` and `cacheTag`.
+Una vez creada la lógica de negocio, podemos centrarnos en la siguiente capa. Estas funciones envuelven nuestros services principales para gestionar la obtención de datos y el rendimiento, aprovechando `"use cache"` y `cacheTag` de Next.js.
 
 ```typescript server/book-reviews/book-reviews.queries.ts
 import "server-only";
@@ -317,7 +318,7 @@ export const getAllBookReviewsQuery = async (
 };
 ```
 
-As you can see, we validate the input in these functions because queries are used directly in server components. If you need to create a server action using a query, you have to decide whether to validate the input in the query or in your server action, bearing in mind that server actions are one layer higher.
+Como puedes ver, validamos el input en estas funciones porque las queries se usan directamente en server components. Si necesitas crear una server action que use una query, debes decidir si validar el input en la query o en tu server action, teniendo en cuenta que las server actions están en una capa superior.
 
 ```typescript server/likes/likes.queries.ts
 import "server-only";
@@ -358,22 +359,22 @@ const getCachedLikesStatus = async ({
 };
 ```
 
-## Public and protected procedures
+## Procedures públicos y protegidos
 
-When you create server actions, you'll mostly run into the need to add **middlewares**. In our case, we have to add 2 of them. One for user authentication and another for input validation using the schemas we created before. But, in the future, you'll need to add more middlewares for logging, adding metadata, etc. To achieve that, you have to add the next dependency:
+Cuando creas server actions, te encontrarás con frecuencia con la necesidad de añadir **middlewares**. En nuestro caso, tenemos que añadir 2: uno para la autenticación del usuario y otro para la validación del input usando los schemas creados anteriormente. Pero, en el futuro, necesitarás añadir más middlewares para logging, añadir metadatos, etc. Para conseguirlo, hay que añadir la siguiente dependencia:
 
 ```bash
 pnpm add next-safe-action
 ```
 
-Then, we create an action client to handle the errors and add a delay to simulate network latency in development mode. In this way, we'll create both procedures using this action client.
+A continuación, creamos un action client para gestionar los errores y añadir un delay para simular latencia de red en modo desarrollo. De este modo, crearemos ambos procedures usando este action client.
 
 ```typescript lib/safe-action.ts
 import { createSafeActionClient } from "next-safe-action";
 import { getSession } from "@/lib/better-auth/server";
 
 /**
- * Helper to simulate network latency in development mode
+ * Helper para simular latencia de red en modo desarrollo
  */
 const simulateDelay = async () => {
   if (process.env.NODE_ENV === "development") {
@@ -382,13 +383,13 @@ const simulateDelay = async () => {
 };
 
 /**
- * Base client with global middleware for logging and delay
+ * Cliente base con middleware global para logging y delay
  */
 export const actionClient = createSafeActionClient({
-  // Global error handler
+  // Manejador global de errores
   handleServerError: (error) => {
-    console.error("Server Error:", error);
-    return error.message || "An unexpected error occurred";
+    console.error("Error del servidor:", error);
+    return error.message || "Ha ocurrido un error inesperado";
   },
 }).use(async ({ next }) => {
   await simulateDelay();
@@ -396,25 +397,25 @@ export const actionClient = createSafeActionClient({
 });
 
 /**
- * Procedure: Public Action
- * Available for everyone, but includes the global delay and validation
+ * Procedure: Acción pública
+ * Disponible para todos, pero incluye el delay global y la validación
  */
 export const publicProcedure = actionClient;
 
 /**
- * Procedure: Protected Action
- * Verifies the user session before executing the action logic
+ * Procedure: Acción protegida
+ * Verifica la sesión del usuario antes de ejecutar la lógica de la acción
  */
 export const protectedProcedure = actionClient.use(async ({ next }) => {
   const session = await getSession();
 
   if (!session?.user) {
     throw new Error(
-      "Unauthorized: You must be logged in to perform this action",
+      "No autorizado: debes estar autenticado para realizar esta acción",
     );
   }
 
-  // Inject the user session into the context (ctx)
+  // Inyecta la sesión del usuario en el contexto (ctx)
   return next({
     ctx: {
       user: session.user,
@@ -424,9 +425,9 @@ export const protectedProcedure = actionClient.use(async ({ next }) => {
 });
 ```
 
-## Server actions & Cache revalidation
+## Server actions y revalidación de caché
 
-We need a server action to create book reviews and another one to toggle the like button. For both actions, we'll use the protected procedure, validate the input and use the functions of the corresponding service.
+Necesitamos una server action para crear reseñas de libros y otra para alternar el botón de like. Para ambas actions, usaremos el procedure protegido, validaremos el input y usaremos las funciones del service correspondiente.
 
 ```typescript server/book-reviews/book-reviews.actions.ts
 "use server";
@@ -476,11 +477,11 @@ export const toogleLikeAction = protectedProcedure
   });
 ```
 
-As you may have noticed, we are updating the cached data by specifying the cache tags. I personally prefer to use this strategy instead of using `revalidatePath` which invalidates cached data for a specific path. It is an interesting approach, and I also use it sometimes, but it's very common to fetch the same data in different pages. For example, if you use the query `getAllBookReviewsQuery` in a new page, you'll have to remember to invalidate the cached data also for this new page. Using updateTag, you ensure that the cached data will be updated in the entire app.
+Como habrás notado, actualizamos los datos en caché especificando los cache tags. Personalmente prefiero esta estrategia a usar `revalidatePath`, que invalida los datos en caché para una ruta específica. Es un enfoque interesante que también uso a veces, pero es muy habitual obtener los mismos datos en distintas páginas. Por ejemplo, si usas la query `getAllBookReviewsQuery` en una nueva página, tendrás que recordar invalidar también los datos en caché de esa nueva página. Usando `updateTag`, te aseguras de que los datos en caché se actualicen en toda la app.
 
-## React hook form and actions
+## React Hook Form y actions
 
-On the client side, the first page we are creating is the one to create a book review. It contains a form which uses **React Hook Form**, which allows you to validate the data on the client side and show feedback to the user. When submitting the validated form, we are going to call our **server action** `createBookReviewAction`.
+En el lado del cliente, la primera página que creamos es la de crear una reseña de libro. Contiene un formulario que usa **React Hook Form**, lo que te permite validar los datos en el cliente y mostrar feedback al usuario. Al enviar el formulario validado, llamaremos a nuestra **server action** `createBookReviewAction`.
 
 ```tsx components/create-review-form.tsx
 "use client";
@@ -530,7 +531,7 @@ export function CreateReviewForm() {
     });
 
     if (result?.data) {
-      toast.success("Book review created successfully!", {
+      toast.success("¡Reseña creada con éxito!", {
         position: "bottom-right",
       });
       form.reset();
@@ -539,9 +540,10 @@ export function CreateReviewForm() {
     }
 
     const errorMessage =
-      result?.serverError || "Failed to create book review. Please try again.";
+      result?.serverError ||
+      "No se ha podido crear la reseña. Inténtalo de nuevo.";
 
-    toast.error("Failed to create review", {
+    toast.error("Error al crear la reseña", {
       description: errorMessage,
       position: "bottom-right",
     });
@@ -550,7 +552,7 @@ export function CreateReviewForm() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Create Book Review</CardTitle>
+        <CardTitle>Crear reseña de libro</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -560,10 +562,10 @@ export function CreateReviewForm() {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Título</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Book title"
+                      placeholder="Título del libro"
                       autoComplete="off"
                       {...field}
                     />
@@ -578,10 +580,10 @@ export function CreateReviewForm() {
               name="author"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Author</FormLabel>
+                  <FormLabel>Autor</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Author name"
+                      placeholder="Nombre del autor"
                       autoComplete="off"
                       {...field}
                     />
@@ -596,11 +598,11 @@ export function CreateReviewForm() {
               name="buyUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Buy URL (optional)</FormLabel>
+                  <FormLabel>URL de compra (opcional)</FormLabel>
                   <FormControl>
                     <Input
                       type="url"
-                      placeholder="https://example.com/book"
+                      placeholder="https://ejemplo.com/libro"
                       autoComplete="off"
                       value={field.value ?? ""}
                       onChange={(event) => {
@@ -610,7 +612,8 @@ export function CreateReviewForm() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Provide a valid URL where this book can be purchased.
+                    Proporciona una URL válida donde se pueda comprar este
+                    libro.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -622,10 +625,10 @@ export function CreateReviewForm() {
               name="content"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Review Content</FormLabel>
+                  <FormLabel>Contenido de la reseña</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Write your review..."
+                      placeholder="Escribe tu reseña..."
                       className="min-h-40"
                       {...field}
                     />
@@ -640,7 +643,7 @@ export function CreateReviewForm() {
               disabled={isSubmitting}
               className="w-full sm:w-auto"
             >
-              {isSubmitting ? "Creating..." : "Create Review"}
+              {isSubmitting ? "Creando..." : "Crear reseña"}
             </Button>
           </form>
         </Form>
@@ -651,30 +654,30 @@ export function CreateReviewForm() {
 ```
 
 ```tsx app/(root)/book-review/create/page.tsx
-import { redirect } from "next/navigation"
-import { CreateReviewForm } from "@/components/create-review-form"
-import { getSession } from "@/lib/better-auth/server"
+import { redirect } from "next/navigation";
+import { CreateReviewForm } from "@/components/create-review-form";
+import { getSession } from "@/lib/better-auth/server";
 
 export default async function CreateBookReviewPage() {
-  const session = await getSession()
+  const session = await getSession();
 
-  const isLoggedIn = !!session?.session
+  const isLoggedIn = !!session?.session;
 
   if (!isLoggedIn) {
-    redirect("/auth/login")
+    redirect("/auth/login");
   }
 
   return (
     <div className="flex flex-1 items-center justify-center">
       <CreateReviewForm />
     </div>
-  )
+  );
 }
 ```
 
-## Book reviews
+## Reseñas de libros
 
-Once we have a way to create book reviews, we can create the reviews board. Considering that we could have hundreds of reviews, we could show a paginated list of reviews.
+Una vez que tenemos una forma de crear reseñas, podemos crear el tablón de reseñas. Teniendo en cuenta que podríamos tener cientos de reseñas, mostraremos una lista paginada.
 
 ```tsx app/(root)/page.tsx
 import { ReviewCard } from "@/components/review-card";
@@ -711,7 +714,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {reviews.data.length === 0 ? (
         <div className="flex min-h-64 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50">
           <p className="text-zinc-600">
-            No reviews yet. Be the first to write one.
+            Aún no hay reseñas. Sé el primero en escribir una.
           </p>
         </div>
       ) : (
@@ -728,11 +731,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 }
 ```
 
-Note that we have a skip-and-take strategy to get a list of 3 reviews. The search parameter **page** determines the skip value. We could also implement the same logic totally on the client side using states, but it's a better practise to handle pagination using the URL. It allows search engines to index all your review pages, but we can also implement it directly in the server component using the query `getAllBookReviewsQuery`. Only the pagination buttons are client-side, allowing you to switch pages by clicking on them. These buttons are included in the `ReviewsPagination` component available in the repository of this project, but they're not relevant to this article. So let's jump into the next section.
+Observa que usamos una estrategia de skip-and-take para obtener una lista de 3 reseñas. El parámetro de búsqueda **page** determina el valor de skip. También podríamos implementar la misma lógica totalmente en el cliente usando estados, pero es mejor práctica gestionar la paginación a través de la URL. Esto permite a los motores de búsqueda indexar todas tus páginas de reseñas, y además podemos implementarlo directamente en el server component usando la query `getAllBookReviewsQuery`. Solo los botones de paginación son del lado del cliente, lo que permite cambiar de página haciendo clic en ellos. Estos botones están incluidos en el componente `ReviewsPagination` disponible en el repositorio de este proyecto, pero no son relevantes para este artículo. Pasemos a la siguiente sección.
 
-## Giving a like
+## Dar un like
 
-First up, we need to show the status of a like button by using the query `getLikesStatusQuery` on the server component `ReviewCard` and passing the value to the like button `ReviewLike`.
+Primero, necesitamos mostrar el estado del botón de like usando la query `getLikesStatusQuery` en el server component `ReviewCard` y pasando el valor al botón de like `ReviewLike`.
 
 ```tsx components/review-card.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -780,7 +783,7 @@ export async function ReviewCard({ review }: ReviewCardProps) {
                 rel="noreferrer noopener"
                 className="text-xs font-medium tracking-wide text-zinc-600 underline-offset-4 hover:text-zinc-900 hover:underline"
               >
-                Buy Book
+                Comprar libro
               </a>
             ) : null}
           </div>
@@ -791,11 +794,11 @@ export async function ReviewCard({ review }: ReviewCardProps) {
 }
 ```
 
-Now, we have to create the `ReviewLike` component, which is responsible for showing the value of the like, but also for toggling it. Focusing on the last task, we need first to bear in mind that `ReviewLike` is a client component, because it has to listen to the click on the button. Therefore, we have several ways to call the server action.
+Ahora tenemos que crear el componente `ReviewLike`, que se encarga de mostrar el valor del like, pero también de alternarlo. Centrándonos en esta última tarea, primero hay que tener en cuenta que `ReviewLike` es un client component, porque tiene que escuchar el clic en el botón. Por tanto, tenemos varias formas de llamar a la server action.
 
-The simple way to toggle the like value is to use the `toogleLikeAction` directly. However, it's a good practise to disable the button while the mutation is executing. This is why I recommend using the `useAction` hook from **next-safe-action**.
+La forma más sencilla de alternar el valor del like es usar `toogleLikeAction` directamente. Sin embargo, es una buena práctica deshabilitar el botón mientras se ejecuta la mutación. Por eso recomiendo usar el hook `useAction` de **next-safe-action**.
 
-However, there is another pitfall. On production, there will be a little delay while changing the status of the like. The user might see this as a bug and try to press the button again. A like button needs to be changed instantly and fluently. The library **next-safe-action** also has the hook `useOptimisticAction`, which we'll be using in this case.
+No obstante, hay otro problema. En producción, habrá un pequeño retraso al cambiar el estado del like. El usuario podría interpretarlo como un bug e intentar pulsar el botón de nuevo. Un botón de like necesita cambiar de forma instantánea y fluida. La librería **next-safe-action** también tiene el hook `useOptimisticAction`, que usaremos en este caso.
 
 ```tsx components/review-like.tsx
 "use client";
@@ -861,7 +864,11 @@ export function ReviewLike({
       className="text-muted-foreground hover:text-foreground h-auto px-0"
       onClick={handleToggleLike}
       disabled={isExecuting}
-      aria-label={optimisticState.isLiked ? "Unlike review" : "Like review"}
+      aria-label={
+        optimisticState.isLiked
+          ? "Quitar like a la reseña"
+          : "Dar like a la reseña"
+      }
     >
       <motion.span
         key={optimisticState.isLiked ? "liked" : "unliked"}
@@ -884,12 +891,12 @@ export function ReviewLike({
 }
 ```
 
-By using this hook, we are defining a default behaviour of the server action `toogleLikeAction` modifying the default state. So, the user see the optimistic value instantly. Then, if the response is successful, the new value will be refreshed on the server side for all pages, so the user will see the same value as the optimistic one. Nevertheless, if the server action throws an error, the hook will change the value to the previous one.
+Al usar este hook, definimos un comportamiento por defecto de la server action `toogleLikeAction` modificando el estado por defecto. Así, el usuario ve el valor optimista al instante. Después, si la respuesta es satisfactoria, el nuevo valor se actualizará en el servidor para todas las páginas, por lo que el usuario verá el mismo valor que el optimista. Sin embargo, si la server action lanza un error, el hook restaurará el valor al anterior.
 
-## Conclusion
+## Conclusión
 
-Server actions are a step forward by Next.js. The guidance principle is to serve your components from the server by default and the client when necessary. I recommend encouraging the integration of them in your app as long as you are using Next.js's app router.
+Las server actions son un paso adelante por parte de Next.js. El principio rector es servir tus componentes desde el servidor por defecto y desde el cliente cuando sea necesario. Recomiendo fomentar su integración en tu app siempre que uses el app router de Next.js.
 
-Of course, there are a lot of things to bear in mind to implement a good architecture to use server actions. But, as with React Query you need to do the same, for example, to manage the cache and revalidations correctly on the client side. Then, tRPC came to give us a better architecture to call the same queries and mutations from both client and server sides safely.
+Por supuesto, hay muchas cosas a tener en cuenta para implementar una buena arquitectura con server actions. Pero ocurre lo mismo con React Query, donde también hay que gestionar correctamente la caché y las revalidaciones en el cliente. Después llegó tRPC para darnos una mejor arquitectura para llamar a las mismas queries y mutaciones tanto desde el cliente como desde el servidor de forma segura.
 
-The architecture I've shown you in this article covers the same capabilities as tRPC, but on the server side, since tRPC is built over React Query. I share with you the link to [the repository](https://github.com/jonathanfreiredev/the-library-card) so you can deep dive into it.
+La arquitectura que he mostrado en este artículo cubre las mismas capacidades que tRPC, pero en el lado del servidor, ya que tRPC está construido sobre React Query. Comparto el enlace al [repositorio](https://github.com/jonathanfreiredev/the-library-card) para que puedas profundizar en él.

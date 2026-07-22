@@ -1,10 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { Header } from "@/components/contact/header";
 import { Content } from "@/components/contact/content";
-import { Stats } from "@/components/contact/stats";
-import { Faq } from "@/components/contact/faq";
-import { Divider } from "@/components/home/divider";
+import { Faq } from "@/components/faq";
+import { Separator } from "@/components/ui/separator";
+import { Reveal } from "@/components/motion/reveal";
+import { Stats } from "@/components/stats";
+import { SectionHeader } from "@/components/home/section-header";
 
 type Params = Promise<{ locale: string }>;
 
@@ -21,16 +22,25 @@ export default async function ContactPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return (
-    <>
-      <Header />
+  const t = await getTranslations({ locale, namespace: "contact.header" });
 
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-12 px-5 py-12 md:px-12 md:gap-24 md:py-16 lg:gap-40 lg:px-20 lg:py-24">
+  return (
+    <main className="flex flex-col w-full items-center gap-20 pb-12 pt-20 max-w-380 md:gap-24 md:py-16 lg:gap-40 lg:pb-24 lg:py-32 px-5 md:px-6 lg:px-8">
+      <div id="projects" className="flex w-full flex-col gap-12 md:gap-24">
+        <SectionHeader title={t("title")} text={t("subtitle")} />
+
         <Content />
-        <Stats />
-        <Divider />
-        <Faq />
+        <Reveal
+          y={30}
+          className="w-full flex justify-end bg-neutral-100 p-6 md:p-8"
+        >
+          <div className="">
+            <Stats />
+          </div>
+        </Reveal>
+        <Separator />
+        <Faq withInfoCard={false} />
       </div>
-    </>
+    </main>
   );
 }
