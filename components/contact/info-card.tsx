@@ -14,7 +14,7 @@ export function InfoCard() {
   return (
     <Reveal
       y={30}
-      className="flex h-full w-full flex-col gap-6 border border-border bg-card p-6 md:p-8"
+      className="flex h-full w-full flex-col gap-6 bg-neutral-100 dark:bg-neutral-900 p-6 md:p-8"
     >
       <div className="flex w-full flex-col gap-6">
         <div className="flex w-full items-center justify-between gap-1 overflow-clip">

@@ -11,7 +11,13 @@ import { cn } from "@/lib/utils";
 const INPUT_CLASSES =
   "block w-full border-0 border-b border-border bg-transparent py-3 pr-3 text-body-m text-foreground placeholder:text-muted-foreground/70 focus:border-foreground focus:border-b-2 focus:pb-[11px] focus:outline-none focus-visible:outline-none";
 
-function FieldLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor: string }) {
+function FieldLabel({
+  children,
+  htmlFor,
+}: {
+  children: React.ReactNode;
+  htmlFor: string;
+}) {
   return (
     <label htmlFor={htmlFor} className="text-tag text-foreground uppercase">
       {children}
@@ -40,7 +46,7 @@ export function Form() {
     return (
       <Reveal
         y={30}
-        className="flex h-full w-full flex-col gap-10 border border-border bg-card p-6 md:p-8"
+        className="flex h-full w-full flex-col gap-10 bg-neutral-100 dark:bg-neutral-900 p-6 md:p-8"
       >
         <h2 className="text-h3 text-foreground uppercase">{t("title")}</h2>
         <p className="text-lead text-foreground">{t("success")}</p>
@@ -51,7 +57,7 @@ export function Form() {
   return (
     <Reveal
       y={30}
-      className="flex h-full w-full flex-col gap-10 border border-border bg-card p-6 md:p-8"
+      className="flex h-full w-full flex-col gap-10 bg-neutral-100 dark:bg-neutral-900 p-6 md:p-8"
     >
       <h2 className="text-h3 text-foreground uppercase">{t("title")}</h2>
 
@@ -107,10 +113,7 @@ export function Form() {
         ) : null}
 
         <div className="flex w-full flex-col gap-3 pt-2">
-          <Button
-            type="submit"
-            className="self-start px-6 py-3"
-          >
+          <Button type="submit" className="self-start px-6 py-3">
             <span className="inline-flex items-center gap-2">
               {t("submit")}
               <ArrowUpRight aria-hidden="true" className="size-4" />

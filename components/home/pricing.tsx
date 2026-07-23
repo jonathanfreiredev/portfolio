@@ -15,7 +15,7 @@ function PricingCard({ index }: PricingCardProps) {
   const t = useTranslations(`home.pricing.items.${index}`);
 
   return (
-    <div className="flex flex-col p-6 md:p-8 bg-neutral-100">
+    <div className="flex flex-col p-6 md:p-8 bg-neutral-100 dark:bg-neutral-900">
       <div className="flex flex-col justify-between h-full gap-14 border p-6 md:p-8">
         <div className="flex flex-col gap-4">
           <h3 className="text-h3 text-foreground uppercase">{t("title")}</h3>

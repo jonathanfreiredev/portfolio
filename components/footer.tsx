@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { Separator } from "./ui/separator";
+import { LinkedInIcon } from "./linkedin-icon";
 
 const SECTION_LINKS = [
   { href: "/#services", key: "services" },
@@ -58,14 +59,18 @@ export async function Footer() {
 
         <Separator className="mt-5" />
 
-        <div className="flex w-full flex-col items-center md:flex-row md:items-center md:justify-between">
-          <span className="text-body-s uppercase text-neutral-600">
-            © 2026 Jonathan Freire
-          </span>
+        <div className="flex w-full flex-col items-center md:flex-row md:items-center md:justify-between gap-3">
+          <div className="flex flex-col gap-3 items-center md:items-start">
+            <span className="text-body-s uppercase">
+              © 2026 Jonathan Freire
+            </span>
 
-          <span className="text-body-s uppercase text-neutral-600">
-            {t("city")}
-          </span>
+            <span className="text-body-s uppercase">{t("city")}</span>
+          </div>
+          {/* LOGO */}
+          <div className="flex justify-center md:justify-end">
+            <LinkedInIcon />
+          </div>
         </div>
       </div>
     </footer>

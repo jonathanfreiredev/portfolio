@@ -78,6 +78,7 @@ export function Hero() {
             sizes="100vw"
             loading="eager"
           />
+          <div className="absolute inset-0 bg-blue-900/30 mix-blend-multiply pointer-events-none" />
         </div>
       </div>
     </Reveal>

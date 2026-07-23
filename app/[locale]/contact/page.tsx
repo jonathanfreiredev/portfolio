@@ -32,7 +32,7 @@ export default async function ContactPage({ params }: { params: Params }) {
         <Content />
         <Reveal
           y={30}
-          className="w-full flex justify-end bg-neutral-100 p-6 md:p-8"
+          className="w-full flex justify-end bg-neutral-100 dark:bg-neutral-900 p-6 md:p-8"
         >
           <div className="">
             <Stats />
