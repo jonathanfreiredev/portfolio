@@ -257,6 +257,7 @@ type ShaderBackgroundProps = {
   height?: string | number;
   className?: string;
   style?: React.CSSProperties;
+  speed?: number;
 };
 
 function compileShader(
@@ -303,7 +304,6 @@ const COLORS: [number, number, number][] = [
 ];
 
 const COLOR_COUNT = 4;
-const TIME_FACTOR = -0.67;
 const SHAPE = [1.32, 0.49, 0.84, 0.01] as const;
 const SURFACE = [1.73, 1.08, 0.07, 2.0] as const;
 const FINISH = [2.27, 0.0, 0.04, 0.35] as const;
@@ -317,6 +317,7 @@ export function ShaderBackground({
   height = "100%",
   className,
   style,
+  speed = 0.67,
 }: ShaderBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -397,7 +398,12 @@ export function ShaderBackground({
       }
       resize();
       const elapsed = (performance.now() - start) / 1000;
-      const scene = new Float32Array([canvas.width, canvas.height, elapsed * TIME_FACTOR, COLOR_COUNT]);
+      const scene = new Float32Array([
+        canvas.width,
+        canvas.height,
+        elapsed * -speed,
+        COLOR_COUNT,
+      ]);
       gl.uniform4fv(loc.scene, scene);
       const space = new Float32Array([OFFSET[0], OFFSET[1], 0, 0]);
       gl.uniform4fv(loc.space, space);
@@ -426,7 +432,7 @@ export function ShaderBackground({
       gl.deleteProgram(program);
       gl.deleteBuffer(buf);
     };
-  }, []);
+  }, [speed]);
 
   return (
     <div

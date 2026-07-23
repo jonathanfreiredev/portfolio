@@ -30,7 +30,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
   const posts = await getAllPosts(locale);
 
   return (
-    <main className="mx-auto flex w-full max-w-[1024px] flex-1 flex-col gap-12 px-5 py-12 md:px-12 md:py-16 lg:px-20 lg:py-24">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-12 px-5 py-12 md:px-12 md:py-16 lg:px-20 lg:py-24">
       <h1>{t("title")}</h1>
       {!posts.length ? (
         <Card>

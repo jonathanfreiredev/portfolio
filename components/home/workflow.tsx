@@ -1,17 +1,44 @@
 "use client";
 
-import { Fragment } from "react";
 import { useTranslations } from "next-intl";
+import { Fragment } from "react";
 
-import { Reveal } from "@/components/motion/reveal";
 import { SectionHeader } from "@/components/home/section-header";
-import { ImagePlaceholder } from "@/components/home/image-placeholder";
+import { Reveal } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
+import { AuroraShaderBackground, RGB } from "../aurora-shader-background";
 import { Progress } from "../ui/progress";
 
 const STEP_COUNT = 4;
 
 const STEP_TOP_PADDING = ["pt-5", "md:pt-28", "md:pt-50", "md:pt-72"] as const;
+
+const COLORS: RGB[][] = [
+  [
+    [0.118, 0.086, 0.196],
+    [0.298, 0.161, 0.361],
+    [0.478, 0.22, 0.4],
+    [0.667, 0.302, 0.427],
+  ],
+  [
+    [0.039, 0.039, 0.071],
+    [0.357, 0.165, 0.525],
+    [0.616, 0.22, 0.573],
+    [0.839, 0.31, 0.659],
+  ],
+  [
+    [0.078, 0.055, 0.129],
+    [0.478, 0.22, 0.522],
+    [0.839, 0.31, 0.659],
+    [1.0, 0.529, 0.596],
+  ],
+  [
+    [0.118, 0.086, 0.196],
+    [0.616, 0.22, 0.573],
+    [1.0, 0.529, 0.596],
+    [1.0, 0.761, 0.886],
+  ],
+];
 
 function StepMeta({ label, value }: { label: string; value: string }) {
   return (
@@ -34,11 +61,9 @@ function StepCard({ index }: { index: number }) {
         STEP_TOP_PADDING[index],
       )}
     >
-      <ImagePlaceholder
-        // TODO: reemplazar imagen
-        label={t("title")}
-        className="aspect-square w-full max-w-40"
-      />
+      <div className="relative w-full max-w-40 aspect-square">
+        <AuroraShaderBackground speed={-1} colors={COLORS[index]} />
+      </div>
       <div className="flex w-full flex-col gap-4">
         <h3 className="text-h4 text-foreground uppercase">{t("title")}</h3>
         <p className="text-body-m text-foreground">{t("text")}</p>

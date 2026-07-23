@@ -4,18 +4,17 @@ import { Link } from "@/i18n/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { ImagePlaceholder } from "@/components/home/image-placeholder";
 import { SectionHeader } from "@/components/home/section-header";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ShaderBackground } from "../shader-background";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
-import { cn } from "@/lib/utils";
-import { ShaderBackground } from "../shader-background";
 
 const SERVICE_COUNT = 5;
 

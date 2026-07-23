@@ -1,12 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { ArrowUpRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
-import { ImagePlaceholder } from "@/components/home/image-placeholder";
+import { Button } from "@/components/ui/button";
+import { CldImage } from "next-cloudinary";
 import { Separator } from "../ui/separator";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -70,11 +70,13 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="w-full">
-          <ImagePlaceholder
-            // TODO: reemplazar imagen
-            label="Hero visual placeholder"
-            className="aspect-[16/7] w-full"
+        <div className="relative w-full aspect-16/7">
+          <CldImage
+            src="portfolio/hero-workstation"
+            alt={t("title")}
+            fill={true}
+            sizes="100vw"
+            loading="eager"
           />
         </div>
       </div>

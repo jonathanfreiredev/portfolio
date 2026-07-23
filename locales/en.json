@@ -65,19 +65,19 @@
       "items": {
         "mantel-azul": {
           "title": "Mantel Azul · AI Cooking Assistant",
-          "description": "An AI-powered cooking community where users can create recipes from photos using computer vision, get personalized culinary assistance, and share their cooking in real time. I built the full stack — from the cookbook system and social features to the AI integrations using the Vercel AI SDK and Flux for image generation."
+          "description": "A social cooking platform where AI turns any photo into a recipe — built full stack, from computer vision integrations to real-time sharing and image generation."
         },
         "wandace": {
           "title": "Wandace · Unified Commerce Platform",
-          "description": "A sales and management platform for retail businesses, built from scratch. I led the architecture end-to-end, covering database design, cloud infrastructure on Azure, and integrations with payment providers and marketing engines."
+          "description": "A full-featured commerce SaaS for retail, built from scratch — I owned the architecture end-to-end, from database design to cloud infrastructure, payments, and marketing integrations."
         },
         "modern-nextjs-stack": {
           "title": "Modern Next.js Stack · Open Source Boilerplate",
-          "description": "A production-ready Next.js boilerplate with authentication, database logic, and a modern UI setup out of the box. Built for developers who want a solid, type-safe foundation without the initial setup overhead."
+          "description": "A production-ready Next.js starter with auth, type-safe DB, and a polished UI out of the box — zero setup overhead."
         },
         "foodie": {
           "title": "Foodie · Digital Menu Platform",
-          "description": "A digital menu platform for restaurants, accessible via QR code from the table. Restaurants could upload a photo or PDF of their physical menu and the system would automatically parse it into a fully customised digital menu. Customers could browse, order, and pay directly from the table. Built a full order management system with per-table and online order tracking, and a unique branded experience for each venue."
+          "description": "Restaurants upload a photo or PDF of their physical menu — AI parses it into a fully branded digital experience with ordering and payment at the table."
         }
       }
     },

@@ -1,16 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-
 import { SectionHeader } from "@/components/home/section-header";
-import { ImagePlaceholder } from "@/components/home/image-placeholder";
+import { CldImage } from "next-cloudinary";
+import { useTranslations } from "next-intl";
 
 type Project = {
   id: string;
   title: string;
   description: string;
-  image?: string;
+  imagePublicId: string;
+  logoPublicId: string;
   url: string | null;
   techStack: string[];
 };
@@ -22,15 +21,49 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <div className="group flex w-full flex-col gap-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-      <div className="relative w-full">
-        <ImagePlaceholder
-          // TODO: reemplazar imagen
-          label={t("title")}
-          className="aspect-square w-full"
+      <div className="relative w-full aspect-square">
+        <CldImage
+          src={project.imagePublicId}
+          alt={t("title")}
+          fill={true}
+          sizes="50vw"
+          loading="eager"
         />
+
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-30 h-30 bg-white/10 
+              backdrop-blur-lg 
+              border border-white/20 
+              shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] 
+              rounded-2xl 
+              text-white flex items-center justify-center lg:w-40 lg:h-40"
+        >
+          {project.id === "modern-nextjs-stack" ? (
+            <div className="text-xl text-white/90 w-full p-5">
+              <p>Modern</p>
+              <p className="text-2xl font-bold text-white/90 text-center">
+                NEXT.js
+              </p>
+              <p className="text-end">Stack</p>
+            </div>
+          ) : (
+            <CldImage
+              src={project.logoPublicId}
+              alt={t("title")}
+              width={
+                project.id === "wandace" || project.id === "foodie" ? 100 : 160
+              }
+              height={
+                project.id === "wandace" || project.id === "foodie" ? 100 : 160
+              }
+              className="w-auto h-auto"
+            />
+          )}
+        </div>
+
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-end gap-2">
-          <span className="bg-foreground/10 px-3 py-1.5 text-tag text-background uppercase text-end">
-            {t("description")}
+          <span className="bg-foreground/30 px-3 py-1.5 text-tag text-background uppercase text-end">
+            {t("title")}
           </span>
         </div>
       </div>
@@ -39,7 +72,7 @@ function ProjectCard({ project }: { project: Project }) {
         <span className="text-foreground/45 text-tag uppercase">
           {teckStack}
         </span>
-        <h3 className="text-h4 text-foreground uppercase">{t("title")}</h3>
+        <h3 className="text-body-l text-foreground/80">{t("description")}</h3>
       </div>
     </div>
   );
@@ -53,74 +86,63 @@ export function Projects() {
       id: "mantel-azul",
       title: "Mantel Azul · AI Cooking Assistant",
       description:
-        "An AI-powered cooking community where users can create recipes from photos using computer vision, get personalized culinary assistance, and share their cooking in real time. I built the full stack — from the cookbook system and social features to the AI integrations using the Vercel AI SDK and Flux for image generation.",
+        "A social cooking platform where AI turns any photo into a recipe — built full stack, from computer vision integrations to real-time sharing and image generation.",
       url: "https://mantelazul.com",
+      imagePublicId: "portfolio/mantel-azul-bg",
+      logoPublicId: "portfolio/mantel-azul-logo",
       techStack: [
         "Next.js",
         "tRPC",
-        "TailwindCSS",
-        "Shadcn",
-        "Vercel AI SDK (OpenAI)",
-        "Flux (Image Generation)",
-        "Prisma",
+        "Vercel AI SDK",
+        "OpenAI",
+        "Flux",
         "PostgreSQL",
-        "Better Auth",
       ],
     },
     {
       id: "wandace",
       title: "Wandace · Unified Commerce Platform",
       description:
-        "A sales and management platform for retail businesses, built from scratch. I led the architecture end-to-end, covering database design, cloud infrastructure on Azure, and integrations with payment providers and marketing engines.",
+        "A full-featured commerce SaaS for retail, built from scratch — I owned the architecture end-to-end, from database design to cloud infrastructure, payments, and marketing integrations.",
       url: "https://wandace.com",
+      imagePublicId: "portfolio/wandace-bg",
+      logoPublicId: "portfolio/wandace-logo",
       techStack: [
         "Next.js",
-        "Nest.js",
-        "TypeScript",
+        "NestJS",
+        "GraphQL",
         "PostgreSQL",
-        "TypeORM",
-        "GraphQL (Apollo)",
-        "tRPC",
-        "NextAuth.js",
-        "Passport",
         "Stripe",
         "Azure",
         "Docker",
-        "Mantine",
-        "Next-intl",
       ],
     },
     {
       id: "modern-nextjs-stack",
       title: "Modern Next.js Stack · Open Source Boilerplate",
       description:
-        "A production-ready Next.js boilerplate with authentication, database logic, and a modern UI setup out of the box. Built for developers who want a solid, type-safe foundation without the initial setup overhead.",
+        "A production-ready Next.js starter with auth, type-safe DB, and a polished UI out of the box — zero setup overhead.",
       url: "https://github.com/jonathanfreiredev/modern-nextjs-stack",
+      imagePublicId: "portfolio/modern-nextjs-stack-bg",
+      logoPublicId: "portfolio/logo-modern-nextjs-stack",
       techStack: [
-        "TypeScript",
         "Next.js",
-        "next-safe-action",
-        "Better-Auth",
+        "TypeScript",
         "Prisma",
-        "Tailwind",
+        "Better-Auth",
         "Zod",
+        "Tailwind",
       ],
     },
     {
       id: "foodie",
       title: "Foodie · Digital Menu Platform",
       description:
-        "A digital menu platform for restaurants, accessible via QR code from the table. Restaurants could upload a photo or PDF of their physical menu and the system would automatically parse it into a fully customised digital menu. Customers could browse, order, and pay directly from the table. Built a full order management system with per-table and online order tracking, and a unique branded experience for each venue.",
+        "Restaurants upload a photo or PDF of their physical menu — AI parses it into a fully branded digital experience with ordering and payment at the table.",
       url: null,
-      techStack: [
-        "TypeScript",
-        "Next.js",
-        "Prisma",
-        "NextAuth.js",
-        "OpenAI API",
-        "CSS",
-        "Vercel",
-      ],
+      imagePublicId: "portfolio/foodie-bg",
+      logoPublicId: "portfolio/logo-foodie",
+      techStack: ["Next.js", "TypeScript", "OpenAI API", "Prisma", "Vercel"],
     },
   ];
 
