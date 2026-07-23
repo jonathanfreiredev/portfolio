@@ -15,6 +15,7 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import { cn } from "@/lib/utils";
+import { ShaderBackground } from "../shader-background";
 
 const SERVICE_COUNT = 5;
 
@@ -62,10 +63,9 @@ export function Services() {
   return (
     <section id="services" className="flex w-full flex-col gap-12 md:gap-24">
       <Reveal className="w-full">
-        <ImagePlaceholder
-          label="Services visual placeholder"
-          className="h-32 w-full md:h-64 lg:h-77"
-        />
+        <div className="w-full h-32 md:h-64 lg:h-77 relative">
+          <ShaderBackground />
+        </div>
       </Reveal>
 
       <SectionHeader title={t("title")} text={t("text")} />
