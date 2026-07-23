@@ -47,7 +47,7 @@
       "subTagline": "Strategy. Technology. Intelligence.",
       "tagline": "Your product, built right from the start.",
       "ctaPrimary": "Start project",
-      "ctaSecondary": "Approach",
+      "ctaSecondary": "Services",
       "responseTimeLabel": "response time",
       "responseTimeValue": "3h",
       "locationLabel": "Based in",
@@ -57,43 +57,35 @@
       "badge": "Who I am",
       "text": "I help ambitious companies turn ideas and business challenges into digital products that are clear, intelligent and built to grow. Not a dev shop. Not an agency. A single point of thinking and execution.",
       "button1": "Works",
-      "button2": "Approach"
+      "button2": "Services"
     },
     "projects": {
       "title": "Projects",
       "text": "Case studies that walk through my approach and impact.",
       "items": {
-        "0": {
-          "title": "Lumen void",
-          "tag": "Art Direction",
-          "duration": "5 weeks",
-          "client": "Sian Labs"
+        "mantel-azul": {
+          "title": "Mantel Azul · AI Cooking Assistant",
+          "description": "An AI-powered cooking community where users can create recipes from photos using computer vision, get personalized culinary assistance, and share their cooking in real time. I built the full stack — from the cookbook system and social features to the AI integrations using the Vercel AI SDK and Flux for image generation."
         },
-        "1": {
-          "title": "Primary form",
-          "tag": "Fashion",
-          "duration": "4 weeks",
-          "client": "Studio Concept"
+        "wandace": {
+          "title": "Wandace · Unified Commerce Platform",
+          "description": "A sales and management platform for retail businesses, built from scratch. I led the architecture end-to-end, covering database design, cloud infrastructure on Azure, and integrations with payment providers and marketing engines."
         },
-        "2": {
-          "title": "Luma wood",
-          "tag": "Product Design",
-          "duration": "2 weeks",
-          "client": "Concept Grain"
+        "modern-nextjs-stack": {
+          "title": "Modern Next.js Stack · Open Source Boilerplate",
+          "description": "A production-ready Next.js boilerplate with authentication, database logic, and a modern UI setup out of the box. Built for developers who want a solid, type-safe foundation without the initial setup overhead."
         },
-        "3": {
-          "title": "Silence studio",
-          "tag": "Branding",
-          "duration": "3 weeks",
-          "client": "Vellum"
+        "foodie": {
+          "title": "Foodie · Digital Menu Platform",
+          "description": "A digital menu platform for restaurants, accessible via QR code from the table. Restaurants could upload a photo or PDF of their physical menu and the system would automatically parse it into a fully customised digital menu. Customers could browse, order, and pay directly from the table. Built a full order management system with per-table and online order tracking, and a unique branded experience for each venue."
         }
       }
     },
-    "theStudio": {
+    "moreAboutMe": {
       "badge": "More about me",
       "text": "Based in Berlin, I work independently with founders and teams who need more than execution. Strategy, full-stack engineering and AI integration, without the agency layer in between.",
       "button1": "About me",
-      "button2": "works",
+      "button2": "Works",
       "videoBadge": "2026",
       "videoTitle": "Jonathan Freire",
       "stats": {
@@ -160,19 +152,19 @@
       "steps": {
         "0": {
           "title": "Discover",
-          "text": "Understanding your challenge, your audience, and what success looks like for you."
+          "text": "Before proposing anything, I take time to understand what you're really trying to solve."
         },
         "1": {
           "title": "Design",
-          "text": "Ideas take shape. I explore directions, test concepts, and refine until it feels right."
+          "text": "We shape flows, architecture, and key decisions together. For platforms, this is where the most important work happens."
         },
         "2": {
           "title": "Build",
-          "text": "I develop the final product with attention to every detail and technical precision."
+          "text": "Clear milestones from day one, so you always know where things stand."
         },
         "3": {
           "title": "Launch",
-          "text": "I manage the launch, provide training if needed, and ensure a smooth transition."
+          "text": "I ship, monitor, and stay close after launch to make sure everything lands right."
         }
       }
     },
@@ -184,24 +176,24 @@
           "title": "Landing pages",
           "text": "A focused landing page designed to convert and built to launch fast. Ideal for validating a product, a campaign or a new offer.",
           "price": "500",
+          "pricePreffix": "from",
           "priceSuffix": "/project",
           "listItem1": "Marketing site design & build",
           "listItem2": "Responsive across breakpoints",
           "listItem3": "Fast loading & SEO-ready",
           "listItem4": "Edit-ready in Framer or custom code",
-          "isPopular": "true",
           "button": "Start project"
         },
         "1": {
           "title": "MVPs & integrations",
           "text": "Product work from architecture to first release: full-stack build, integrations, and AI where it adds measurable value.",
           "price": "2500",
+          "pricePreffix": "from",
           "priceSuffix": "/project",
           "listItem1": "Product architecture & scope",
           "listItem2": "Full-stack development",
           "listItem3": "API & service integrations",
           "listItem4": "AI features where they add value",
-          "isPopular": "false",
           "button": "Start project"
         }
       }
@@ -249,7 +241,6 @@
     },
     "footer": {
       "city": "Berlin, Germany",
-      "basedIn": "Based in",
       "blog": "Blog",
       "contact": "Contact",
       "services": "Services",
@@ -291,36 +282,6 @@
       "projectsDeliveredAmount": "9+",
       "clientsWorldwide": "Clients worldwide",
       "clientsWorldwideAmount": "4+"
-    },
-    "faq": {
-      "title": "Have some questions?",
-      "badge": "FAQ",
-      "questions": {
-        "0": {
-          "question": "What does a project typically cost?",
-          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers, no open-ended invoices, no surprises once the scope is agreed."
-        },
-        "1": {
-          "question": "How long does a project take?",
-          "answer": "Most projects run between 3 and 8 weeks, depending on scope. A landing page is usually a couple of weeks; an MVP or integration takes longer. I set clear milestones at the start so you always know where the work stands."
-        },
-        "2": {
-          "question": "How does a project get started?",
-          "answer": "Send a short note about what you're working on. I reply within a couple of days. If it looks like a fit, I set up a 30-minute call to understand the opportunity, the constraints and the shape of the work. From there I send a written proposal — no obligation to move forward."
-        },
-        "3": {
-          "question": "Do you work with my existing codebase, stack or team?",
-          "answer": "Yes. I work inside what you already have — your stack, your design system, your team's process — and integrate with the people involved. If something needs to be replaced or refactored, I flag it clearly before any change."
-        },
-        "4": {
-          "question": "What if I only have a rough idea?",
-          "answer": "That's where I add the most value. A clear brief helps, but it isn't required. I help shape the idea, define what's actually worth building, and put a first scope in front of you before any commitment."
-        },
-        "5": {
-          "question": "What happens after launch?",
-          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, you can keep me on a light retainer for ongoing work, or take the codebase forward on your own. Either way, you leave with a system that's yours to run."
-        }
-      }
     }
   }
 }
