@@ -70,15 +70,15 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="relative w-full aspect-16/7">
+        <div className="relative w-full aspect-16/10 md:aspect-16/7">
           <CldImage
-            src="portfolio/hero-workstation"
+            src="portfolio/hero-blurred"
             alt={t("title")}
             fill={true}
             sizes="100vw"
             loading="eager"
+            className="object-cover"
           />
-          <div className="absolute inset-0 bg-blue-900/30 mix-blend-multiply pointer-events-none" />
         </div>
       </div>
     </Reveal>
