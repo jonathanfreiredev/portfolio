@@ -1,286 +1,286 @@
 {
   "metadata": {
     "siteTitle": "Jonathan Freire | Digital Product Architect",
-    "siteDescription": "Your product, built right from the start."
+    "siteDescription": "Tu producto, construido desde el comienzo."
   },
   "nav": {
-    "home": "Home",
+    "home": "Inicio",
     "blog": "Blog",
-    "contact": "Contact",
-    "openMenu": "Open menu",
-    "switchLanguage": "Switch language"
+    "contact": "Contacto",
+    "openMenu": "Abrir menú",
+    "switchLanguage": "Cambiar idioma"
   },
   "theme": {
-    "toggle": "Toggle theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
+    "toggle": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
   },
   "blog": {
     "title": "Blog",
-    "empty": "No posts yet",
-    "emptyDescription": "Add your first post in {folder} to publish it here.",
-    "readingTime": "min read",
-    "postNotFoundTitle": "Post not found",
-    "postNotFoundDescription": "The requested article does not exist."
+    "empty": "Aún no hay artículos",
+    "emptyDescription": "Añade tu primer artículo en {folder} para publicarla aquí.",
+    "readingTime": "lectura mínima",
+    "postNotFoundTitle": "Artículo no encontrado",
+    "postNotFoundDescription": "El artículo solicitado no existe."
   },
   "tableOfContents": {
-    "title": "Contents"
+    "title": "Contenidos"
   },
   "notFound": {
     "code": "404",
     "title": "404",
-    "description": "Sorry, I can't find that page. It might have been removed, or the link might be broken.",
-    "goHome": "Go home",
-    "contact": "Contact"
+    "description": "Lo siento, no puedo encontrar esa página. Puede que haya sido eliminada, o el enlace podría estar roto.",
+    "goHome": "Volver al inicio",
+    "contact": "Contacto"
   },
   "legal": {
     "metadata": {
       "titleSuffix": " - Jonathan Freire",
-      "notFoundTitle": "Document not found",
-      "notFoundDescription": "The requested legal document does not exist."
+      "notFoundTitle": "Documento no encontrado",
+      "notFoundDescription": "El documento legal solicitado no existe."
     }
   },
   "home": {
     "hero": {
       "title": "Digital product architect",
-      "subTagline": "Strategy. Technology. Intelligence.",
-      "tagline": "Your product, built right from the start.",
-      "ctaPrimary": "Start project",
-      "ctaSecondary": "Services",
-      "responseTimeLabel": "response time",
-      "responseTimeValue": "3h",
-      "locationLabel": "Based in",
-      "locationValue": "Berlin"
+      "subTagline": "Estrategia. Tecnología. Inteligencia.",
+      "tagline": "Tu producto, construido desde el comienzo.",
+      "ctaPrimary": "Iniciar proyecto",
+      "ctaSecondary": "Servicios",
+      "responseTimeLabel": "tiempo de respuesta",
+      "responseTimeValue": "3 h",
+      "locationLabel": "Con base en",
+      "locationValue": "Berlín"
     },
     "aboutIntro": {
-      "badge": "Who I am",
-      "text": "I help ambitious companies turn ideas and business challenges into digital products that are clear, intelligent and built to grow. Not a dev shop. Not an agency. A single point of thinking and execution.",
-      "button1": "Works",
-      "button2": "Services"
+      "badge": "Quién soy",
+      "text": "Ayudo a las empresas ambiciosas a convertir ideas y retos empresariales en productos digitales claros, inteligentes y diseñados para crecer. No es una tienda de desarrollo. No es una agencia. Un único punto de pensamiento y de ejecución.",
+      "button1": "Trabajos",
+      "button2": "Servicios"
     },
     "projects": {
-      "title": "Projects",
-      "text": "Case studies that walk through my approach and impact.",
+      "title": "Proyectos",
+      "text": "Casos de estudio con enfoque e impacto reales.",
       "items": {
         "mantel-azul": {
-          "title": "Mantel Azul · AI Cooking Assistant",
-          "description": "A social cooking platform where AI turns any photo into a recipe — built full stack, from computer vision integrations to real-time sharing and image generation."
+          "title": "Mantel Azul · Asistente de cocina de IA",
+          "description": "Una plataforma social de cocina donde la IA convierte cualquier foto en receta — desarrollada de principio a fin, desde la integración de visión artificial hasta el uso compartido en tiempo real y la generación de imágenes."
         },
         "wandace": {
-          "title": "Wandace · Unified Commerce Platform",
-          "description": "A full-featured commerce SaaS for retail, built from scratch — I owned the architecture end-to-end, from database design to cloud infrastructure, payments, and marketing integrations."
+          "title": "Wandace · Plataforma de Comercio Unificado",
+          "description": "Una plataforma SaaS de comercio para retail, construida completamente desde cero — me encargué de la arquitectura de extremo a extremo: desde el diseño de la base de datos hasta la infraestructura en la nube, pagos e integraciones de marketing."
         },
         "modern-nextjs-stack": {
-          "title": "Modern Next.js Stack · Open Source Boilerplate",
-          "description": "A production-ready Next.js starter with auth, type-safe DB, and a polished UI out of the box — zero setup overhead."
+          "title": "Stack moderno de Next.js · Boilerplate de código abierto",
+          "description": "Un template de Next.js listo para producción con autenticación, base de datos tipada y una UI cuidada desde el primer momento — sin configuración inicial."
         },
         "foodie": {
-          "title": "Foodie · Digital Menu Platform",
-          "description": "Restaurants upload a photo or PDF of their physical menu — AI parses it into a fully branded digital experience with ordering and payment at the table."
+          "title": "Comida - Plataforma de menú digital",
+          "description": "Los restaurantes suben una foto o PDF de su carta física — la IA la convierte en una experiencia digital con marca propia, pedidos y pago en mesa."
         }
       }
     },
     "moreAboutMe": {
-      "badge": "More about me",
-      "text": "Based in Berlin, I work independently with founders and teams who need more than execution. Strategy, full-stack engineering and AI integration, without the agency layer in between.",
-      "button1": "About me",
-      "button2": "Works",
+      "badge": "Más sobre mí",
+      "text": "Con sede en Berlín, trabajo de forma independiente con fundadores y equipos que necesitan más que la ejecución. Estrategia, ingeniería full-stack e integración de IA, sin la capa de agencia intermedia.",
+      "button1": "Sobre mí",
+      "button2": "Trabajos",
       "videoBadge": "2026",
       "videoTitle": "Jonathan Freire",
       "stats": {
-        "projectsDelivered": "Projects delivered",
+        "projectsDelivered": "Proyectos entregados",
         "projectsDeliveredAmount": "10",
         "projectsDeliveredSuffix": "+",
-        "clientsWorldwide": "Clients worldwide",
+        "clientsWorldwide": "Clientes alrededor del mundo",
         "clientsWorldwideAmount": "5",
         "clientsWorldwideSuffix": "+"
       }
     },
     "services": {
-      "title": "Services",
-      "text": "I work across strategy, product design, full-stack engineering, and AI integrations.",
+      "title": "Servicios",
+      "text": "Trabajo en la estrategia, el diseño de productos, la ingeniería completa y las integraciones de IA.",
       "items": {
         "0": {
-          "title": "Product Architecture",
-          "listItem1": "Information architecture",
-          "listItem2": "User flows",
-          "listItem3": "Tech foundations",
-          "text": "Turning an idea into a clear, buildable system. Shaping the product, defining how the pieces connect, and the technical decisions that will define the codebase for years to come."
+          "title": "Arquitectura de producto",
+          "listItem1": "Arquitectura de la información",
+          "listItem2": "Flujos de usuario",
+          "listItem3": "Fundamentos de tecnología",
+          "text": "Convertir una idea en un sistema claro y construible. Formando el producto, definiendo cómo se conectan las piezas, y las decisiones técnicas que definirán la base del código en los próximos años."
         },
         "1": {
-          "title": "Full-Stack Engineering",
+          "title": "Ingeniería Full-Stack",
           "listItem1": "TypeScript · Python",
-          "listItem2": "Cloud services",
-          "listItem3": "Service integrations",
-          "text": "Web platforms built to scale, not to be rebuilt. Frontend, backend, APIs and database, all designed to grow together from day one."
+          "listItem2": "Servicios en la nube",
+          "listItem3": "Integraciones de servicios",
+          "text": "Plataformas web construidas a escala, no para ser reconstruidas. Frontend, backend, APIs y base de datos, todas diseñadas para crecer juntas desde el primer día."
         },
         "2": {
-          "title": "AI Integration",
-          "listItem1": "LLM integration",
-          "listItem2": "Intelligent workflows",
-          "listItem3": "Applied AI",
-          "text": "Applied where it creates measurable product value — not as a trend, but as a lever that makes the product genuinely smarter."
+          "title": "Integración de IA",
+          "listItem1": "Integración LLM",
+          "listItem2": "Flujo de trabajo inteligente",
+          "listItem3": "IA aplicada",
+          "text": "Aplicado donde genera valor medible en el producto — no como tendencia, sino como palanca que hace el producto genuinamente más inteligente."
         },
         "3": {
           "title": "Landing Pages",
-          "listItem1": "Framer or custom code",
-          "listItem2": "Responsive build",
-          "listItem3": "Fast loading",
-          "text": "Marketing sites and landing pages built to convert and designed to last. The same product thinking I bring to platforms, applied to the first impression."
+          "listItem1": "Framer o código personalizado",
+          "listItem2": "Desarrollo responsive",
+          "listItem3": "Carga rápida",
+          "text": "Sites de marketing y landing pages construidos para convertir y diseñados para durar. El mismo enfoque de producto que aplico a las plataformas, puesto en la primera impresión."
         },
         "4": {
-          "title": "Digital Strategy",
-          "listItem1": "Problem reframing",
-          "listItem2": "Build sequencing",
-          "listItem3": "Team alignment",
-          "text": "Before any code, defining what the right thing to build is. Reframing the opportunity, sequencing the work, and aligning product, design and engineering around a shared direction."
+          "title": "Estrategia digital",
+          "listItem1": "Reformulación del problema",
+          "listItem2": "Secuenciación del desarrollo",
+          "listItem3": "Alineación del equipo",
+          "text": "Antes de escribir una línea de código, definir qué es lo correcto construir. Reformular la oportunidad, secuenciar el trabajo y alinear producto, diseño e ingeniería en torno a una dirección común."
         }
       },
       "infoCard": {
-        "text": "If you don't find exactly the service you need, I can tailor one for you.",
-        "button": "Book a call"
+        "text": "Si no encuentras exactamente el servicio que necesitas, puedo adaptar uno para ti.",
+        "button": "Reserva una llamada"
       }
     },
     "workflow": {
-      "title": "Flow",
-      "text": "Process for turning ideas into real, working solutions that deliver amazing results.",
-      "processLabel": "Process:",
-      "processValue": "4 steps",
-      "durationLabel": "Duration:",
-      "durationValue": "~ 1 month",
+      "title": "Flujo",
+      "text": "Proceso para convertir ideas en soluciones reales y funcionales que generan resultados extraordinarios.",
+      "processLabel": "Proceso:",
+      "processValue": "4 pasos",
+      "durationLabel": "Duración:",
+      "durationValue": "~ 1 mes",
       "steps": {
         "0": {
-          "title": "Discover",
-          "text": "Before proposing anything, I take time to understand what you're really trying to solve."
+          "title": "Exploración",
+          "text": "Antes de proponer algo, me tomo tiempo para entender lo que realmente estás tratando de resolver."
         },
         "1": {
-          "title": "Design",
-          "text": "We shape flows, architecture, and key decisions together. For platforms, this is where the most important work happens."
+          "title": "Diseño",
+          "text": "Damos forma a los flujos, la arquitectura y las decisiones clave juntos."
         },
         "2": {
-          "title": "Build",
-          "text": "Clear milestones from day one, so you always know where things stand."
+          "title": "Desarrollo",
+          "text": "Hitos claros desde el primer día, para que siempre sepas cómo va todo."
         },
         "3": {
-          "title": "Launch",
-          "text": "I ship, monitor, and stay close after launch to make sure everything lands right."
+          "title": "Despliegue",
+          "text": "Despliego, monitorizo y me mantengo cerca después del lanzamiento para asegurarme de que todo funciona como debe."
         }
       }
     },
     "pricing": {
-      "title": "Pricing",
-      "text": "I keep pricing clear and fully transparent. Final cost depends on scope and timeline.",
+      "title": "Precios",
+      "text": "Mantengo los precios claros y totalmente transparentes. El coste final depende del alcance y el plazo.",
       "items": {
         "0": {
           "title": "Landing pages",
-          "text": "A focused landing page designed to convert and built to launch fast. Ideal for validating a product, a campaign or a new offer.",
+          "text": "Una landing page enfocada, diseñada para convertir y lista para lanzar rápido. Ideal para validar un producto, una campaña o una nueva oferta.",
           "price": "500",
-          "pricePreffix": "from",
-          "priceSuffix": "/project",
-          "listItem1": "Marketing site design & build",
-          "listItem2": "Responsive across breakpoints",
-          "listItem3": "Fast loading & SEO-ready",
-          "listItem4": "Edit-ready in Framer or custom code",
-          "button": "Start project"
+          "pricePreffix": "desde",
+          "priceSuffix": "/proyecto",
+          "listItem1": "Diseño y desarrollo de marketing sites",
+          "listItem2": "Responsive en todos los breakpoints",
+          "listItem3": "Carga rápida y listo para SEO",
+          "listItem4": "Listo para editar en Framer o en código",
+          "button": "Iniciar proyecto"
         },
         "1": {
-          "title": "MVPs & integrations",
-          "text": "Product work from architecture to first release: full-stack build, integrations, and AI where it adds measurable value.",
+          "title": "MVPs e integraciones",
+          "text": "Producto desde la arquitectura hasta la primera versión: desarrollo full-stack, integraciones y IA donde añade valor medible.",
           "price": "2500",
-          "pricePreffix": "from",
-          "priceSuffix": "/project",
-          "listItem1": "Product architecture & scope",
-          "listItem2": "Full-stack development",
-          "listItem3": "API & service integrations",
-          "listItem4": "AI features where they add value",
-          "button": "Start project"
+          "pricePreffix": "desde",
+          "priceSuffix": "/proyecto",
+          "listItem1": "Arquitectura y alcance del producto",
+          "listItem2": "Desarrollo full-stack",
+          "listItem3": "Integraciones de API y servicios",
+          "listItem4": "Funcionalidades de IA donde aportan valor",
+          "button": "Iniciar proyecto"
         }
       }
     },
     "faq": {
-      "title": "Have some questions?",
+      "title": "¿Tienes alguna pregunta?",
       "badge": "FAQ",
       "infoCard": {
-        "title": "Not finding answers?",
-        "text": "Reach out anytime. I'm happy to answer any questions before you commit to working together.",
-        "button": "Contact us"
+        "title": "¿No encuentras lo que buscas?",
+        "text": "Escríbeme cuando quieras. Estaré encantado de resolver cualquier duda antes de que decidamos trabajar juntos.",
+        "button": "Contacto"
       },
       "questions": {
         "0": {
-          "question": "What does a project typically cost?",
-          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers, no open-ended invoices, no surprises once the scope is agreed."
+          "question": "¿Cuánto cuesta un proyecto normalmente?",
+          "answer": "Cada proyecto se presupuesta según el trabajo real, no las horas. Tras una primera conversación envío una propuesta cerrada con un entregable claro, plazo y precio. Sin retainers, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
         },
         "1": {
-          "question": "How long does a project take?",
-          "answer": "Most projects run between 3 and 8 weeks, depending on scope. A landing page is usually a couple of weeks; an MVP or integration takes longer. I set clear milestones at the start so you always know where the work stands."
+          "question": "¿Cuánto tiempo lleva un proyecto?",
+          "answer": "La mayoría de los proyectos duran entre 3 y 8 semanas, según el alcance. Una landing page suele ser cosa de un par de semanas; un MVP o una integración lleva más tiempo. Establezco hitos claros desde el inicio para que siempre sepas cómo va el trabajo."
         },
         "2": {
-          "question": "How does a project get started?",
+          "question": "¿Cómo se pone en marcha un proyecto?",
           "answer": "Send a short note about what you're working on. I reply within a couple of days. If it looks like a fit, I set up a 30-minute call to understand the opportunity, the constraints and the shape of the work. From there I send a written proposal — no obligation to move forward."
         },
         "3": {
-          "question": "Do you work with my existing codebase, stack or team?",
-          "answer": "Yes. I work inside what you already have — your stack, your design system, your team's process — and integrate with the people involved. If something needs to be replaced or refactored, I flag it clearly before any change."
+          "question": "¿Trabajas con mi código existente, mi stack o mi equipo?",
+          "answer": "Sí. Trabajo dentro de lo que ya tienes — tu stack, tu sistema de diseño, el proceso de tu equipo — e integro con las personas implicadas. Si algo necesita reemplazarse o refactorizarse, lo indico claramente antes de hacer ningún cambio."
         },
         "4": {
-          "question": "What if I only have a rough idea?",
-          "answer": "That's where I add the most value. A clear brief helps, but it isn't required. I help shape the idea, define what's actually worth building, and put a first scope in front of you before any commitment."
+          "question": "¿Y si solo tengo una idea?",
+          "answer": "Ahí es donde más valor aporto. Un briefing claro ayuda, pero no es necesario. Ayudo a dar forma a la idea, definir qué merece realmente la pena construir y presentarte un primer alcance antes de ningún compromiso."
         },
         "5": {
-          "question": "What happens after launch?",
-          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, you can keep me on a light retainer for ongoing work, or take the codebase forward on your own. Either way, you leave with a system that's yours to run."
+          "question": "¿Qué pasa después de lanzar?",
+          "answer": "No desaparezco. La mayoría de los proyectos incluyen un periodo corto de soporte para correcciones y ajustes. Después, puedes mantenerme con un retainer ligero para trabajo continuado, o llevar el código adelante por tu cuenta. De cualquier manera, te quedas con un sistema que es tuyo para gestionar."
         }
       }
     },
     "cta": {
-      "badge": "Free 20-min intro call",
-      "title": "Tell me what you're building",
-      "text": "Work with someone that brings clarity, care, and creativity to every project.",
-      "button": "Book a call"
+      "badge": "Llamada de introducción gratuita de 20 minutos",
+      "title": "Dime qué estás construyendo",
+      "text": "Trabaja con alguien que aporte claridad, cuidado y creatividad a cada proyecto.",
+      "button": "Reserva una llamada"
     },
     "footer": {
-      "city": "Berlin, Germany",
+      "city": "Berlin, Alemania",
       "blog": "Blog",
-      "contact": "Contact",
-      "services": "Services",
-      "workflow": "Workflow",
-      "pricing": "Pricing",
-      "terms": "Terms of Service",
-      "privacy": "Privacy Policy"
+      "contact": "Contacto",
+      "services": "Servicios",
+      "workflow": "Flujo de trabajo",
+      "pricing": "Precios",
+      "terms": "Términos de Servicio",
+      "privacy": "Política de Privacidad"
     }
   },
   "contact": {
     "metadata": {
-      "title": "Contact | Jonathan Freire",
-      "description": "Contact Jonathan Freire, Digital Product Architect based in Berlin. Book a call or send a message to talk about your next web app or AI project."
+      "title": "Contacto | Jonathan Freire",
+      "description": "Contacta con Jonathan Freire, Digital Product Architect con base en Berlín. Reserva una llamada o envía un mensaje para hablar de tu próxima aplicación web o proyecto de IA."
     },
     "header": {
-      "title": "Contact",
-      "subtitle": "Pick a time or drop me a message. I reply within 24 hours."
+      "title": "Contacto",
+      "subtitle": "Escoge una hora o envíame un mensaje. Respondo dentro de 24 horas."
     },
     "info": {
       "emailLabel": "Email",
       "emailValue": "jonathan.freireespinoza@gmail.com",
-      "locationLabel": "Location",
-      "locationValue": "Berlin",
-      "mapAlt": "Map of Berlin, Germany"
+      "locationLabel": "Ubicación",
+      "locationValue": "Berlín",
+      "mapAlt": "Mapa de Berlin, Alemania"
     },
     "form": {
-      "title": "Prefer to write? I'll reply within 24 hours.",
-      "nameLabel": "Name",
+      "title": "¿Prefieres escribir? Responderé en menos de 24 horas.",
+      "nameLabel": "Nombre",
       "namePlaceholder": "Jane Smith",
       "emailLabel": "Email",
-      "emailPlaceholder": "jane@example.com",
-      "messageLabel": "Message",
-      "messagePlaceholder": "Tell me about your new idea",
-      "submit": "Submit",
-      "success": "Thanks. I will reply within 24 hours.",
-      "sending": "Sending...",
-      "errorRequired": "Please fill in all fields.",
-      "errorEmail": "Please enter a valid email address.",
-      "errorMessage": "Message must be at least 10 characters.",
-      "errorGeneric": "Something went wrong. Please try again."
+      "emailPlaceholder": "jane@ejemplo.com",
+      "messageLabel": "Mensaje",
+      "messagePlaceholder": "Cuéntame sobre tu nueva idea",
+      "submit": "Enviar",
+      "success": "Gracias. Responderé en menos de 24 horas.",
+      "sending": "Enviando...",
+      "errorRequired": "Por favor, rellena todos los campos.",
+      "errorEmail": "Por favor, introduce una dirección de correo electrónico válida.",
+      "errorMessage": "El mensaje debe tener al menos 10 caracteres.",
+      "errorGeneric": "Algo salió mal. Por favor, inténtalo de nuevo."
     }
   }
 }
