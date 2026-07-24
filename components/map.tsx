@@ -16,9 +16,10 @@ export default function Map() {
     <MapContainer
       center={[52.52, 13.405]} // Berlin
       zoom={13}
-      className="h-full w-full grayscale"
+      className="h-full w-full"
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png" />
+
       <Marker position={[52.52, 13.405]}>
         <Popup>Berlin</Popup>
       </Marker>

@@ -59,6 +59,7 @@ export default async function Layout({
     <html
       lang={locale}
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body

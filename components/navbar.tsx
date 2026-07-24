@@ -99,7 +99,10 @@ export function Navbar() {
                   <MenuIcon />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[82%] max-w-sm">
+              <SheetContent
+                side="right"
+                className="w-[82%] max-w-sm dark:bg-neutral-900"
+              >
                 <SheetHeader>
                   <SheetTitle className="sr-only">{t("openMenu")}</SheetTitle>
                 </SheetHeader>

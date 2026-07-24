@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
@@ -25,21 +25,62 @@ function FieldLabel({
   );
 }
 
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export function Form() {
   const t = useTranslations("contact.form");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
     const form = event.currentTarget;
     const data = new FormData(form);
-    if (!data.get("Name") || !data.get("Email") || !data.get("Message")) {
-      setError("Please fill in all fields.");
+
+    const name = (data.get("Name") as string).trim();
+    const email = (data.get("Email") as string).trim();
+    const message = (data.get("Message") as string).trim();
+
+    // Client-side validation
+    if (!name || !email || !message) {
+      setError(t("errorRequired"));
       return;
     }
-    setSubmitted(true);
+    if (!validateEmail(email)) {
+      setError(t("errorEmail"));
+      return;
+    }
+    if (message.length < 10) {
+      setError(t("errorMessage"));
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        setError(result.error ?? t("errorGeneric"));
+        return;
+      }
+
+      setSubmitted(true);
+    } catch {
+      setError(t("errorGeneric"));
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -59,7 +100,7 @@ export function Form() {
       y={30}
       className="flex h-full w-full flex-col gap-10 bg-neutral-100 dark:bg-neutral-900 p-6 md:p-8"
     >
-      <h2 className="text-h3 text-foreground uppercase">{t("title")}</h2>
+      <h2 className="text-lead text-foreground">{t("title")}</h2>
 
       <form
         onSubmit={handleSubmit}
@@ -113,10 +154,23 @@ export function Form() {
         ) : null}
 
         <div className="flex w-full flex-col gap-3 pt-2">
-          <Button type="submit" className="self-start px-6 py-3">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="self-start px-6 py-3"
+          >
             <span className="inline-flex items-center gap-2">
-              {t("submit")}
-              <ArrowUpRight aria-hidden="true" className="size-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  {t("sending")}
+                </>
+              ) : (
+                <>
+                  {t("submit")}
+                  <ArrowUpRight aria-hidden="true" className="size-4" />
+                </>
+              )}
             </span>
           </Button>
         </div>
