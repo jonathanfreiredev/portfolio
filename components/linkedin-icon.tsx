@@ -3,7 +3,7 @@ import Image from "next/image";
 export function LinkedInIcon() {
   return (
     <a
-      href="https://www.linkedin.com/in/jonathanfreire"
+      href="https://www.linkedin.com/in/jonathan-freire/"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="LinkedIn"
