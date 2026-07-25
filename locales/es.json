@@ -65,19 +65,19 @@
       "items": {
         "mantel-azul": {
           "title": "Mantel Azul · Asistente de cocina de IA",
-          "description": "Una plataforma social de cocina donde la IA convierte cualquier foto en receta — desarrollada de principio a fin, desde la integración de visión artificial hasta el uso compartido en tiempo real y la generación de imágenes."
+          "description": "An AI-powered cooking community where users can create recipes from photos using computer vision, get personalized culinary assistance, and share their cooking in real time. I built the full stack — from the cookbook system and social features to the AI integrations using the Vercel AI SDK and Flux for image generation."
         },
         "wandace": {
           "title": "Wandace · Plataforma de Comercio Unificado",
-          "description": "Una plataforma SaaS de comercio para retail, construida completamente desde cero — me encargué de la arquitectura de extremo a extremo: desde el diseño de la base de datos hasta la infraestructura en la nube, pagos e integraciones de marketing."
+          "description": "A sales and management platform for retail businesses, built from scratch. I led the architecture end-to-end, covering database design, cloud infrastructure on Azure, and integrations with payment providers and marketing engines."
         },
         "modern-nextjs-stack": {
           "title": "Stack moderno de Next.js · Boilerplate de código abierto",
-          "description": "Un template de Next.js listo para producción con autenticación, base de datos tipada y una UI cuidada desde el primer momento — sin configuración inicial."
+          "description": "A production-ready Next.js boilerplate with authentication, database logic, and a modern UI setup out of the box. Built for developers who want a solid, type-safe foundation without the initial setup overhead."
         },
         "foodie": {
           "title": "Comida - Plataforma de menú digital",
-          "description": "Los restaurantes suben una foto o PDF de su carta física — la IA la convierte en una experiencia digital con marca propia, pedidos y pago en mesa."
+          "description": "A digital menu platform for restaurants, accessible via QR code from the table. Restaurants could upload a photo or PDF of their physical menu and the system would automatically parse it into a fully customised digital menu. Customers could browse, order, and pay directly from the table. Built a full order management system with per-table and online order tracking, and a unique branded experience for each venue."
         }
       }
     },
@@ -152,19 +152,19 @@
       "steps": {
         "0": {
           "title": "Exploración",
-          "text": "Antes de proponer algo, me tomo tiempo para entender lo que realmente estás tratando de resolver."
+          "text": "Understanding your challenge, your audience, and what success looks like for you."
         },
         "1": {
           "title": "Diseño",
-          "text": "Damos forma a los flujos, la arquitectura y las decisiones clave juntos."
+          "text": "Ideas take shape. I explore directions, test concepts, and refine until it feels right."
         },
         "2": {
           "title": "Desarrollo",
-          "text": "Hitos claros desde el primer día, para que siempre sepas cómo va todo."
+          "text": "I develop the final product with attention to every detail and technical precision."
         },
         "3": {
           "title": "Despliegue",
-          "text": "Despliego, monitorizo y me mantengo cerca después del lanzamiento para asegurarme de que todo funciona como debe."
+          "text": "I manage the launch, provide training if needed, and ensure a smooth transition."
         }
       }
     },
@@ -253,11 +253,11 @@
   "contact": {
     "metadata": {
       "title": "Contacto | Jonathan Freire",
-      "description": "Contacta con Jonathan Freire, Digital Product Architect con base en Berlín. Reserva una llamada o envía un mensaje para hablar de tu próxima aplicación web o proyecto de IA."
+      "description": "Tell me about your project. I will get back to you within 24 hours without delay."
     },
     "header": {
       "title": "Contacto",
-      "subtitle": "Escoge una hora o envíame un mensaje. Respondo dentro de 24 horas."
+      "subtitle": "Tell me about your project and I'll get back to you within 24 hours without delay."
     },
     "info": {
       "emailLabel": "Email",
@@ -267,7 +267,7 @@
       "mapAlt": "Mapa de Berlin, Alemania"
     },
     "form": {
-      "title": "¿Prefieres escribir? Responderé en menos de 24 horas.",
+      "title": "Send me a message",
       "nameLabel": "Nombre",
       "namePlaceholder": "Jane Smith",
       "emailLabel": "Email",
