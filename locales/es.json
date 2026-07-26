@@ -45,11 +45,11 @@
     "hero": {
       "title": "Digital product architect",
       "subTagline": "Estrategia. Tecnología. Inteligencia.",
-      "tagline": "Tu producto, construido desde el comienzo.",
+      "tagline": "Clear from day one. Built to grow.",
       "ctaPrimary": "Iniciar proyecto",
       "ctaSecondary": "Servicios",
       "responseTimeLabel": "tiempo de respuesta",
-      "responseTimeValue": "3 h",
+      "responseTimeValue": "1 day",
       "locationLabel": "Con base en",
       "locationValue": "Berlín"
     },
@@ -171,30 +171,34 @@
     "pricing": {
       "title": "Precios",
       "text": "Mantengo los precios claros y totalmente transparentes. El coste final depende del alcance y el plazo.",
+      "otherPricings": "Need only architecture or strategy work, without a full build? Let's scope that separately.",
+      "button": "Contacto",
       "items": {
         "0": {
           "title": "Landing pages",
           "text": "Una landing page enfocada, diseñada para convertir y lista para lanzar rápido. Ideal para validar un producto, una campaña o una nueva oferta.",
           "price": "500",
           "pricePreffix": "desde",
-          "priceSuffix": "/proyecto",
-          "listItem1": "Diseño y desarrollo de marketing sites",
-          "listItem2": "Responsive en todos los breakpoints",
-          "listItem3": "Carga rápida y listo para SEO",
+          "priceSuffix": "/project · ~2 weeks",
+          "additionalText": "Price depends on number of sections and content complexity.",
+          "listItem1": "Arquitectura y alcance del producto",
+          "listItem2": "Structured for conversion, not just decoration",
+          "listItem3": "Content strategy included, not just design",
           "listItem4": "Listo para editar en Framer o en código",
-          "button": "Iniciar proyecto"
+          "button": "Reserva una llamada"
         },
         "1": {
           "title": "MVPs e integraciones",
           "text": "Producto desde la arquitectura hasta la primera versión: desarrollo full-stack, integraciones y IA donde añade valor medible.",
           "price": "2500",
           "pricePreffix": "desde",
-          "priceSuffix": "/proyecto",
+          "priceSuffix": "/project · 4-8 weeks",
+          "additionalText": "Price depends on scope, integrations and timeline",
           "listItem1": "Arquitectura y alcance del producto",
           "listItem2": "Desarrollo full-stack",
           "listItem3": "Integraciones de API y servicios",
-          "listItem4": "Funcionalidades de IA donde aportan valor",
-          "button": "Iniciar proyecto"
+          "listItem4": "Documented so it scales without a rebuild",
+          "button": "Reserva una llamada"
         }
       }
     },
@@ -209,7 +213,7 @@
       "questions": {
         "0": {
           "question": "¿Cuánto cuesta un proyecto normalmente?",
-          "answer": "Cada proyecto se presupuesta según el trabajo real, no las horas. Tras una primera conversación envío una propuesta cerrada con un entregable claro, plazo y precio. Sin retainers, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
+          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers during the project, no open-ended invoices, no surprises once the scope is agreed."
         },
         "1": {
           "question": "¿Cuánto tiempo lleva un proyecto?",
@@ -217,7 +221,7 @@
         },
         "2": {
           "question": "¿Cómo se pone en marcha un proyecto?",
-          "answer": "Send a short note about what you're working on. I reply within a couple of days. If it looks like a fit, I set up a 30-minute call to understand the opportunity, the constraints and the shape of the work. From there I send a written proposal — no obligation to move forward."
+          "answer": "Book a free 20-minute call directly, or send a short note if you'd rather write first. Either way, if it looks like a fit, I follow up with a written proposal — no obligation to move forward."
         },
         "3": {
           "question": "¿Trabajas con mi código existente, mi stack o mi equipo?",
@@ -225,11 +229,11 @@
         },
         "4": {
           "question": "¿Y si solo tengo una idea?",
-          "answer": "Ahí es donde más valor aporto. Un briefing claro ayuda, pero no es necesario. Ayudo a dar forma a la idea, definir qué merece realmente la pena construir y presentarte un primer alcance antes de ningún compromiso."
+          "answer": "That's where I add the most value. A clear brief helps, but it isn't required — I help shape the idea and define what's actually worth building before you commit to anything."
         },
         "5": {
           "question": "¿Qué pasa después de lanzar?",
-          "answer": "No desaparezco. La mayoría de los proyectos incluyen un periodo corto de soporte para correcciones y ajustes. Después, puedes mantenerme con un retainer ligero para trabajo continuado, o llevar el código adelante por tu cuenta. De cualquier manera, te quedas con un sistema que es tuyo para gestionar."
+          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, if you want ongoing help, we can set up a light retainer — or you take the codebase forward on your own. Either way, you leave with a system that's yours to run."
         }
       }
     },
