@@ -45,11 +45,11 @@
     "hero": {
       "title": "Digital product architect",
       "subTagline": "Strategy. Technology. Intelligence.",
-      "tagline": "Your product, built right from the start.",
+      "tagline": "Clear from day one. Built to grow.",
       "ctaPrimary": "Start project",
       "ctaSecondary": "Services",
       "responseTimeLabel": "response time",
-      "responseTimeValue": "3h",
+      "responseTimeValue": "1 day",
       "locationLabel": "Based in",
       "locationValue": "Berlin"
     },
@@ -171,30 +171,34 @@
     "pricing": {
       "title": "Pricing",
       "text": "I keep pricing clear and fully transparent. Final cost depends on scope and timeline.",
+      "otherPricings": "Need only architecture or strategy work, without a full build? Let's scope that separately.",
+      "button": "Contact me",
       "items": {
         "0": {
           "title": "Landing pages",
           "text": "A focused landing page designed to convert and built to launch fast. Ideal for validating a product, a campaign or a new offer.",
           "price": "500",
           "pricePreffix": "from",
-          "priceSuffix": "/project",
-          "listItem1": "Marketing site design & build",
-          "listItem2": "Responsive across breakpoints",
-          "listItem3": "Fast loading & SEO-ready",
+          "priceSuffix": "/project · ~2 weeks",
+          "additionalText": "Price depends on number of sections and content complexity.",
+          "listItem1": "Product architecture & scope",
+          "listItem2": "Structured for conversion, not just decoration",
+          "listItem3": "Content strategy included, not just design",
           "listItem4": "Edit-ready in Framer or custom code",
-          "button": "Start project"
+          "button": "Book a call"
         },
         "1": {
           "title": "MVPs & integrations",
           "text": "Product work from architecture to first release: full-stack build, integrations, and AI where it adds measurable value.",
           "price": "2500",
           "pricePreffix": "from",
-          "priceSuffix": "/project",
+          "priceSuffix": "/project · 4-8 weeks",
+          "additionalText": "Price depends on scope, integrations and timeline",
           "listItem1": "Product architecture & scope",
           "listItem2": "Full-stack development",
           "listItem3": "API & service integrations",
-          "listItem4": "AI features where they add value",
-          "button": "Start project"
+          "listItem4": "Documented so it scales without a rebuild",
+          "button": "Book a call"
         }
       }
     },
@@ -209,7 +213,7 @@
       "questions": {
         "0": {
           "question": "What does a project typically cost?",
-          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers, no open-ended invoices, no surprises once the scope is agreed."
+          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers during the project, no open-ended invoices, no surprises once the scope is agreed."
         },
         "1": {
           "question": "How long does a project take?",
@@ -217,7 +221,7 @@
         },
         "2": {
           "question": "How does a project get started?",
-          "answer": "Send a short note about what you're working on. I reply within a couple of days. If it looks like a fit, I set up a 30-minute call to understand the opportunity, the constraints and the shape of the work. From there I send a written proposal — no obligation to move forward."
+          "answer": "Book a free 20-minute call directly, or send a short note if you'd rather write first. Either way, if it looks like a fit, I follow up with a written proposal — no obligation to move forward."
         },
         "3": {
           "question": "Do you work with my existing codebase, stack or team?",
@@ -225,11 +229,11 @@
         },
         "4": {
           "question": "What if I only have a rough idea?",
-          "answer": "That's where I add the most value. A clear brief helps, but it isn't required. I help shape the idea, define what's actually worth building, and put a first scope in front of you before any commitment."
+          "answer": "That's where I add the most value. A clear brief helps, but it isn't required — I help shape the idea and define what's actually worth building before you commit to anything."
         },
         "5": {
           "question": "What happens after launch?",
-          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, you can keep me on a light retainer for ongoing work, or take the codebase forward on your own. Either way, you leave with a system that's yours to run."
+          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, if you want ongoing help, we can set up a light retainer — or you take the codebase forward on your own. Either way, you leave with a system that's yours to run."
         }
       }
     },
