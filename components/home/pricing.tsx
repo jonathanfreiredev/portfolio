@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { SectionHeader } from "@/components/home/section-header";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
+import { Reveal } from "../motion/reveal";
 
 type PricingCardProps = {
   index: number;
@@ -24,16 +25,23 @@ function PricingCard({ index }: PricingCardProps) {
         </div>
 
         <div className="flex flex-col gap-10">
-          <div className="flex items-end gap-1">
-            <span className="pb-1.5 text-tag text-muted-foreground">
-              {t("pricePreffix")}
-            </span>
-            <span className="text-display-s text-foreground tabular-nums">
-              {t("price")}€
-            </span>
-            <span className="pb-1.5 text-tag text-muted-foreground uppercase">
-              {t("priceSuffix")}
-            </span>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-end gap-1">
+              <span className="pb-1.5 text-tag text-muted-foreground">
+                {t("pricePreffix")}
+              </span>
+              <span className="text-display-s text-foreground tabular-nums">
+                {t("price")}€
+              </span>
+              <span className="pb-1.5 text-tag text-muted-foreground uppercase">
+                {t("priceSuffix")}
+              </span>
+            </div>
+            <div>
+              <span className="text-base text-muted-foreground">
+                {t("additionalText")}
+              </span>
+            </div>
           </div>
 
           <ul className="flex flex-col gap-3">
@@ -72,10 +80,28 @@ export function Pricing() {
     <section id="pricing" className="flex w-full flex-col gap-12 md:gap-24">
       <SectionHeader title={t("title")} text={t("text")} />
 
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        {Array.from({ length: PLAN_COUNT }).map((_, i) => (
-          <PricingCard key={i} index={i} />
-        ))}
+      <div className="flex flex-col gap-15">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {Array.from({ length: PLAN_COUNT }).map((_, i) => (
+            <PricingCard key={i} index={i} />
+          ))}
+        </div>
+
+        <Reveal y={30} className="w-[70%] md:w-full">
+          <div className="flex w-full flex-col justify-between gap-6 md:flex-row md:gap-8">
+            <div className="flex w-full flex-col gap-2 max-w-100">
+              <p className="text-body-l text-foreground">
+                {t("otherPricings")}
+              </p>
+            </div>
+            <Button asChild>
+              <Link href="/contact" className="inline-flex items-center gap-2">
+                {t("button")}
+                <ArrowUpRight aria-hidden="true" className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
