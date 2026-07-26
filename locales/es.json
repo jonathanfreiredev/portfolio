@@ -45,11 +45,11 @@
     "hero": {
       "title": "Digital product architect",
       "subTagline": "Estrategia. Tecnología. Inteligencia.",
-      "tagline": "Clear from day one. Built to grow.",
+      "tagline": "Claro desde el primer día. Construido para crecer.",
       "ctaPrimary": "Iniciar proyecto",
       "ctaSecondary": "Servicios",
       "responseTimeLabel": "tiempo de respuesta",
-      "responseTimeValue": "1 day",
+      "responseTimeValue": "1 día",
       "locationLabel": "Con base en",
       "locationValue": "Berlín"
     },
@@ -65,11 +65,11 @@
       "items": {
         "mantel-azul": {
           "title": "Mantel Azul · Asistente de cocina de IA",
-          "description": "An AI-powered cooking community where users can create recipes from photos using computer vision, get personalized culinary assistance, and share their cooking in real time. I built the full stack — from the cookbook system and social features to the AI integrations using the Vercel AI SDK and Flux for image generation."
+          "description": "Una plataforma social de cocina donde la IA convierte cualquier foto en receta — desarrollo full stack: desde integraciones de visión artificial hasta compartición en tiempo real y generación de imágenes."
         },
         "wandace": {
           "title": "Wandace · Plataforma de Comercio Unificado",
-          "description": "A sales and management platform for retail businesses, built from scratch. I led the architecture end-to-end, covering database design, cloud infrastructure on Azure, and integrations with payment providers and marketing engines."
+          "description": "Una plataforma SaaS de comercio completa para retail, construida desde cero — me encargué de la arquitectura de extremo a extremo: desde el diseño de la base de datos hasta la infraestructura en la nube, pagos e integraciones de marketing."
         },
         "modern-nextjs-stack": {
           "title": "Stack moderno de Next.js · Boilerplate de código abierto",
@@ -171,7 +171,7 @@
     "pricing": {
       "title": "Precios",
       "text": "Mantengo los precios claros y totalmente transparentes. El coste final depende del alcance y el plazo.",
-      "otherPricings": "Need only architecture or strategy work, without a full build? Let's scope that separately.",
+      "otherPricings": "¿Necesitas solo arquitectura o trabajo de estrategia, sin desarrollo completo? Lo presupuestamos por separado.",
       "button": "Contacto",
       "items": {
         "0": {
@@ -179,11 +179,11 @@
           "text": "Una landing page enfocada, diseñada para convertir y lista para lanzar rápido. Ideal para validar un producto, una campaña o una nueva oferta.",
           "price": "500",
           "pricePreffix": "desde",
-          "priceSuffix": "/project · ~2 weeks",
-          "additionalText": "Price depends on number of sections and content complexity.",
+          "priceSuffix": "/proyecto · ~2 semanas",
+          "additionalText": "El precio depende del número de secciones y de la complejidad del contenido.",
           "listItem1": "Arquitectura y alcance del producto",
-          "listItem2": "Structured for conversion, not just decoration",
-          "listItem3": "Content strategy included, not just design",
+          "listItem2": "Estructurada para convertir, no solo para decorar",
+          "listItem3": "Estrategia de contenido incluida, no solo diseño",
           "listItem4": "Listo para editar en Framer o en código",
           "button": "Reserva una llamada"
         },
@@ -192,12 +192,12 @@
           "text": "Producto desde la arquitectura hasta la primera versión: desarrollo full-stack, integraciones y IA donde añade valor medible.",
           "price": "2500",
           "pricePreffix": "desde",
-          "priceSuffix": "/project · 4-8 weeks",
-          "additionalText": "Price depends on scope, integrations and timeline",
+          "priceSuffix": "/proyecto · 4-8 semanas",
+          "additionalText": "El precio depende del alcance, las integraciones y el plazo",
           "listItem1": "Arquitectura y alcance del producto",
           "listItem2": "Desarrollo full-stack",
           "listItem3": "Integraciones de API y servicios",
-          "listItem4": "Documented so it scales without a rebuild",
+          "listItem4": "Documentado para que escale sin necesidad de rehacerlo",
           "button": "Reserva una llamada"
         }
       }
@@ -213,7 +213,7 @@
       "questions": {
         "0": {
           "question": "¿Cuánto cuesta un proyecto normalmente?",
-          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers during the project, no open-ended invoices, no surprises once the scope is agreed."
+          "answer": "Cada proyecto se presupuesta según el trabajo real, no las horas. Tras una primera conversación envío una propuesta cerrada con un entregable claro, plazo y precio. Sin retainers durante el proyecto, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
         },
         "1": {
           "question": "¿Cuánto tiempo lleva un proyecto?",
@@ -221,7 +221,7 @@
         },
         "2": {
           "question": "¿Cómo se pone en marcha un proyecto?",
-          "answer": "Book a free 20-minute call directly, or send a short note if you'd rather write first. Either way, if it looks like a fit, I follow up with a written proposal — no obligation to move forward."
+          "answer": "Reserva una llamada gratuita de 20 minutos directamente, o envía un mensaje si prefieres escribir primero. En cualquier caso, si parece que encaja, respondo con una propuesta por escrito — sin compromiso de continuar."
         },
         "3": {
           "question": "¿Trabajas con mi código existente, mi stack o mi equipo?",
@@ -229,11 +229,11 @@
         },
         "4": {
           "question": "¿Y si solo tengo una idea?",
-          "answer": "That's where I add the most value. A clear brief helps, but it isn't required — I help shape the idea and define what's actually worth building before you commit to anything."
+          "answer": "Ahí es donde más valor aporto. Un briefing claro ayuda, pero no es necesario — ayudo a dar forma a la idea y definir qué merece realmente la pena construir antes de que te comprometas a nada."
         },
         "5": {
           "question": "¿Qué pasa después de lanzar?",
-          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, if you want ongoing help, we can set up a light retainer — or you take the codebase forward on your own. Either way, you leave with a system that's yours to run."
+          "answer": "No desaparezco. La mayoría de los proyectos incluyen un periodo corto de soporte para correcciones y ajustes. Después, si quieres ayuda continuada, podemos establecer un retainer ligero — o llevas el código adelante por tu cuenta. De cualquier manera, te quedas con un sistema que es tuyo para gestionar."
         }
       }
     },
@@ -264,7 +264,7 @@
       "subtitle": "Tell me about your project and I'll get back to you within 24 hours without delay."
     },
     "meeting": {
-      "title": "Prefer to talk? Pick a time that works for you."
+      "title": "¿Prefieres hablar? Elige el momento que mejor te venga."
     },
     "form": {
       "title": "Send me a message",
