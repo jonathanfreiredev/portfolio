@@ -1,23 +1,23 @@
-import { InfoCard } from "@/components/contact/info-card";
 import { Form } from "@/components/contact/form";
 import CalEmbed from "../cal-embed";
+import { Reveal } from "../motion/reveal";
 
 export function Content() {
   return (
     <section className="w-full flex flex-col gap-10">
-      <div className="grid w-full grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-3">
-        <div className="lg:col-span-1">
-          <InfoCard />
+      <div className="grid w-full grid-cols-1 gap-10 xl:grid-cols-5 xl:gap-3">
+        <div className="xl:col-span-2">
+          <Form />
         </div>
-        <div className="relative lg:col-span-2 flex flex-col gap-4">
-          <h3 className="text-lead p-1">
-            Prefer to talk? Pick a time that works for you.
-          </h3>
-          <CalEmbed />
+        <div className="xl:col-span-3">
+          <Reveal
+            y={30}
+            className="relative flex h-full w-full flex-col gap-10 bg-neutral-100 dark:bg-neutral-900 p-6 md:p-8"
+          >
+            <CalEmbed />
+          </Reveal>
         </div>
       </div>
-
-      <Form />
     </section>
   );
 }

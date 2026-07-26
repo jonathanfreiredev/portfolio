@@ -21,21 +21,18 @@ const NAV_LINKS = [
   { href: "/contact", key: "contact" },
 ] as const;
 
-const SHEET_GROUPS = [
-  [
-    { href: "/", key: "home" },
-    { href: "/blog", key: "blog" },
-    { href: "/contact", key: "contact" },
-  ],
-  [
-    { href: "/#services", key: "services" },
-    { href: "/#workflow", key: "workflow" },
-    { href: "/#pricing", key: "pricing" },
-  ],
-  [
-    { href: "/legal/terms", key: "terms" },
-    { href: "/legal/privacy", key: "privacy" },
-  ],
+const SHEET_ITEMS = [
+  { href: "/", key: "home" },
+
+  { href: "/#services", key: "services" },
+  { href: "/#workflow", key: "workflow" },
+  { href: "/#pricing", key: "pricing" },
+
+  { href: "/blog", key: "blog" },
+  { href: "/contact", key: "contact" },
+
+  { href: "/legal/terms", key: "terms" },
+  { href: "/legal/privacy", key: "privacy" },
 ] as const;
 
 export function Navbar() {
@@ -107,22 +104,15 @@ export function Navbar() {
                   <SheetTitle className="sr-only">{t("openMenu")}</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col">
-                  {SHEET_GROUPS.map((group, groupIndex) => (
-                    <div key={groupIndex} className="flex flex-col">
-                      {group.map((link) => (
-                        <SheetClose asChild key={link.href}>
-                          <Link
-                            href={link.href}
-                            className="border-b border-border px-4 py-4 text-base text-foreground hover:bg-muted"
-                          >
-                            {labelFor(link.key)}
-                          </Link>
-                        </SheetClose>
-                      ))}
-                      {groupIndex < SHEET_GROUPS.length - 1 ? (
-                        <div aria-hidden="true" className="h-2 bg-muted" />
-                      ) : null}
-                    </div>
+                  {SHEET_ITEMS.map((item, index) => (
+                    <SheetClose asChild key={item.key}>
+                      <Link
+                        href={item.href}
+                        className="border-b border-border px-4 py-4 text-base text-foreground hover:bg-muted"
+                      >
+                        {labelFor(item.key)}
+                      </Link>
+                    </SheetClose>
                   ))}
                 </div>
               </SheetContent>

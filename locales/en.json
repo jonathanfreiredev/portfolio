@@ -259,12 +259,8 @@
       "title": "Contact",
       "subtitle": "Pick a time or drop me a message. I reply within 24 hours."
     },
-    "info": {
-      "emailLabel": "Email",
-      "emailValue": "jonathan.freireespinoza@gmail.com",
-      "locationLabel": "Location",
-      "locationValue": "Berlin",
-      "mapAlt": "Map of Berlin, Germany"
+    "meeting": {
+      "title": "Prefer to talk? Pick a time that works for you."
     },
     "form": {
       "title": "Prefer to write? I'll reply within 24 hours.",

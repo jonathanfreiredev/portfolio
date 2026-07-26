@@ -51,10 +51,10 @@ function ProjectCard({ project }: { project: Project }) {
               src={project.logoPublicId}
               alt={t("title")}
               width={
-                project.id === "wandace" || project.id === "foodie" ? 100 : 160
+                project.id === "wandace" || project.id === "foodie" ? 80 : 160
               }
               height={
-                project.id === "wandace" || project.id === "foodie" ? 100 : 160
+                project.id === "wandace" || project.id === "foodie" ? 80 : 160
               }
               className="w-auto h-auto"
             />
