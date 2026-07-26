@@ -45,11 +45,11 @@
     "hero": {
       "title": "Digital product architect",
       "subTagline": "Estrategia. Tecnología. Inteligencia.",
-      "tagline": "Claro desde el primer día. Construido para crecer.",
+      "tagline": "Tu producto, construido desde el comienzo.",
       "ctaPrimary": "Iniciar proyecto",
       "ctaSecondary": "Servicios",
       "responseTimeLabel": "tiempo de respuesta",
-      "responseTimeValue": "1 día",
+      "responseTimeValue": "3 h",
       "locationLabel": "Con base en",
       "locationValue": "Berlín"
     },
@@ -179,11 +179,11 @@
           "text": "Una landing page enfocada, diseñada para convertir y lista para lanzar rápido. Ideal para validar un producto, una campaña o una nueva oferta.",
           "price": "500",
           "pricePreffix": "desde",
-          "priceSuffix": "/proyecto · ~2 semanas",
+          "priceSuffix": "/proyecto",
           "additionalText": "El precio depende del número de secciones y de la complejidad del contenido.",
           "listItem1": "Arquitectura y alcance del producto",
-          "listItem2": "Estructurada para convertir, no solo para decorar",
-          "listItem3": "Estrategia de contenido incluida, no solo diseño",
+          "listItem2": "Responsive en todos los breakpoints",
+          "listItem3": "Carga rápida y listo para SEO",
           "listItem4": "Listo para editar en Framer o en código",
           "button": "Reserva una llamada"
         },
@@ -192,12 +192,12 @@
           "text": "Producto desde la arquitectura hasta la primera versión: desarrollo full-stack, integraciones y IA donde añade valor medible.",
           "price": "2500",
           "pricePreffix": "desde",
-          "priceSuffix": "/proyecto · 4-8 semanas",
+          "priceSuffix": "/proyecto",
           "additionalText": "El precio depende del alcance, las integraciones y el plazo",
           "listItem1": "Arquitectura y alcance del producto",
           "listItem2": "Desarrollo full-stack",
           "listItem3": "Integraciones de API y servicios",
-          "listItem4": "Documentado para que escale sin necesidad de rehacerlo",
+          "listItem4": "Funcionalidades de IA donde aportan valor",
           "button": "Reserva una llamada"
         }
       }
@@ -213,7 +213,7 @@
       "questions": {
         "0": {
           "question": "¿Cuánto cuesta un proyecto normalmente?",
-          "answer": "Cada proyecto se presupuesta según el trabajo real, no las horas. Tras una primera conversación envío una propuesta cerrada con un entregable claro, plazo y precio. Sin retainers durante el proyecto, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
+          "answer": "Cada proyecto se presupuesta según el trabajo real, no las horas. Tras una primera conversación envío una propuesta cerrada con un entregable claro, plazo y precio. Sin retainers, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
         },
         "1": {
           "question": "¿Cuánto tiempo lleva un proyecto?",
@@ -221,7 +221,7 @@
         },
         "2": {
           "question": "¿Cómo se pone en marcha un proyecto?",
-          "answer": "Reserva una llamada gratuita de 20 minutos directamente, o envía un mensaje si prefieres escribir primero. En cualquier caso, si parece que encaja, respondo con una propuesta por escrito — sin compromiso de continuar."
+          "answer": "Send a short note about what you're working on. I reply within a couple of days. If it looks like a fit, I set up a 30-minute call to understand the opportunity, the constraints and the shape of the work. From there I send a written proposal — no obligation to move forward."
         },
         "3": {
           "question": "¿Trabajas con mi código existente, mi stack o mi equipo?",
@@ -229,11 +229,11 @@
         },
         "4": {
           "question": "¿Y si solo tengo una idea?",
-          "answer": "Ahí es donde más valor aporto. Un briefing claro ayuda, pero no es necesario — ayudo a dar forma a la idea y definir qué merece realmente la pena construir antes de que te comprometas a nada."
+          "answer": "Ahí es donde más valor aporto. Un briefing claro ayuda, pero no es necesario. Ayudo a dar forma a la idea, definir qué merece realmente la pena construir y presentarte un primer alcance antes de ningún compromiso."
         },
         "5": {
           "question": "¿Qué pasa después de lanzar?",
-          "answer": "No desaparezco. La mayoría de los proyectos incluyen un periodo corto de soporte para correcciones y ajustes. Después, si quieres ayuda continuada, podemos establecer un retainer ligero — o llevas el código adelante por tu cuenta. De cualquier manera, te quedas con un sistema que es tuyo para gestionar."
+          "answer": "No desaparezco. La mayoría de los proyectos incluyen un periodo corto de soporte para correcciones y ajustes. Después, puedes mantenerme con un retainer ligero para trabajo continuado, o llevar el código adelante por tu cuenta. De cualquier manera, te quedas con un sistema que es tuyo para gestionar."
         }
       }
     },
