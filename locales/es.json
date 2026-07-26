@@ -259,12 +259,8 @@
       "title": "Contacto",
       "subtitle": "Tell me about your project and I'll get back to you within 24 hours without delay."
     },
-    "info": {
-      "emailLabel": "Email",
-      "emailValue": "jonathan.freireespinoza@gmail.com",
-      "locationLabel": "Ubicación",
-      "locationValue": "Berlín",
-      "mapAlt": "Mapa de Berlin, Alemania"
+    "meeting": {
+      "title": "Prefer to talk? Pick a time that works for you."
     },
     "form": {
       "title": "Send me a message",
