@@ -1,6 +1,7 @@
 "use client";
 
 import { SectionHeader } from "@/components/home/section-header";
+import { cn } from "@/lib/utils";
 import { CldImage } from "next-cloudinary";
 import { useTranslations } from "next-intl";
 
@@ -50,13 +51,13 @@ function ProjectCard({ project }: { project: Project }) {
             <CldImage
               src={project.logoPublicId}
               alt={t("title")}
-              width={
-                project.id === "wandace" || project.id === "foodie" ? 80 : 160
-              }
-              height={
-                project.id === "wandace" || project.id === "foodie" ? 80 : 160
-              }
-              className="w-auto h-auto"
+              fill={true}
+              sizes="160px"
+              className={cn(
+                "w-auto h-auto object-contain",
+                (project.id === "wandace" || project.id === "foodie") &&
+                  "p-4 lg:p-8",
+              )}
             />
           )}
         </div>
