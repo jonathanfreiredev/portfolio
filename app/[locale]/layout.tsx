@@ -11,6 +11,7 @@ import {
 } from "next-intl/server";
 import { Geist_Mono, Inter } from "next/font/google";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -66,6 +67,11 @@ export default async function Layout({
         className="min-h-full flex flex-col items-center"
         suppressHydrationWarning
       >
+        <Script
+          id="cookieyes"
+          src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
+          strategy="beforeInteractive"
+        />
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <Navbar />
