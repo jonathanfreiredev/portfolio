@@ -1,7 +1,7 @@
 {
   "metadata": {
     "siteTitle": "Jonathan Freire | Digital Product Architect",
-    "siteDescription": "Your product, built right from the start."
+    "siteDescription": "Clear from day one. Built to grow."
   },
   "nav": {
     "home": "Home",
@@ -188,8 +188,8 @@
           "button": "Book a call"
         },
         "1": {
-          "title": "MVPs & integrations",
-          "text": "Product work from architecture to first release: full-stack build, integrations, and AI where it adds measurable value.",
+          "title": "MVPs & Automations",
+          "text": "Product work from architecture to first release: full-stack build, automations, and AI where it adds measurable value.",
           "price": "2500",
           "pricePreffix": "from",
           "priceSuffix": "/project · 4-8 weeks",
@@ -217,7 +217,7 @@
         },
         "1": {
           "question": "How long does a project take?",
-          "answer": "Most projects run between 3 and 8 weeks, depending on scope. A landing page is usually a couple of weeks; an MVP or integration takes longer. I set clear milestones at the start so you always know where the work stands."
+          "answer": "Most projects run between 2 and 8 weeks, depending on scope. A landing page is usually a couple of weeks; an MVP or integration takes longer. I set clear milestones at the start so you always know where the work stands."
         },
         "2": {
           "question": "How does a project get started?",
@@ -251,7 +251,8 @@
       "workflow": "Workflow",
       "pricing": "Pricing",
       "terms": "Terms of Service",
-      "privacy": "Privacy Policy"
+      "privacy": "Privacy Policy",
+      "imprint": "Imprint"
     }
   },
   "contact": {
