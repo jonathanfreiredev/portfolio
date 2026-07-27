@@ -33,6 +33,7 @@ const SHEET_ITEMS = [
 
   { href: "/legal/terms", key: "terms" },
   { href: "/legal/privacy", key: "privacy" },
+  { href: "/legal/imprint", key: "imprint" },
 ] as const;
 
 export function Navbar() {

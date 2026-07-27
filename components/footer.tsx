@@ -8,12 +8,13 @@ const SECTION_LINKS = [
   { href: "/#services", key: "services" },
   { href: "/#workflow", key: "workflow" },
   { href: "/#pricing", key: "pricing" },
+  { href: "/blog", key: "blog" },
 ] as const;
 
 const PAGE_LINKS = [
-  { href: "/blog", key: "blog" },
   { href: "/legal/terms", key: "terms" },
   { href: "/legal/privacy", key: "privacy" },
+  { href: "/legal/imprint", key: "imprint" },
 ] as const;
 
 export async function Footer() {
