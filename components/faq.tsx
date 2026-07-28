@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
 
-const QUESTION_COUNT = 6;
+const QUESTION_COUNT = 7;
 
 function InfoCard() {
   const t = useTranslations("home.faq.infoCard");

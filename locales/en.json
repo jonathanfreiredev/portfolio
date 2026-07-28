@@ -175,29 +175,29 @@
       "button": "Contact me",
       "items": {
         "0": {
-          "title": "Landing pages",
-          "text": "A focused landing page designed to convert and built to launch fast. Ideal for validating a product, a campaign or a new offer.",
-          "price": "500",
+          "title": "Custom Software & AI",
+          "text": "Admin panels, platforms, API integrations, and AI-powered automation, scoped to what the project actually needs.",
+          "price": "5000",
           "pricePreffix": "from",
-          "priceSuffix": "/project · ~2 weeks",
-          "additionalText": "Price depends on number of sections and content complexity.",
-          "listItem1": "Product architecture & scope",
-          "listItem2": "Structured for conversion, not just decoration",
-          "listItem3": "Content strategy included, not just design",
-          "listItem4": "Edit-ready in Framer or custom code",
-          "button": "Book a call"
-        },
-        "1": {
-          "title": "MVPs & Automations",
-          "text": "Product work from architecture to first release: full-stack build, automations, and AI where it adds measurable value.",
-          "price": "2500",
-          "pricePreffix": "from",
-          "priceSuffix": "/project · 4-8 weeks",
+          "priceSuffix": "/project · 6-12 weeks",
           "additionalText": "Price depends on scope, integrations and timeline",
           "listItem1": "Product architecture & scope",
           "listItem2": "Full-stack development",
           "listItem3": "API & service integrations",
           "listItem4": "Documented so it scales without a rebuild",
+          "button": "Book a call"
+        },
+        "1": {
+          "title": "Landing Pages",
+          "text": "Landing pages and corporate websites, built to convert and engineered to load fast.",
+          "price": "800",
+          "pricePreffix": "from",
+          "priceSuffix": "/project · 1-3 weeks",
+          "additionalText": "Price depends on number of sections and content complexity.",
+          "listItem1": "Product architecture & scope",
+          "listItem2": "Structured for conversion, not just decoration",
+          "listItem3": "Content strategy included, not just design",
+          "listItem4": "Edit-ready in Framer or custom code",
           "button": "Book a call"
         }
       }
@@ -213,15 +213,15 @@
       "questions": {
         "0": {
           "question": "What does a project typically cost?",
-          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers during the project, no open-ended invoices, no surprises once the scope is agreed."
+          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers, no open-ended invoices, no surprises once the scope is agreed."
         },
         "1": {
           "question": "How long does a project take?",
-          "answer": "Most projects run between 2 and 8 weeks, depending on scope. A landing page is usually a couple of weeks; an MVP or integration takes longer. I set clear milestones at the start so you always know where the work stands."
+          "answer": "It depends on what you're building. A landing page usually takes 1 to 3 weeks; custom software or an AI integration typically runs 6 to 12 weeks. I set clear milestones at the start so you always know where the work stands."
         },
         "2": {
           "question": "How does a project get started?",
-          "answer": "Book a free 20-minute call directly, or send a short note if you'd rather write first. Either way, if it looks like a fit, I follow up with a written proposal — no obligation to move forward."
+          "answer": "Book a free 20-minute call, or send a short note if you'd rather write first. If it looks like a fit, I follow up with a written proposal — no obligation to move forward."
         },
         "3": {
           "question": "Do you work with my existing codebase, stack or team?",
@@ -232,8 +232,12 @@
           "answer": "That's where I add the most value. A clear brief helps, but it isn't required — I help shape the idea and define what's actually worth building before you commit to anything."
         },
         "5": {
+          "question": "Should I start with an MVP or build the full product?",
+          "answer": "In most cases, start smaller. Validating the core of the product before committing to the full scope reduces risk on both sides and gives you real feedback before the biggest decisions are locked in. It's still scoped and priced as Custom Software & AI, just tighter: fewer features, a shorter timeline, and a clear path to expand once it's proven."
+        },
+        "6": {
           "question": "What happens after launch?",
-          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, if you want ongoing help, we can set up a light retainer — or you take the codebase forward on your own. Either way, you leave with a system that's yours to run."
+          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, any ongoing work — new features, maintenance, optimization — is scoped and priced individually, based on what you actually need. You leave with a system that's yours to run, with or without me."
         }
       }
     },

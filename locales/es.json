@@ -172,32 +172,32 @@
       "title": "Precios",
       "text": "Mantengo los precios claros y totalmente transparentes. El coste final depende del alcance y del plazo.",
       "otherPricings": "¿Solo necesitas arquitectura o trabajo de estrategia, sin un desarrollo completo? Hablemos de eso por separado.",
-      "button": "Contactar",
+      "button": "Contáctame",
       "items": {
         "0": {
-          "title": "Landing pages",
-          "text": "Una landing page enfocada en convertir y pensada para lanzarse rápido. Ideal para validar un producto, una campaña o una nueva oferta.",
-          "price": "500",
+          "title": "Software a medida e IA",
+          "text": "Paneles de administración, plataformas, integraciones de APIs y automatización con IA, ajustado a lo que el proyecto realmente necesita.",
+          "price": "5000",
           "pricePreffix": "desde",
-          "priceSuffix": "/proyecto · ~2 semanas",
-          "additionalText": "El precio depende del número de secciones y de la complejidad del contenido.",
-          "listItem1": "Arquitectura y alcance del producto",
-          "listItem2": "Estructurada para convertir, no solo para decorar",
-          "listItem3": "Estrategia de contenido incluida, no solo diseño",
-          "listItem4": "Lista para editar en Framer o en código a medida",
-          "button": "Reservar una llamada"
-        },
-        "1": {
-          "title": "MVPs e automatizaciones",
-          "text": "Trabajo de producto desde la arquitectura hasta el primer lanzamiento: desarrollo full-stack, automatizaciones e IA donde aporta valor medible.",
-          "price": "2500",
-          "pricePreffix": "desde",
-          "priceSuffix": "/proyecto · 4-8 semanas",
+          "priceSuffix": "€/proyecto · 6-12 semanas",
           "additionalText": "El precio depende del alcance, las integraciones y el plazo",
           "listItem1": "Arquitectura y alcance del producto",
           "listItem2": "Desarrollo full-stack",
           "listItem3": "Integración de APIs y servicios",
           "listItem4": "Documentado para que escale sin necesidad de rehacerlo",
+          "button": "Reservar una llamada"
+        },
+        "1": {
+          "title": "Landing pages",
+          "text": "Landing pages y webs corporativas, pensadas para convertir y con carga rápida.",
+          "price": "800",
+          "pricePreffix": "desde",
+          "priceSuffix": "€/proyecto · 1-3 semanas",
+          "additionalText": "El precio depende del número de secciones y de la complejidad del contenido.",
+          "listItem1": "Arquitectura y alcance del producto",
+          "listItem2": "Estructurada para convertir, no solo para decorar",
+          "listItem3": "Estrategia de contenido incluida, no solo diseño",
+          "listItem4": "Lista para editar en Framer o en código a medida",
           "button": "Reservar una llamada"
         }
       }
@@ -213,27 +213,31 @@
       "questions": {
         "0": {
           "question": "¿Cuánto cuesta normalmente un proyecto?",
-          "answer": "Cada proyecto se define según el trabajo real, no según las horas. Tras una primera conversación, envío una propuesta cerrada con un entregable, un plazo y un precio claros. Sin cuotas fijas durante el proyecto, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
+          "answer": "Cada proyecto se dimensiona según el trabajo real, no según las horas. Después de una primera conversación, envío una propuesta cerrada con un entregable, un plazo y un precio claros. Sin tarifas fijas mensuales, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
         },
         "1": {
-          "question": "¿Cuánto dura un proyecto?",
-          "answer": "La mayoría de los proyectos duran entre 2 y 8 semanas, según el alcance. Una landing page suele llevar un par de semanas; un MVP o una integración lleva más tiempo. Defino hitos claros desde el inicio para que siempre sepas en qué punto está el trabajo."
+          "question": "¿Cuánto tiempo dura un proyecto?",
+          "answer": "Depende de lo que se vaya a construir. Una landing page suele tardar de 1 a 3 semanas; un software a medida o una integración de IA suele llevar entre 6 y 12 semanas. Defino hitos claros desde el principio para que siempre sepas en qué punto está el trabajo."
         },
         "2": {
-          "question": "¿Cómo se pone en marcha un proyecto?",
-          "answer": "Reserva directamente una llamada gratuita de 20 minutos, o envíame una breve nota si prefieres escribir primero. En cualquier caso, si parece encajar, te hago llegar una propuesta por escrito, sin ningún compromiso de seguir adelante."
+          "question": "¿Cómo empieza un proyecto?",
+          "answer": "Reserva una llamada gratuita de 20 minutos, o envía una nota breve si prefieres escribir primero. Si parece un buen encaje, te respondo con una propuesta por escrito, sin ningún compromiso de continuar."
         },
         "3": {
-          "question": "¿Trabajas con mi código, mi stack o mi equipo actuales?",
-          "answer": "Sí. Trabajo dentro de lo que ya tienes: tu stack, tu sistema de diseño, el proceso de tu equipo, e integrándome con las personas implicadas. Si algo necesita sustituirse o refactorizarse, lo señalo claramente antes de hacer ningún cambio."
+          "question": "¿Trabajas con mi código base, mi stack o mi equipo actual?",
+          "answer": "Sí. Trabajo dentro de lo que ya tienes: tu stack, tu sistema de diseño, el proceso de tu equipo, e integro con las personas implicadas. Si algo necesita reemplazarse o refactorizarse, lo señalo claramente antes de hacer ningún cambio."
         },
         "4": {
-          "question": "¿Y si solo tengo una idea general?",
-          "answer": "Ahí es donde más valor aporto. Un briefing claro ayuda, pero no es imprescindible: te ayudo a dar forma a la idea y a definir qué merece la pena construir antes de comprometerte con nada."
+          "question": "¿Y si solo tengo una idea poco definida?",
+          "answer": "Ahí es donde más valor aporto. Tener un brief claro ayuda, pero no es imprescindible: ayudo a dar forma a la idea y a definir qué merece realmente la pena construir antes de que te comprometas con nada."
         },
         "5": {
+          "question": "¿Debería empezar con un MVP o construir el producto completo?",
+          "answer": "En la mayoría de los casos, es mejor empezar más pequeño. Validar el núcleo del producto antes de comprometerse con el alcance completo reduce el riesgo para ambas partes y te da feedback real antes de tomar las decisiones más importantes. Se sigue dimensionando y cotizando como Software a Medida & IA, pero de forma más ajustada: menos funcionalidades, un plazo más corto y un camino claro para ampliarlo una vez validado."
+        },
+        "6": {
           "question": "¿Qué pasa después del lanzamiento?",
-          "answer": "No desaparezco. La mayoría de los proyectos incluyen un breve periodo de soporte para ajustes y correcciones. Después, si quieres ayuda continua, podemos plantear un retainer ligero, o tú mismo llevas el código adelante. En cualquier caso, te quedas con un sistema que es tuyo y que puedes gestionar."
+          "answer": "No desaparezco. La mayoría de los proyectos incluyen una ventana de soporte breve para correcciones y ajustes. Después de eso, cualquier trabajo continuado (nuevas funcionalidades, mantenimiento, optimización) se dimensiona y cotiza de forma individual, según lo que realmente necesites. Te vas con un sistema que es tuyo para gestionar, conmigo o sin mí."
         }
       }
     },
