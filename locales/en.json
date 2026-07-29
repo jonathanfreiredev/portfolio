@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "siteTitle": "Jonathan Freire | Digital Product Architect",
+    "siteTitle": "Jonathan Freire | Digital Product Engineer",
     "siteDescription": "Clear from day one. Built to grow."
   },
   "nav": {
@@ -43,7 +43,7 @@
   },
   "home": {
     "hero": {
-      "title": "Digital product architect",
+      "title": "Digital Product Engineer",
       "subTagline": "Strategy. Technology. Intelligence.",
       "tagline": "Clear from day one. Built to grow.",
       "ctaPrimary": "Start project",
@@ -262,7 +262,7 @@
   "contact": {
     "metadata": {
       "title": "Contact | Jonathan Freire",
-      "description": "Contact Jonathan Freire, Digital Product Architect based in Berlin. Book a call or send a message to talk about your next web app or AI project."
+      "description": "Contact Jonathan Freire, Digital Product Engineer based in Berlin. Book a call or send a message to talk about your next web app or AI project."
     },
     "header": {
       "title": "Contact",
