@@ -67,10 +67,11 @@ export default async function Layout({
         className="min-h-full flex flex-col items-center"
         suppressHydrationWarning
       >
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <Script
           id="cookieyes"
           src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
