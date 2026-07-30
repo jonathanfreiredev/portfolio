@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AboutIntro } from "@/components/home/about-intro";
 import { Cta } from "@/components/home/cta";
 import { Faq } from "@/components/faq";
 import { Hero } from "@/components/home/hero";
-import { Pricing } from "@/components/home/pricing";
-import { Projects } from "@/components/home/projects";
-import { Services } from "@/components/home/services";
 import { MoreAboutMe } from "@/components/home/more-about-me";
-import { Workflow } from "@/components/home/workflow";
+import { Pricing } from "@/components/home/pricing";
 import { Separator } from "@/components/ui/separator";
+
+const Projects = dynamic(() =>
+  import("@/components/home/projects").then((mod) => mod.Projects)
+);
+const Services = dynamic(() =>
+  import("@/components/home/services").then((mod) => mod.Services)
+);
+const Workflow = dynamic(() =>
+  import("@/components/home/workflow").then((mod) => mod.Workflow)
+);
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;

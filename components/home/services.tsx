@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -8,13 +9,17 @@ import { SectionHeader } from "@/components/home/section-header";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ShaderBackground } from "../shader-background";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+
+const ShaderBackground = dynamic(
+  () => import("../shader-background").then((mod) => mod.ShaderBackground),
+  { ssr: false }
+);
 
 const SERVICE_COUNT = 5;
 

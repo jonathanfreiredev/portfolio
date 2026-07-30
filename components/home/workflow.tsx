@@ -1,13 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { Fragment } from "react";
 
 import { SectionHeader } from "@/components/home/section-header";
 import { Reveal } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
-import { AuroraShaderBackground, RGB } from "../aurora-shader-background";
+import type { RGB } from "../aurora-shader-background";
 import { Progress } from "../ui/progress";
+
+const AuroraShaderBackground = dynamic(
+  () =>
+    import("../aurora-shader-background").then(
+      (mod) => mod.AuroraShaderBackground
+    ),
+  { ssr: false }
+);
 
 const STEP_COUNT = 4;
 

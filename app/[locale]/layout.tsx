@@ -71,7 +71,7 @@ export default async function Layout({
         <Script
           id="cookieyes"
           src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
