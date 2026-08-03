@@ -1,15 +1,13 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { MDXRemote } from "next-mdx-remote/rsc";
-import { hasLocale } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Header } from "@/components/header";
+import { SectionHeader } from "@/components/home/section-header";
+import { routing } from "@/i18n/routing";
+import { getLegalBySlug, getLegalSlugs } from "@/lib/legal";
 import { mdxComponents } from "@/lib/mdx-components";
 import { remarkUnwrapImages } from "@/lib/mdx-plugins";
-import { getLegalBySlug, getLegalSlugs } from "@/lib/legal";
-import { routing } from "@/i18n/routing";
-import { Separator } from "@/components/ui/separator";
-import { SectionHeader } from "@/components/home/section-header";
+import type { Metadata } from "next";
+import { hasLocale } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import { notFound } from "next/navigation";
 
 type LegalPageProps = {
   params: Promise<{ locale: string; slug: string }>;

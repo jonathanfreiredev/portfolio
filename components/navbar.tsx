@@ -105,7 +105,7 @@ export function Navbar() {
                   <SheetTitle className="sr-only">{t("openMenu")}</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col">
-                  {SHEET_ITEMS.map((item, index) => (
+                  {SHEET_ITEMS.map((item) => (
                     <SheetClose asChild key={item.key}>
                       <Link
                         href={item.href}

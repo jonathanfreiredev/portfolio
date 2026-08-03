@@ -1,14 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 import { Reveal } from "@/components/motion/reveal";
-import { AboutIntro } from "./about-intro";
 import { Stats } from "../stats";
+import { AboutIntro } from "./about-intro";
 
 export function MoreAboutMe() {
-  const t = useTranslations("home.moreAboutMe");
-
   return (
     <Reveal as="section" id="studio" y={30} className="w-full">
       <div className="flex w-full flex-col">

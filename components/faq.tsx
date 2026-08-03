@@ -54,7 +54,7 @@ function FaqItem({ index }: { index: number }) {
 }
 
 interface FaqProps {
-  withInfoCard?: Boolean;
+  withInfoCard?: boolean;
 }
 
 export function Faq({ withInfoCard = true }: FaqProps) {
