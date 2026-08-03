@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
 import { getAllPosts } from "@/lib/posts";
+import { buildAlternates } from "@/lib/seo";
 
 type BlogPageProps = {
   params: Promise<{ locale: string }>;
@@ -20,6 +21,8 @@ export async function generateMetadata({ params }: BlogPageProps) {
   const t = await getTranslations({ locale, namespace: "blog" });
   return {
     title: t("title"),
+    description: t("description"),
+    alternates: buildAlternates("/blog"),
   };
 }
 

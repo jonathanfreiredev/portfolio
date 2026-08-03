@@ -9,6 +9,7 @@ import { Hero } from "@/components/home/hero";
 import { MoreAboutMe } from "@/components/home/more-about-me";
 import { Pricing } from "@/components/home/pricing";
 import { Separator } from "@/components/ui/separator";
+import { buildAlternates } from "@/lib/seo";
 
 const Projects = dynamic(() =>
   import("@/components/home/projects").then((mod) => mod.Projects)
@@ -32,6 +33,7 @@ export async function generateMetadata({
   return {
     title: t("siteTitle"),
     description: t("siteDescription"),
+    alternates: buildAlternates("/"),
   };
 }
 
@@ -39,8 +41,26 @@ export default async function Home({ params }: HomePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const t = await getTranslations({ locale, namespace: "home.faq.questions" });
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: Array.from({ length: 7 }).map((_, i) => ({
+      "@type": "Question",
+      name: t(`${i}.question`),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: t(`${i}.answer`),
+      },
+    })),
+  };
+
   return (
     <main className="flex flex-col w-full items-center">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Hero />
       <div className="flex flex-col gap-20 py-12 max-w-380 md:gap-24 md:py-16 lg:gap-40 lg:py-24 px-5 md:px-6 lg:px-8">
         <AboutIntro translations="home.aboutIntro" />

@@ -17,6 +17,7 @@ import {
   getPostSlugs,
 } from "@/lib/posts";
 import { routing } from "@/i18n/routing";
+import { buildAlternates, siteUrl } from "@/lib/seo";
 
 type BlogDetailPageProps = {
   params: Promise<{ locale: string; slug: string }>;
@@ -53,6 +54,7 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.description,
+    alternates: buildAlternates(`/blog/${slug}`),
     openGraph: {
       title: post.title,
       description: post.description,
@@ -76,8 +78,30 @@ export default async function PostPage({ params }: BlogDetailPageProps) {
   const { hero, content } = extractHeroImage(post.content);
   const headings = extractHeadings(content);
 
+  const blogPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    url: `${siteUrl}/${locale === routing.defaultLocale ? "" : `${locale}/`}blog/${slug}`,
+    author: {
+      "@type": "Person",
+      name: "Jonathan Freire",
+      url: siteUrl,
+    },
+    ...(hero ? { image: hero } : {}),
+    ...(post.tags?.length ? { keywords: post.tags.join(", ") } : {}),
+  };
+
   return (
     <main className="mx-auto w-full max-w-[1440px] flex-1 px-5 py-12 md:px-12 md:py-16 lg:px-20 lg:py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(blogPostingSchema),
+        }}
+      />
       <div className="grid gap-12 lg:grid-cols-[1fr_220px]">
         <article className="mx-auto w-full max-w-[680px] space-y-6">
           <p className="text-eyebrow text-muted-foreground">

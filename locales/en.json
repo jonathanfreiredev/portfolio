@@ -18,6 +18,7 @@
   },
   "blog": {
     "title": "Blog",
+    "description": "Thoughts on product architecture, full-stack engineering, and applied AI.",
     "empty": "No posts yet",
     "emptyDescription": "Add your first post in {folder} to publish it here.",
     "readingTime": "min read",

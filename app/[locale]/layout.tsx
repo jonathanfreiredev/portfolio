@@ -2,6 +2,7 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
+import { siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import {
@@ -34,6 +35,7 @@ export async function generateMetadata({
   if (!hasLocale(routing.locales, locale)) return {};
   const t = await getTranslations({ locale, namespace: "metadata" });
   return {
+    metadataBase: new URL(siteUrl),
     title: t("siteTitle"),
     description: t("siteDescription"),
   };
@@ -56,6 +58,29 @@ export default async function Layout({
 
   const messages = await getMessages();
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Jonathan Freire",
+    url: siteUrl,
+    jobTitle: "Digital Product Engineer",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Berlin",
+      addressCountry: "DE",
+    },
+    sameAs: ["https://github.com/jonathanfreiredev"],
+  };
+
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Jonathan Freire",
+    url: siteUrl,
+    description: "Clear from day one. Built to grow.",
+    inLanguage: locale,
+  };
+
   return (
     <html
       lang={locale}
@@ -67,6 +92,12 @@ export default async function Layout({
         className="min-h-full flex flex-col items-center"
         suppressHydrationWarning
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([personSchema, webSiteSchema]),
+          }}
+        />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         <Script
           id="cookieyes"

@@ -1,7 +1,9 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
 <!-- END:nextjs-agent-rules -->
 
 ## Project
@@ -63,7 +65,7 @@ Hardcoded strings in the codebase are a bug. If you find one, extract it.
 - `i18n/routing.ts` — `defineRouting({ locales: ["en", "es"], defaultLocale: "en", localePrefix: "as-needed" })`.
 - `i18n/request.ts` — `getRequestConfig` with a `deepmerge` fallback so non-default locales inherit any missing keys from `en.json`. This is the file wired into `createNextIntlPlugin` in `next.config.ts`.
 - `i18n/navigation.ts` — `createNavigation(routing)` re-exports `Link`, `useRouter`, `usePathname`, `redirect`. Always import from here, never from `next/link` or `next/navigation`, so the locale prefix is applied automatically.
-- `middleware.ts` — `createMiddleware(routing)` at the project root with the standard matcher `'/((?!api|_next|_vercel|.*\\..*).*)'`.
+- `proxy.ts` — `createMiddleware(routing)` at the project root with the standard matcher `'/((?!api|_next|_vercel|.*\\..*).*)'`.
 - `app/[locale]/` — all user-facing pages live under the locale segment. `app/robots.ts` and `app/sitemap.ts` stay at the root.
 - `components/locale-switcher.tsx` — the EN/ES toggle in the navbar. Do not rebuild this; consume it.
 
