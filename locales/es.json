@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "siteTitle": "Jonathan Freire | Digital Product Engineer",
-    "siteDescription": "Tu producto, construido desde el comienzo."
+    "siteTitle": "Jonathan Freire — Freelance Product Engineer & Desarrollador Full-Stack",
+    "siteDescription": "Freelance Digital Product Engineer. Ayudo a startups y scale-ups a construir plataformas web, integraciones de IA y landing pages. De la estrategia al producto final."
   },
   "nav": {
     "home": "Inicio",
@@ -44,7 +44,7 @@
   },
   "home": {
     "hero": {
-      "title": "Digital Product Engineer",
+      "title": "Digital Product Architect",
       "subTagline": "Estrategia. Tecnología. Inteligencia.",
       "tagline": "Tu producto, construido desde el comienzo.",
       "ctaPrimary": "Empezar proyecto",
@@ -263,7 +263,7 @@
   "contact": {
     "metadata": {
       "title": "Contacto | Jonathan Freire",
-      "description": "Contact Jonathan Freire, Digital Product Engineer based in Berlin. Book a call or send a message to talk about your next web app or AI project."
+      "description": "Contacta con Jonathan Freire, Digital Product Architect ubicado en Berlín. Reserva una llamada o envía un mensaje para hablar de tu próxima web app o proyecto de IA."
     },
     "header": {
       "title": "Contacto",
