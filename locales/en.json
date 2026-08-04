@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "siteTitle": "Jonathan Freire | Digital Product Engineer",
-    "siteDescription": "Clear from day one. Built to grow."
+    "siteTitle": "Jonathan Freire — Freelance Product Engineer & Full-Stack Developer",
+    "siteDescription": "Freelance Digital Product Engineer. I help startups and scale-ups build web platforms, AI integrations, and landing pages. From strategy to shipped product."
   },
   "nav": {
     "home": "Home",
@@ -18,6 +18,7 @@
   },
   "blog": {
     "title": "Blog",
+    "description": "Thoughts on product architecture, full-stack engineering, and applied AI.",
     "empty": "No posts yet",
     "emptyDescription": "Add your first post in {folder} to publish it here.",
     "readingTime": "min read",
