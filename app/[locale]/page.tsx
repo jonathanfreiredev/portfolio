@@ -12,13 +12,13 @@ import { Separator } from "@/components/ui/separator";
 import { buildAlternates } from "@/lib/seo";
 
 const Projects = dynamic(() =>
-  import("@/components/home/projects").then((mod) => mod.Projects)
+  import("@/components/home/projects").then((mod) => mod.Projects),
 );
 const Services = dynamic(() =>
-  import("@/components/home/services").then((mod) => mod.Services)
+  import("@/components/home/services").then((mod) => mod.Services),
 );
 const Workflow = dynamic(() =>
-  import("@/components/home/workflow").then((mod) => mod.Workflow)
+  import("@/components/home/workflow").then((mod) => mod.Workflow),
 );
 
 type HomePageProps = {
@@ -33,7 +33,13 @@ export async function generateMetadata({
   return {
     title: t("siteTitle"),
     description: t("siteDescription"),
+    robots: { index: true, follow: true },
     alternates: buildAlternates("/"),
+    openGraph: {
+      title: t("siteTitle"),
+      description: t("siteDescription"),
+      type: "website",
+    },
   };
 }
 

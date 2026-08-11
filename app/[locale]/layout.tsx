@@ -98,7 +98,11 @@ export default async function Layout({
             __html: JSON.stringify([personSchema, webSiteSchema]),
           }}
         />
-        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://res.cloudinary.com"
+          crossOrigin="anonymous"
+        />
         <Script
           id="cookieyes"
           src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"

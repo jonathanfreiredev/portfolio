@@ -17,6 +17,12 @@ export async function generateMetadata({ params }: { params: Params }) {
     title: t("title"),
     description: t("description"),
     alternates: buildAlternates("/contact"),
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      type: "website",
+    },
   };
 }
 
@@ -25,7 +31,10 @@ export default async function ContactPage({ params }: { params: Params }) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "contact.header" });
-  const faqT = await getTranslations({ locale, namespace: "home.faq.questions" });
+  const faqT = await getTranslations({
+    locale,
+    namespace: "home.faq.questions",
+  });
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

@@ -23,6 +23,12 @@ export async function generateMetadata({ params }: BlogPageProps) {
     title: t("title"),
     description: t("description"),
     alternates: buildAlternates("/blog"),
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: t("title"),
+      description: t("description"),
+      type: "website",
+    },
   };
 }
 
