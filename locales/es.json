@@ -18,6 +18,7 @@
   },
   "blog": {
     "title": "Blog",
+    "description": "Reflexiones sobre arquitectura de producto, ingeniería full-stack e IA aplicada.",
     "empty": "Todavía no hay artículos",
     "emptyDescription": "Añade tu primer artículo en {folder} para publicarlo aquí.",
     "readingTime": "min de lectura",
@@ -43,7 +44,7 @@
   },
   "home": {
     "hero": {
-      "title": "Digital Product Architect",
+      "title": "Digital Product Engineer",
       "subTagline": "Estrategia. Tecnología. Inteligencia.",
       "tagline": "Claro desde el primer día. Construido para crecer.",
       "ctaPrimary": "Empezar proyecto",
@@ -262,7 +263,7 @@
   "contact": {
     "metadata": {
       "title": "Contacto | Jonathan Freire",
-      "description": "Contacta con Jonathan Freire, Digital Product Architect ubicado en Berlín. Reserva una llamada o envía un mensaje para hablar de tu próxima web app o proyecto de IA."
+      "description": "Contacta con Jonathan Freire, Digital Product Engineer ubicado en Berlín. Reserva una llamada o envía un mensaje para hablar de tu próxima web app o proyecto de IA."
     },
     "header": {
       "title": "Contacto",
@@ -285,6 +286,8 @@
       "errorRequired": "Por favor, completa todos los campos.",
       "errorEmail": "Por favor, introduce una dirección de correo electrónico válida.",
       "errorMessage": "El mensaje debe tener al menos 10 caracteres.",
+      "errorTooFast": "Por favor, tómate un momento antes de enviar.",
+      "errorTurnstile": "Verificación fallida. Por favor, inténtalo de nuevo.",
       "errorGeneric": "Algo ha salido mal. Por favor, inténtalo de nuevo."
     }
   }

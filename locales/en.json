@@ -286,6 +286,8 @@
       "errorRequired": "Please fill in all fields.",
       "errorEmail": "Please enter a valid email address.",
       "errorMessage": "Message must be at least 10 characters.",
+      "errorTooFast": "Please take a moment before submitting.",
+      "errorTurnstile": "Verification failed. Please try again.",
       "errorGeneric": "Something went wrong. Please try again."
     }
   }

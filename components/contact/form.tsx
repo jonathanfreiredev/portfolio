@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ArrowUpRight, Loader2 } from "lucide-react";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
@@ -10,6 +11,11 @@ import { cn } from "@/lib/utils";
 
 const INPUT_CLASSES =
   "block w-full border-0 border-b border-border bg-transparent py-3 pr-3 text-body-m text-foreground placeholder:text-muted-foreground/70 focus:border-foreground focus:border-b-2 focus:pb-[11px] focus:outline-none focus-visible:outline-none";
+
+const HONEYPOT_CLASSES =
+  "absolute left-[-9999px] top-auto h-px w-px overflow-hidden";
+
+const MIN_SUBMIT_MS = 3000;
 
 function FieldLabel({
   children,
@@ -34,6 +40,12 @@ export function Form() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mountedAt, setMountedAt] = useState<number | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMountedAt(Date.now());
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -45,8 +57,14 @@ export function Form() {
     const name = (data.get("Name") as string).trim();
     const email = (data.get("Email") as string).trim();
     const message = (data.get("Message") as string).trim();
+    const honeypot = (data.get("website") as string | null) ?? "";
+    const tsRaw = data.get("ts") as string | null;
 
-    // Client-side validation
+    if (honeypot) {
+      setSubmitted(true);
+      return;
+    }
+
     if (!name || !email || !message) {
       setError(t("errorRequired"));
       return;
@@ -60,13 +78,31 @@ export function Form() {
       return;
     }
 
+    const ts = tsRaw ? Number.parseInt(tsRaw, 10) : 0;
+    if (!mountedAt || !ts || Date.now() - ts < MIN_SUBMIT_MS) {
+      setError(t("errorTooFast"));
+      return;
+    }
+
+    if (!turnstileToken) {
+      setError(t("errorTurnstile"));
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          honeypot,
+          ts,
+          token: turnstileToken,
+        }),
       });
 
       if (!response.ok) {
@@ -146,6 +182,27 @@ export function Form() {
             className={cn(INPUT_CLASSES, "resize-y")}
           />
         </div>
+
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className={cn(HONEYPOT_CLASSES)}
+        />
+        <input
+          type="hidden"
+          name="ts"
+          value={mountedAt ?? ""}
+        />
+
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onError={() => setTurnstileToken(null)}
+          onExpire={() => setTurnstileToken(null)}
+        />
 
         {error ? (
           <p className="text-helper text-destructive" role="alert">
