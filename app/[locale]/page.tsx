@@ -34,7 +34,7 @@ export async function generateMetadata({
     title: t("siteTitle"),
     description: t("siteDescription"),
     robots: { index: true, follow: true },
-    alternates: buildAlternates("/"),
+    alternates: buildAlternates("/", locale),
     openGraph: {
       title: t("siteTitle"),
       description: t("siteDescription"),

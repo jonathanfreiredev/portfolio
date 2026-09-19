@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: BlogPageProps) {
   return {
     title: t("title"),
     description: t("description"),
-    alternates: buildAlternates("/blog"),
+    alternates: buildAlternates("/blog", locale),
     robots: { index: true, follow: true },
     openGraph: {
       title: t("title"),

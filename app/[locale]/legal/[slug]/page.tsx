@@ -43,7 +43,6 @@ export async function generateMetadata({
   return {
     title: `${doc.title}${t("metadata.titleSuffix")}`,
     description: doc.description,
-    robots: { index: false, follow: true },
     openGraph: {
       title: doc.title,
       description: doc.description,
