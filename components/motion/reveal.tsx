@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type RevealProps = {
   children: ReactNode;
@@ -7,6 +9,7 @@ type RevealProps = {
   as?: "div" | "section" | "article" | "header";
   trigger?: "mount" | "inView";
   y?: number;
+  once?: boolean;
   id?: string;
 };
 
@@ -16,54 +19,74 @@ const SLIDE_IN: Record<number, string> = {
   100: "slide-in-from-bottom-[100px]",
 };
 
+const TRANSLATE_Y: Record<number, string> = {
+  30: "translate-y-[30px]",
+  60: "translate-y-[60px]",
+  100: "translate-y-[100px]",
+};
+
 const ANIMATION =
   "duration-[800ms] ease-[cubic-bezier(0.35,0,0,1)] [animation-fill-mode:both]";
 
 const REDUCED_MOTION =
   "motion-reduce:animate-none motion-reduce:opacity-100 motion-reduce:translate-y-0";
 
-/**
- * Server-rendered CSS-only reveal. No client component, no React hydration
- * for the animation itself. Below-fold `inView` variants are unhidden
- * immediately; a tiny inline script in the layout wires up the scroll-linked
- * delay via a vanilla IntersectionObserver (no React, no JS bundle).
- */
 export function Reveal({
   children,
   delay = 0.2,
   className,
   as = "div",
-  trigger = "mount",
+  trigger = "inView",
   y = 30,
+  once = true,
   id,
 }: RevealProps) {
-  const slideInClass = SLIDE_IN[y] || SLIDE_IN[30];
+  const ref = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
   const Tag = as;
 
-  if (trigger === "inView") {
-    // Start visible (so users without JS — and PageSpeed — always see content).
-    // The inline script in the layout applies opacity-0 + translate before the
-    // first IO tick, then adds the animation classes when the element scrolls
-    // into view. The element is fully usable even if JS never runs.
-    const animationClasses = `animate-in fade-in ${slideInClass} ${ANIMATION} ${REDUCED_MOTION}`;
-    return (
-      <Tag
-        id={id}
-        data-reveal=""
-        data-delay={delay}
-        className={className ? `${className} ${animationClasses}` : animationClasses}
-      >
-        {children}
-      </Tag>
-    );
-  }
+  useEffect(() => {
+    if (trigger !== "inView") return;
 
-  const mountClasses = `animate-in fade-in ${slideInClass} ${ANIMATION} ${REDUCED_MOTION}`;
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          if (once) observer.disconnect();
+        } else if (!once) {
+          setVisible(false);
+        }
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [trigger, once]);
+
+  const slideInClass = SLIDE_IN[y] || SLIDE_IN[30];
+  const translateYClass = TRANSLATE_Y[y] || TRANSLATE_Y[30];
+
+  const animationClasses =
+    trigger === "mount"
+      ? `animate-in fade-in ${slideInClass} ${ANIMATION} ${REDUCED_MOTION}`
+      : visible
+        ? `animate-in fade-in ${slideInClass} ${ANIMATION} ${REDUCED_MOTION}`
+        : `opacity-0 ${translateYClass} ${REDUCED_MOTION}`;
+
+  const combinedClassName = className
+    ? `${className} ${animationClasses}`
+    : animationClasses;
+
   return (
     <Tag
+      ref={ref as React.RefObject<HTMLDivElement>}
       id={id}
+      className={combinedClassName}
       style={{ animationDelay: `${delay}s` }}
-      className={className ? `${className} ${mountClasses}` : mountClasses}
     >
       {children}
     </Tag>

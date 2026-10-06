@@ -19,8 +19,6 @@ const AuroraShaderBackground = dynamic(
   { ssr: false }
 );
 
-const STEP_COUNT = WORKFLOW_STEP_COUNT;
-
 const STEP_TOP_PADDING = ["pt-5", "md:pt-28", "md:pt-50", "md:pt-72"] as const;
 
 const COLORS: RGB[][] = [
@@ -114,10 +112,10 @@ export function Workflow() {
       <div className="flex flex-col md:flex-row md:items-stretch">
         <StepDivider className="hidden md:flex" />
 
-        {Array.from({ length: STEP_COUNT }).map((_, i) => (
+        {Array.from({ length: WORKFLOW_STEP_COUNT }).map((_, i) => (
           <Fragment key={i}>
             <StepCard index={i} />
-            {i < STEP_COUNT - 1 && <StepDivider />}
+            {i < WORKFLOW_STEP_COUNT - 1 && <StepDivider />}
           </Fragment>
         ))}
       </div>

@@ -321,8 +321,20 @@ export function AuroraShaderBackground({
     if (pendingRelease !== undefined) window.clearTimeout(pendingRelease);
     pendingContextReleases.delete(canvas);
 
-    const gl = canvas.getContext("webgl", { antialias: false });
-    if (!gl) return;
+    let gl: WebGLRenderingContext | null = null;
+    let program: WebGLProgram | null = null;
+    let buffer: WebGLBuffer | null = null;
+    let uni = {
+      colors: null as WebGLUniformLocation | null,
+      scene: null as WebGLUniformLocation | null,
+      shape: null as WebGLUniformLocation | null,
+      surface: null as WebGLUniformLocation | null,
+      finish: null as WebGLUniformLocation | null,
+      transform: null as WebGLUniformLocation | null,
+      space: null as WebGLUniformLocation | null,
+      cursor: null as WebGLUniformLocation | null,
+    };
+    let initialized = false;
 
     const paddedColors: RGB[] = [...colors];
     while (paddedColors.length < 8) {
@@ -330,79 +342,96 @@ export function AuroraShaderBackground({
     }
     const colorCount = colors.length;
 
-    const compile = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      return s;
-    };
-    const program = gl.createProgram()!;
-    const vertexShader = compile(gl.VERTEX_SHADER, VERT);
-    const fragmentShader = compile(gl.FRAGMENT_SHADER, FRAG);
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(fragmentShader);
-    gl.useProgram(program);
+    // Compiling the shader is the expensive part and it runs on the main
+    // thread. Defer it until the section is actually on screen so tools that
+    // never scroll (Lighthouse, PageSpeed Insights) never pay for it.
+    function initGl(): boolean {
+      if (initialized) return gl !== null;
+      initialized = true;
+      if (!canvas) return false;
 
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 3, -1, -1, 3]),
-      gl.STATIC_DRAW,
-    );
-    const loc = gl.getAttribLocation(program, "a_position");
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const ctx = canvas.getContext("webgl", { antialias: false });
+      if (!ctx) return false;
 
-    const uni = {
-      colors: gl.getUniformLocation(program, "u_colors"),
-      scene: gl.getUniformLocation(program, "u_scene"),
-      shape: gl.getUniformLocation(program, "u_shape"),
-      surface: gl.getUniformLocation(program, "u_surface"),
-      finish: gl.getUniformLocation(program, "u_finish"),
-      transform: gl.getUniformLocation(program, "u_transform"),
-      space: gl.getUniformLocation(program, "u_space"),
-      cursor: gl.getUniformLocation(program, "u_cursor"),
-    };
-    gl.uniform3fv(uni.colors, new Float32Array(paddedColors.flat()));
-    gl.uniform4f(
-      uni.shape,
-      UNIFORMS.scale,
-      UNIFORMS.intensity,
-      UNIFORMS.paramA,
-      UNIFORMS.warp,
-    );
-    gl.uniform4f(
-      uni.surface,
-      UNIFORMS.detail,
-      UNIFORMS.contrast,
-      UNIFORMS.brightness,
-      UNIFORMS.saturation,
-    );
-    gl.uniform4f(
-      uni.finish,
-      UNIFORMS.hue,
-      UNIFORMS.vignette,
-      UNIFORMS.blur,
-      UNIFORMS.grain,
-    );
-    gl.uniform4f(
-      uni.transform,
-      UNIFORMS.seed,
-      UNIFORMS.rotate,
-      UNIFORMS.drift,
-      UNIFORMS.oklab,
-    );
-    gl.uniform4f(
-      uni.cursor,
-      0,
-      UNIFORMS.cursorEffect,
-      UNIFORMS.cursorStrength,
-      UNIFORMS.cursorRadius,
-    );
+      const compile = (type: number, src: string) => {
+        const s = ctx.createShader(type)!;
+        ctx.shaderSource(s, src);
+        ctx.compileShader(s);
+        return s;
+      };
+      const prog = ctx.createProgram()!;
+      const vertexShader = compile(ctx.VERTEX_SHADER, VERT);
+      const fragmentShader = compile(ctx.FRAGMENT_SHADER, FRAG);
+      ctx.attachShader(prog, vertexShader);
+      ctx.attachShader(prog, fragmentShader);
+      ctx.linkProgram(prog);
+      ctx.deleteShader(vertexShader);
+      ctx.deleteShader(fragmentShader);
+      ctx.useProgram(prog);
+
+      const buf = ctx.createBuffer();
+      ctx.bindBuffer(ctx.ARRAY_BUFFER, buf);
+      ctx.bufferData(
+        ctx.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 3, -1, -1, 3]),
+        ctx.STATIC_DRAW,
+      );
+      const attrib = ctx.getAttribLocation(prog, "a_position");
+      ctx.enableVertexAttribArray(attrib);
+      ctx.vertexAttribPointer(attrib, 2, ctx.FLOAT, false, 0, 0);
+
+      uni = {
+        colors: ctx.getUniformLocation(prog, "u_colors"),
+        scene: ctx.getUniformLocation(prog, "u_scene"),
+        shape: ctx.getUniformLocation(prog, "u_shape"),
+        surface: ctx.getUniformLocation(prog, "u_surface"),
+        finish: ctx.getUniformLocation(prog, "u_finish"),
+        transform: ctx.getUniformLocation(prog, "u_transform"),
+        space: ctx.getUniformLocation(prog, "u_space"),
+        cursor: ctx.getUniformLocation(prog, "u_cursor"),
+      };
+      ctx.uniform3fv(uni.colors, new Float32Array(paddedColors.flat()));
+      ctx.uniform4f(
+        uni.shape,
+        UNIFORMS.scale,
+        UNIFORMS.intensity,
+        UNIFORMS.paramA,
+        UNIFORMS.warp,
+      );
+      ctx.uniform4f(
+        uni.surface,
+        UNIFORMS.detail,
+        UNIFORMS.contrast,
+        UNIFORMS.brightness,
+        UNIFORMS.saturation,
+      );
+      ctx.uniform4f(
+        uni.finish,
+        UNIFORMS.hue,
+        UNIFORMS.vignette,
+        UNIFORMS.blur,
+        UNIFORMS.grain,
+      );
+      ctx.uniform4f(
+        uni.transform,
+        UNIFORMS.seed,
+        UNIFORMS.rotate,
+        UNIFORMS.drift,
+        UNIFORMS.oklab,
+      );
+      ctx.uniform4f(
+        uni.cursor,
+        0,
+        UNIFORMS.cursorEffect,
+        UNIFORMS.cursorStrength,
+        UNIFORMS.cursorRadius,
+      );
+
+      gl = ctx;
+      program = prog;
+      buffer = buf;
+      return true;
+    }
 
     let targetX = 0;
     let targetY = 0;
@@ -417,12 +446,16 @@ export function AuroraShaderBackground({
     let raf = 0;
     let lastNow: number | null = null;
     let visible = document.visibilityState === "visible";
-    let inView = true;
+    let inView = false;
     let disposed = false;
     const start = performance.now();
-    const timeAnimated = Math.abs(speed) > 0.0001;
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timeAnimated = !reduceMotion && Math.abs(speed) > 0.0001;
 
     const resizeCanvas = () => {
+      if (!gl) return;
       const rect = container.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rawWidth = Math.max(1, Math.round(rect.width * dpr));
@@ -443,6 +476,8 @@ export function AuroraShaderBackground({
 
     function requestRender() {
       if (!disposed && visible && inView && raf === 0) {
+        if (!initGl()) return;
+        resizeCanvas();
         raf = requestAnimationFrame(render);
       }
     }
@@ -501,16 +536,21 @@ export function AuroraShaderBackground({
 
     const resizeObserver = new ResizeObserver(updateLayout);
     resizeObserver.observe(container);
-    const intersectionObserver = new IntersectionObserver(([entry]) => {
-      inView = entry?.isIntersecting ?? true;
-      if (inView) requestRender();
-      else if (raf !== 0) {
-        cancelAnimationFrame(raf);
-        raf = 0;
-        lastNow = null;
-      }
-    });
-    intersectionObserver.observe(canvas);
+    let intersectionObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === "function") {
+      intersectionObserver = new IntersectionObserver(([entry]) => {
+        inView = entry?.isIntersecting ?? true;
+        if (inView) requestRender();
+        else if (raf !== 0) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          lastNow = null;
+        }
+      });
+      intersectionObserver.observe(canvas);
+    } else {
+      inView = true;
+    }
     const onVisibilityChange = () => {
       visible = document.visibilityState === "visible";
       if (visible) requestRender();
@@ -531,7 +571,6 @@ export function AuroraShaderBackground({
       mouseX += (targetX - mouseX) * follow;
       mouseY += (targetY - mouseY) * follow;
       cursorPresence += (targetPresence - cursorPresence) * follow;
-      resizeCanvas();
       const w = canvas.width;
       const h = canvas.height;
       gl.uniform4f(uni.scene, w, h, ((now - start) / 1000) * speed, colorCount);
@@ -565,7 +604,7 @@ export function AuroraShaderBackground({
       disposed = true;
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
-      intersectionObserver.disconnect();
+      intersectionObserver?.disconnect();
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("resize", updateLayout);
       if (UNIFORMS.cursorEnabled) {
@@ -578,16 +617,19 @@ export function AuroraShaderBackground({
           onPointerLeave,
         );
       }
-      gl.deleteBuffer(buf);
-      gl.deleteProgram(program);
-      const releaseTimer = window.setTimeout(() => {
-        if (pendingContextReleases.get(canvas) !== releaseTimer) return;
-        pendingContextReleases.delete(canvas);
-        gl.getExtension("WEBGL_lose_context")?.loseContext();
-        canvas.width = 1;
-        canvas.height = 1;
-      }, 0);
-      pendingContextReleases.set(canvas, releaseTimer);
+      if (gl) {
+        const ctx = gl;
+        if (buffer) ctx.deleteBuffer(buffer);
+        if (program) ctx.deleteProgram(program);
+        const releaseTimer = window.setTimeout(() => {
+          if (pendingContextReleases.get(canvas) !== releaseTimer) return;
+          pendingContextReleases.delete(canvas);
+          ctx.getExtension("WEBGL_lose_context")?.loseContext();
+          canvas.width = 1;
+          canvas.height = 1;
+        }, 0);
+        pendingContextReleases.set(canvas, releaseTimer);
+      }
     };
   }, [speed, colors]);
 

@@ -171,18 +171,20 @@ export default async function Layout({
           href="https://cdn.sanity.io"
           crossOrigin="anonymous"
         />
-        {/* <Script
-          id="cookieyes"
-          src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
-          strategy="lazyOnload"
-        /> */}
-        <Script
-          id="reveal-observer"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var els=document.querySelectorAll('[data-reveal]');if(!els.length||!('IntersectionObserver' in window))return;var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var d=parseFloat(e.target.getAttribute('data-delay')||'0');e.target.style.animationDelay=d+'s';e.target.classList.add('is-in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -10% 0px',threshold:0});els.forEach(function(el){io.observe(el);});})();`,
-          }}
-        />
+        {/*
+          CookieYes only runs on the Vercel production deployment. Its script
+          checks the current host against the domain registered in the CookieYes
+          account, and throws (disabling the banner) anywhere else — including
+          localhost. Gating on VERCEL_ENV keeps local and preview builds clean.
+        */}
+        {process.env.VERCEL_ENV === "production" ? (
+          <Script
+            id="cookieyes"
+            src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
+            strategy="lazyOnload"
+          />
+        ) : null}
+
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <Navbar />

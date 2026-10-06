@@ -327,55 +327,83 @@ export function ShaderBackground({
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    const gl = canvas.getContext("webgl", {
-      antialias: false,
-      alpha: true,
-      premultipliedAlpha: false,
-    });
-    if (!gl) return;
+    let gl: WebGLRenderingContext | null = null;
+    let program: WebGLProgram | null = null;
+    let buffer: WebGLBuffer | null = null;
+    let loc: Record<string, WebGLUniformLocation | null> | null = null;
+    let initAttempted = false;
 
-    const program = createProgram(gl, VERT, FRAG);
-    if (!program) return;
-    gl.useProgram(program);
+    // WebGL context creation and shader compilation are heavy on the main
+    // thread (worse under CPU throttling and software rendering). Pay for them
+    // only once the section scrolls into view, so tools that never scroll —
+    // Lighthouse, PageSpeed Insights — pay nothing.
+    function initGl(): boolean {
+      if (initAttempted) return gl !== null;
+      initAttempted = true;
+      if (!canvas) return false;
 
-    const posLoc = gl.getAttribLocation(program, "a_position");
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 3, -1, -1, 3]),
-      gl.STATIC_DRAW,
-    );
-    gl.enableVertexAttribArray(posLoc);
-    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+      const ctx = canvas.getContext("webgl", {
+        antialias: false,
+        alpha: true,
+        premultipliedAlpha: false,
+      });
+      if (!ctx) return false;
 
-    const loc = {
-      colors: gl.getUniformLocation(program, "u_colors"),
-      scene: gl.getUniformLocation(program, "u_scene"),
-      shape: gl.getUniformLocation(program, "u_shape"),
-      surface: gl.getUniformLocation(program, "u_surface"),
-      finish: gl.getUniformLocation(program, "u_finish"),
-      transform: gl.getUniformLocation(program, "u_transform"),
-      space: gl.getUniformLocation(program, "u_space"),
-      cursor: gl.getUniformLocation(program, "u_cursor"),
-    };
+      const prog = createProgram(ctx, VERT, FRAG);
+      if (!prog) return false;
+      ctx.useProgram(prog);
 
-    const colorData = new Float32Array(8 * 3);
-    for (let i = 0; i < COLOR_COUNT; i++) {
-      colorData[i * 3] = COLORS[i][0];
-      colorData[i * 3 + 1] = COLORS[i][1];
-      colorData[i * 3 + 2] = COLORS[i][2];
+      const posLoc = ctx.getAttribLocation(prog, "a_position");
+      const buf = ctx.createBuffer();
+      ctx.bindBuffer(ctx.ARRAY_BUFFER, buf);
+      ctx.bufferData(
+        ctx.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 3, -1, -1, 3]),
+        ctx.STATIC_DRAW,
+      );
+      ctx.enableVertexAttribArray(posLoc);
+      ctx.vertexAttribPointer(posLoc, 2, ctx.FLOAT, false, 0, 0);
+
+      const uniforms = {
+        colors: ctx.getUniformLocation(prog, "u_colors"),
+        scene: ctx.getUniformLocation(prog, "u_scene"),
+        shape: ctx.getUniformLocation(prog, "u_shape"),
+        surface: ctx.getUniformLocation(prog, "u_surface"),
+        finish: ctx.getUniformLocation(prog, "u_finish"),
+        transform: ctx.getUniformLocation(prog, "u_transform"),
+        space: ctx.getUniformLocation(prog, "u_space"),
+        cursor: ctx.getUniformLocation(prog, "u_cursor"),
+      };
+
+      const colorData = new Float32Array(8 * 3);
+      for (let i = 0; i < COLOR_COUNT; i++) {
+        colorData[i * 3] = COLORS[i][0];
+        colorData[i * 3 + 1] = COLORS[i][1];
+        colorData[i * 3 + 2] = COLORS[i][2];
+      }
+      ctx.uniform3fv(uniforms.colors, colorData);
+      ctx.uniform4fv(uniforms.shape, SHAPE as unknown as Float32Array);
+      ctx.uniform4fv(uniforms.surface, SURFACE as unknown as Float32Array);
+      ctx.uniform4fv(uniforms.finish, FINISH as unknown as Float32Array);
+      ctx.uniform4fv(uniforms.transform, TRANSFORM as unknown as Float32Array);
+      ctx.uniform4fv(uniforms.cursor, CURSOR as unknown as Float32Array);
+
+      gl = ctx;
+      program = prog;
+      buffer = buf;
+      loc = uniforms;
+      return true;
     }
-    gl.uniform3fv(loc.colors, colorData);
-    gl.uniform4fv(loc.shape, SHAPE as unknown as Float32Array);
-    gl.uniform4fv(loc.surface, SURFACE as unknown as Float32Array);
-    gl.uniform4fv(loc.finish, FINISH as unknown as Float32Array);
-    gl.uniform4fv(loc.transform, TRANSFORM as unknown as Float32Array);
-    gl.uniform4fv(loc.cursor, CURSOR as unknown as Float32Array);
 
     let rafId = 0;
-    let paused = false;
+    let inView = false;
+    let disposed = false;
     const start = performance.now();
+    const scene = new Float32Array(4);
+    const space = new Float32Array([OFFSET[0], OFFSET[1], 0, 0]);
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function resize() {
       if (!canvas || !container || !gl) return;
@@ -390,47 +418,89 @@ export function ShaderBackground({
       }
     }
 
-    function render() {
-      if (!gl || !canvas) return;
-      if (paused) {
-        rafId = requestAnimationFrame(render);
-        return;
-      }
-      resize();
-      const elapsed = (performance.now() - start) / 1000;
-      const scene = new Float32Array([
-        canvas.width,
-        canvas.height,
-        elapsed * -speed,
-        COLOR_COUNT,
-      ]);
+    function drawFrame(elapsed: number) {
+      if (!gl || !canvas || !loc) return;
+      scene[0] = canvas.width;
+      scene[1] = canvas.height;
+      scene[2] = elapsed * -speed;
+      scene[3] = COLOR_COUNT;
       gl.uniform4fv(loc.scene, scene);
-      const space = new Float32Array([OFFSET[0], OFFSET[1], 0, 0]);
       gl.uniform4fv(loc.space, space);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    function canRender() {
+      return !disposed && inView && !document.hidden;
+    }
+
+    function stop() {
+      if (rafId !== 0) {
+        cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
+    }
+
+    function render() {
+      rafId = 0;
+      if (!canRender()) return;
+      drawFrame((performance.now() - start) / 1000);
+      if (!reduceMotion) {
+        rafId = requestAnimationFrame(render);
+      }
+    }
+
+    function requestFrame() {
+      if (!canRender() || rafId !== 0) return;
+      if (!initGl()) return;
+      resize();
+      if (reduceMotion) {
+        // Draw a single static frame instead of animating forever.
+        render();
+        return;
+      }
       rafId = requestAnimationFrame(render);
     }
 
     function onVisibility() {
-      paused = document.hidden;
-      if (!paused && gl && canvas) {
-        rafId = requestAnimationFrame(render);
-      }
+      if (document.hidden) stop();
+      else requestFrame();
     }
 
-    const ro = new ResizeObserver(() => resize());
+    const ro = new ResizeObserver(() => {
+      if (!gl) return;
+      resize();
+      if (reduceMotion) drawFrame(0);
+      requestFrame();
+    });
     ro.observe(container);
+
+    // Pause the render loop while the section is off-screen. This is what keeps
+    // Lighthouse (and PageSpeed Insights) from hanging: the page can go quiet.
+    let io: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === "function") {
+      io = new IntersectionObserver(([entry]) => {
+        inView = entry?.isIntersecting ?? true;
+        if (inView) requestFrame();
+        else stop();
+      });
+      io.observe(container);
+    } else {
+      inView = true;
+      requestFrame();
+    }
+
     document.addEventListener("visibilitychange", onVisibility);
 
-    resize();
-    rafId = requestAnimationFrame(render);
-
     return () => {
-      cancelAnimationFrame(rafId);
+      disposed = true;
+      stop();
       ro.disconnect();
+      io?.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
-      gl.deleteProgram(program);
-      gl.deleteBuffer(buf);
+      if (gl) {
+        if (program) gl.deleteProgram(program);
+        if (buffer) gl.deleteBuffer(buffer);
+      }
     };
   }, [speed]);
 
