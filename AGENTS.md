@@ -16,6 +16,7 @@ The brand system is the source of truth. Load these files before working on any 
 
 - `../brand/DESIGN.md` — visual system: colour, typography, spacing, grid, components, page sections. **Mandatory context for every task in this folder.**
 - `../brand/strategy.md` — voice, messaging, services, positioning, vocabulary rules. **Load only if the task requires brand voice, copy or positioning decisions.**
+- `../brand/BLOG.md` — blog post authoring system: file conventions, frontmatter, structure, voice, SEO and the cover image workflow. **Mandatory context for every task that writes or edits a post under `posts/`.**
 
 **Direction of change.** When the brand docs and the implementation diverge, the docs win. Update the implementation to match. The brand files live in `../brand/` and are edited there, not from this project.
 
