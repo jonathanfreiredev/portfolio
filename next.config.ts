@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-popover",
       "@radix-ui/react-tooltip",
     ],
+    useLightningcss: true,
   },
   compiler: {
     removeConsole: isProduction

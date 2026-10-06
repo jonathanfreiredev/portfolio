@@ -11,8 +11,8 @@ import { MoreAboutMe } from "@/components/home/more-about-me";
 // components/home/pricing.tsx. Re-enable this import and the <Pricing /> render below to restore it.
 // import { Pricing } from "@/components/home/pricing";
 import { Separator } from "@/components/ui/separator";
-import { FAQ_COUNT } from "@/lib/constants";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { FAQ_COUNT, SERVICE_COUNT } from "@/lib/constants";
+import { buildAlternates, buildOpenGraph, siteUrl } from "@/lib/seo";
 
 const Projects = dynamic(() =>
   import("@/components/home/projects").then((mod) => mod.Projects),
@@ -51,6 +51,12 @@ export default async function Home({ params }: HomePageProps) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale, namespace: "home.faq.questions" });
+  const tServices = await getTranslations({
+    locale,
+    namespace: "home.services",
+  });
+  const tMeta = await getTranslations({ locale, namespace: "metadata" });
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -64,11 +70,52 @@ export default async function Home({ params }: HomePageProps) {
     })),
   };
 
+  const professionalServiceSchema = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${siteUrl}/#service`,
+    name: "Jonathan Freire",
+    description: tMeta("siteDescription"),
+    url: siteUrl,
+    areaServed: "Worldwide",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Berlin",
+      addressCountry: "DE",
+    },
+    provider: { "@id": `${siteUrl}/#person` },
+    priceRange: "€€",
+    knowsAbout: [
+      "AI engineering",
+      "Large language models",
+      "Retrieval-augmented generation",
+      "AI agents",
+      "Tool calling",
+      "Model Context Protocol",
+      "TypeScript",
+      "Python",
+    ],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: tServices("title"),
+      itemListElement: Array.from({ length: SERVICE_COUNT }).map((_, i) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: tServices(`items.${i}.title`),
+          description: tServices(`items.${i}.text`),
+        },
+      })),
+    },
+  };
+
   return (
     <main className="flex flex-col w-full items-center">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([faqSchema, professionalServiceSchema]),
+        }}
       />
       <Hero />
       <div className="flex flex-col gap-20 py-12 max-w-380 md:gap-24 md:py-16 lg:gap-40 lg:py-24 px-5 md:px-6 lg:px-8">

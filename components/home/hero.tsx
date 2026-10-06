@@ -4,10 +4,9 @@ import { Link } from "@/i18n/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { CldImage } from "next-cloudinary";
-import { Separator } from "../ui/separator";
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
@@ -22,13 +21,7 @@ export function Hero() {
   const t = useTranslations("home.hero");
 
   return (
-    <Reveal
-      as="section"
-      trigger="mount"
-      delay={0.4}
-      y={100}
-      className="flex w-full pt-32 pb-10 md:pt-32 md:pb-12 lg:pb-12"
-    >
+    <section className="flex w-full pt-32 pb-10 md:pt-32 md:pb-12 lg:pb-12">
       <div className="flex w-full flex-col items-center gap-14 md:gap-14 lg:gap-14">
         <div className="flex flex-col gap-6 w-full max-w-380 px-5 md:px-6 lg:px-8">
           <h1 className="text-display-l text-foreground">{t("title")}</h1>
@@ -82,6 +75,6 @@ export function Hero() {
           />
         </div>
       </div>
-    </Reveal>
+    </section>
   );
 }

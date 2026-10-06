@@ -2,7 +2,6 @@ import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { routing } from "@/i18n/routing";
-import { SERVICE_COUNT } from "@/lib/constants";
 import {
   buildOpenGraph,
   buildTwitter,
@@ -101,12 +100,6 @@ export default async function Layout({
   setRequestLocale(locale);
 
   const messages = await getMessages();
-  const tMeta = await getTranslations({ locale, namespace: "metadata" });
-  const tHero = await getTranslations({ locale, namespace: "home.hero" });
-  const tServices = await getTranslations({
-    locale,
-    namespace: "home.services",
-  });
 
   const knowsAbout = [
     "AI engineering",
@@ -126,7 +119,7 @@ export default async function Layout({
     name: "Jonathan Freire",
     url: siteUrl,
     jobTitle: "AI Engineer",
-    description: tMeta("siteDescription"),
+    description: "AI engineer and software engineer based in Berlin. I build production LLM applications: RAG, agents and MCP integrations, in TypeScript and Python.",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Berlin",
@@ -146,39 +139,9 @@ export default async function Layout({
     name: "Jonathan Freire",
     alternateName: "jonathanfreire.com",
     url: siteUrl,
-    description: tHero("tagline"),
+    description: "Intelligent systems, built to ship.",
     inLanguage: locale,
     publisher: { "@id": `${siteUrl}/#person` },
-  };
-
-  const professionalServiceSchema = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    "@id": `${siteUrl}/#service`,
-    name: "Jonathan Freire",
-    description: tMeta("siteDescription"),
-    url: siteUrl,
-    areaServed: "Worldwide",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Berlin",
-      addressCountry: "DE",
-    },
-    provider: { "@id": `${siteUrl}/#person` },
-    priceRange: "€€",
-    knowsAbout,
-    hasOfferCatalog: {
-      "@type": "OfferCatalog",
-      name: tServices("title"),
-      itemListElement: Array.from({ length: SERVICE_COUNT }).map((_, i) => ({
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: tServices(`items.${i}.title`),
-          description: tServices(`items.${i}.text`),
-        },
-      })),
-    },
   };
 
   return (
@@ -195,11 +158,7 @@ export default async function Layout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([
-              personSchema,
-              webSiteSchema,
-              professionalServiceSchema,
-            ]),
+            __html: JSON.stringify([personSchema, webSiteSchema]),
           }}
         />
         <link
@@ -216,6 +175,13 @@ export default async function Layout({
           id="cookieyes"
           src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
           strategy="lazyOnload"
+        />
+        <Script
+          id="reveal-observer"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var els=document.querySelectorAll('[data-reveal]');if(!els.length||!('IntersectionObserver' in window))return;var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var d=parseFloat(e.target.getAttribute('data-delay')||'0');e.target.style.animationDelay=d+'s';e.target.classList.add('is-in');io.unobserve(e.target);}});},{rootMargin:'0px 0px -10% 0px',threshold:0});els.forEach(function(el){io.observe(el);});})();`,
+          }}
         />
         <ThemeProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>

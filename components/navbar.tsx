@@ -1,18 +1,9 @@
 "use client";
 
-import { MenuIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LocaleSwitcher } from "@/components/locale-switcher";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { NavbarMobile } from "@/components/navbar-mobile";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -20,22 +11,6 @@ const NAV_LINKS = [
   { href: "/projects", key: "projects" },
   { href: "/blog", key: "blog" },
   { href: "/contact", key: "contact" },
-] as const;
-
-const SHEET_ITEMS = [
-  { href: "/", key: "home" },
-  { href: "/projects", key: "projects" },
-
-  { href: "/#services", key: "services" },
-  { href: "/#workflow", key: "workflow" },
-  // { href: "/#pricing", key: "pricing" }, // Pricing section temporarily removed.
-
-  { href: "/blog", key: "blog" },
-  { href: "/contact", key: "contact" },
-
-  { href: "/legal/terms", key: "terms" },
-  { href: "/legal/privacy", key: "privacy" },
-  { href: "/legal/imprint", key: "imprint" },
 ] as const;
 
 export function Navbar() {
@@ -52,17 +27,16 @@ export function Navbar() {
     return pathname.startsWith(path);
   };
 
-  const labelFor = (key: string) => {
-    if (key === "home") return t("home");
-    if (key === "projects") return t("projects");
-    if (key === "blog") return t("blog");
-    if (key === "contact") return t("contact");
-    if (key === "services") return tFooter("services");
-    if (key === "workflow") return tFooter("workflow");
-    if (key === "pricing") return tFooter("pricing");
-    if (key === "terms") return tFooter("terms");
-    if (key === "privacy") return tFooter("privacy");
-    return key;
+  const labels = {
+    home: t("home"),
+    projects: t("projects"),
+    blog: t("blog"),
+    contact: t("contact"),
+    services: tFooter("services"),
+    workflow: tFooter("workflow"),
+    terms: tFooter("terms"),
+    privacy: tFooter("privacy"),
+    imprint: tFooter("imprint"),
   };
 
   return (
@@ -84,44 +58,15 @@ export function Navbar() {
                     : "text-foreground hover:text-muted-foreground",
                 )}
               >
-                {labelFor(link.key)}
+                {labels[link.key]}
               </Link>
             ))}
           </nav>
           <LocaleSwitcher />
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="icon-lg"
-                  aria-label={t("openMenu")}
-                >
-                  <MenuIcon />
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="w-[82%] max-w-sm dark:bg-neutral-900"
-              >
-                <SheetHeader>
-                  <SheetTitle className="sr-only">{t("openMenu")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col">
-                  {SHEET_ITEMS.map((item) => (
-                    <SheetClose asChild key={item.key}>
-                      <Link
-                        href={item.href}
-                        className="border-b border-border px-4 py-4 text-base text-foreground hover:bg-muted"
-                      >
-                        {labelFor(item.key)}
-                      </Link>
-                    </SheetClose>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <NavbarMobile
+            openMenuLabel={t("openMenu")}
+            labels={labels as Record<string, string>}
+          />
         </div>
       </div>
     </header>
