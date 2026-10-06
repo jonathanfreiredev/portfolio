@@ -171,11 +171,11 @@ export default async function Layout({
           href="https://cdn.sanity.io"
           crossOrigin="anonymous"
         />
-        <Script
+        {/* <Script
           id="cookieyes"
           src="https://cdn-cookieyes.com/client_data/1da8e5662d2a0f5a30f0570d/script.js"
           strategy="lazyOnload"
-        />
+        /> */}
         <Script
           id="reveal-observer"
           strategy="lazyOnload"
