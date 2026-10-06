@@ -1,0 +1,142 @@
+---
+title: "Deploying an AI Agent in Production: Vercel vs Modal"
+date: "2026-10-06"
+slug: "deploying-ai-agents-vercel-vs-modal"
+description: "Why a general serverless host like Vercel breaks for long-running AI agents, and how Modal, a serverless runtime built for agents, fixes it."
+tags: ["vercel", "modal", "ai-agents", "serverless", "python", "deployment"]
+---
+
+![Deploying an AI Agent in Production: Vercel vs Modal](https://res.cloudinary.com/ddjovluur/image/upload/v1791304644/portfolio/blog/deploying-ai-agents-vercel-vs-modal.jpg)
+
+Where does an AI agent run when you ship it? For the past year my answer has been stable: the web product goes to Vercel, the agent itself goes to Modal, a serverless platform built for long-running Python and GPU work. This post explains that split, with the limits and the prices behind the decision.
+
+I won't cover agent frameworks or prompt design. I assume you already have a working agent loop, model calls plus tools, and the question is where to deploy it. If you have never used Modal, that is fine, I'll show the code that deploys a real agent there.
+
+I still recommend Vercel, and I use it every week for client work. It is the right home for the app layer, the pages, the auth, the API routes. Modal takes the part Vercel is not built for: the compute the app triggers. The two work best together.
+
+## What an agent does to a runtime
+
+An agent is a loop, not a request handler. One user message can become a dozen model calls, tool executions and retries before you have an answer worth streaming back. From the runtime's point of view, that loop makes four demands:
+
+1. **Long runs.** A research or coding task easily takes minutes per user message.
+2. **Heavy initialization.** The first import of `torch`, or the first load of a retrieval index, can cost seconds on its own.
+3. **State worth keeping.** That loaded index, and often the session memory, saves work on every later turn. Throwing it away after each request is waste.
+4. **Bursty concurrency.** One user message can fan out into several parallel tool runs. Traffic arrives in spikes, not a steady stream.
+
+None of this matches what a request-scoped serverless function is optimized for: handle one event fast, exit, let the platform recycle everything.
+
+## Where Vercel starts to hurt
+
+Vercel Functions with [Fluid compute](https://vercel.com/docs/fluid-compute) got genuinely better for agents. Instances are reused across requests instead of dying after each one, and billing moved to Active CPU, which pauses while your code waits on I/O. An agent loop spends most of its time waiting on a model API, so that billing model fits agents well.
+
+Then the [limits](https://vercel.com/docs/functions/limitations) catch up with you. The default maximum duration is 300 seconds on every plan. Hobby cannot go beyond that. Pro and Enterprise reach [800 seconds, with a 1800 second extended maximum in beta](https://vercel.com/docs/functions/configuring-functions/duration) since June 2026. Five minutes covers a chat agent. It does not cover an agent that browses, runs code and retries its own mistakes, and the failure mode is ugly: a 504 in the middle of a run, with the loop and its state gone.
+
+Cold starts are the second problem. Fluid compute reuses instances, but when traffic spikes, new instances still boot, and every boot re-runs your global scope: the imports, the index load, the client setup. On a web app that cost is a few hundred milliseconds. On an agent stack with heavy Python dependencies it is seconds, and it lands exactly on the requests you most wanted to be fast.
+
+The rest is shorter to state. Memory tops out at 2 GB on Hobby and 4 GB on Pro, with 1 and 2 vCPUs attached. There are no GPUs on Vercel Functions. And functions run in a single region by default.
+
+Vercel does have an answer for duration: [Workflows](https://vercel.com/docs/workflows), which can pause and resume, and hold state from minutes to months. If you are already deep in the Vercel stack, look at them. What they solve is duration; initialization cost and a warm, stateful container stay your problem.
+
+![Vercel Functions boot a new instance for each burst and re-run imports every time; a Modal container boots once and stays warm across requests](https://res.cloudinary.com/ddjovluur/image/upload/v1791304589/portfolio/blog/deploying-ai-agents-vercel-vs-modal-figure-1.png)
+
+## Why I run agents on Modal
+
+Modal defines serverless around containers instead of requests. You write Python, decorate a function or a class, and `modal deploy` turns it into an autoscaling deployment with a URL. Framing it that way moves every number that hurt above:
+
+- **Duration.** The default timeout is 300 seconds, but any [function can set between 1 second and 24 hours](https://modal.com/docs/guide/timeouts). No plan gates the number. A one-hour agent run is one argument.
+- **Cold starts.** A container boots in about one second, and Modal's [memory snapshots](https://modal.com/docs/guide/memory-snapshots) skip the initialization work entirely on most boots. Modal measured a plain `import torch` going from about 5 seconds to about 1 second, and a Stable Diffusion function from 13 seconds to 3.5. Initialization-heavy functions typically start [3 to 10 times faster](https://modal.com/blog/mem-snapshots).
+- **Warmth.** You control it. `scaledown_window` keeps a container alive between 2 seconds and 20 minutes after its last input, and `min_containers` keeps a floor of containers running at all times.
+- **State.** A warm container is a place where a loaded index and a session can simply live in memory, with [Volumes](https://modal.com/docs/guide/volumes) for the part that must survive restarts.
+- **GPUs.** One decorator argument, from a T4 to a B300, up to 8 per container. Your agent only needs one when it needs one.
+- **A place for agent-written code.** [Sandboxes](https://modal.com/docs/guide/sandbox) are isolated containers for the code an agent generates and executes, with filesystem snapshots to checkpoint a session. Modal is one of the [official sandbox providers of the OpenAI Agents SDK](https://modal.com/blog/building-with-modal-and-the-openai-agent-sdk), alongside Vercel, E2B and a few others.
+- **Pricing.** Everything is [billed per second](https://modal.com/pricing): an H100 at $3.95 per hour of actual runtime, CPU at $0.0000131 per core-second. The Starter plan costs $0 and includes $30 of compute every month, which covers a lot of agent traffic while you are still building.
+
+Modal is not the only option in this space. RunPod and Baseten focus on serverless GPUs for models, Replicate on serving model inference, E2B on agent sandboxes. I pick Modal because it covers the whole agent: the loop, the sandbox where the agent runs code, and the GPU when the job needs one. And its documentation is deep enough that a client team can find its own answers after I leave, which is part of how I choose any platform.
+
+## Vercel vs Modal, side by side
+
+| What matters for an agent | Vercel Functions | Modal |
+| --- | --- | --- |
+| Longest run | 300s on Hobby, 800s on Pro, 1800s in beta | Any value from 1s to 24h, set per function |
+| Cold start on a new instance | Re-runs imports and setup on every new instance | Container boot around 1s, memory snapshots skip imports |
+| Warm between requests | Instance reuse, no guarantee | `scaledown_window` up to 20 min, `min_containers` |
+| State between requests | External store required (database, Redis) | In memory on a warm container, plus Volumes |
+| Memory ceiling | 2 GB on Hobby, 4 GB on Pro | Any container size, GPUs included |
+| GPUs | None | T4 to B300, up to 8 per container |
+| Agent code execution | Separate Sandbox product | Sandboxes built in, with filesystem snapshots |
+| Pricing | Active CPU + provisioned memory + invocations | Per-second CPU, GPU and memory, $30/month included on Starter |
+| Languages | Node.js, Bun, Python (TypeScript-first) | Python, TypeScript, Go |
+
+## What the code looks like
+
+On Vercel, the agent lives in a route handler with a duration you negotiate with the plan:
+
+```typescript app/api/agent/route.ts
+export const maxDuration = 800; // Pro plan. Hobby stays at 300s.
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  // One model call would be fine. A tool loop with retries
+  // is what turns this into a timeout risk.
+  const result = await runAgent(messages);
+
+  return Response.json(result);
+}
+```
+
+On Modal, the agent is a class with its resources and lifecycle in the open:
+
+```python research_agent.py
+import modal
+
+app = modal.App("research-agent")
+image = modal.Image.debian_slim().pip_install("pydantic-ai")
+
+@app.cls(
+    image=image,
+    secrets=[modal.Secret.from_name("openai-api-key")],
+    timeout=3600,               # 1 hour per run, no plan upgrade needed
+    scaledown_window=15 * 60,   # stay warm 15 minutes after the last input
+    min_containers=1,
+    enable_memory_snapshot=True,
+)
+@modal.concurrent(max_inputs=16)
+class ResearchAgent:
+    @modal.enter(snap=True)
+    def load(self):
+        # Runs once per container and lands inside the memory snapshot.
+        self.index = build_index()
+
+    @modal.method()
+    async def run(self, question: str) -> str:
+        return await agent_loop(self.index, question)
+```
+
+One command deploys it, builds the image on change, and handles the version transition:
+
+```bash
+modal deploy research_agent.py
+```
+
+The deployment gets a URL you can call from your app with `@modal.web_server` or `@modal.fastapi_endpoint`, so the Next.js route handler keeps doing what it is good at, auth and streaming, and forwards the run to Modal.
+
+One thing to watch: test memory snapshots outside production first. Modal recommends that until your setup has proven stable across restores.
+
+## When Vercel is enough
+
+If your agent answers in one or two model calls, or a tool loop that stays under five minutes, Vercel alone is a perfectly good answer, and the operational simplicity of one platform is worth more than anything Modal adds. That is the case for most chat-with-your-data features.
+
+My rule of thumb: the moment an agent runs minutes, executes the code it writes, or loads anything heavier than a client SDK, it earns its own deployment. This is the architecture I ship: the app on Vercel, the agent on Modal, talking over one endpoint:
+
+![The architecture I ship: the Next.js app on Vercel handles UI, auth and streaming, and forwards agent runs to a Modal deployment with tools, sandbox, volume and optional GPU](https://res.cloudinary.com/ddjovluur/image/upload/v1791304591/portfolio/blog/deploying-ai-agents-vercel-vs-modal-figure-2.png)
+
+The split keeps the [stack I ship web products on](/blog/how-i-ship-fast-in-2026-my-modern-nextjs-stack) untouched. The app just calls an HTTP endpoint, the same as it calls any other internal service.
+
+## Wrapping Up
+
+Vercel and Modal do different jobs. Vercel is where the product lives. Modal is where the agent works. The limits that decide it are duration, cold starts and state, and on those three, Modal wins for any agent whose runs are measured in minutes.
+
+The honest trade-off: you take on a second platform, a second deploy pipeline, and in practice a Python codebase next to your TypeScript one. If your agents are short and your team wants one vendor, staying on Vercel, with `maxDuration` set high and Workflows where you need durability, is a defensible choice.
+
+If you want to see a full agent on Modal, including the sandbox where the agent executes its own code, start with [their coding agent example](https://modal.com/docs/examples/agent). It is the example I point clients at when this split comes up, and it runs on the free Starter plan.

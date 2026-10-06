@@ -119,6 +119,37 @@ function MdxImage({ src, alt }: MdxImageProps) {
   );
 }
 
+function MdxTable({ children }: ComponentProps<"table">) {
+  return (
+    <div className="my-6 w-full overflow-x-auto rounded-[2px] border border-primary/10">
+      <table className="w-full border-collapse text-sm">{children}</table>
+    </div>
+  );
+}
+
+function MdxTableRow({ children }: ComponentProps<"tr">) {
+  return <tr className="border-b border-primary/10 last:border-b-0">{children}</tr>;
+}
+
+function MdxTableCell({
+  children,
+  ...rest
+}: ComponentProps<"td"> & { scope?: string }) {
+  return (
+    <td {...rest} className="px-4 py-3 align-top leading-relaxed text-foreground">
+      {children}
+    </td>
+  );
+}
+
+function MdxTableHeader({ children }: ComponentProps<"th">) {
+  return (
+    <th className="bg-card px-4 py-3 text-left align-top font-medium">
+      <span className="text-eyebrow text-muted-foreground">{children}</span>
+    </th>
+  );
+}
+
 export const mdxComponents = {
   h2: (props: ComponentProps<"h2">) => <Heading level={2} {...props} />,
   h3: (props: ComponentProps<"h3">) => <Heading level={3} {...props} />,
@@ -174,4 +205,13 @@ export const mdxComponents = {
 
   pre: MdxPre,
   img: MdxImage,
+
+  table: (props: ComponentProps<"table">) => <MdxTable {...props} />,
+  thead: ({ children }: ComponentProps<"thead">) => (
+    <thead className="border-b border-primary/10">{children}</thead>
+  ),
+  tbody: ({ children }: ComponentProps<"tbody">) => <tbody>{children}</tbody>,
+  tr: (props: ComponentProps<"tr">) => <MdxTableRow {...props} />,
+  th: (props: ComponentProps<"th">) => <MdxTableHeader {...props} />,
+  td: (props: ComponentProps<"td">) => <MdxTableCell {...props} />,
 };

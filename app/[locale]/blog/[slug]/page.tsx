@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import remarkGfm from "remark-gfm";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { hasLocale } from "next-intl";
 
@@ -160,7 +161,7 @@ export default async function PostPage({ params }: BlogDetailPageProps) {
               components={mdxComponents}
               options={{
                 mdxOptions: {
-                  remarkPlugins: [remarkUnwrapImages, remarkCodeMetaToTitle],
+                  remarkPlugins: [remarkGfm, remarkUnwrapImages, remarkCodeMetaToTitle],
                   rehypePlugins: [
                     [rehypePrettyCode, rehypePrettyCodeOptions],
                     rehypeCodeTitleToData,
