@@ -1,6 +1,7 @@
 "use client";
 
 import { SectionHeader } from "@/components/home/section-header";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { CldImage } from "next-cloudinary";
 import { useTranslations } from "next-intl";
@@ -11,9 +12,61 @@ type Project = {
   description: string;
   imagePublicId: string;
   logoPublicId: string;
-  url: string | null;
   techStack: string[];
 };
+
+const PROJECTS: Project[] = [
+  {
+    id: "mantel-azul",
+    title: "Mantel Azul · AI Cooking Assistant",
+    description:
+      "A multilingual recipe app with an AI cooking assistant. Turn a photo or a handwritten card into a recipe, search your own collection by meaning, and plan the week with your household.",
+    imagePublicId: "portfolio/mantel-azul-bg",
+    logoPublicId: "portfolio/mantel-azul-logo",
+    techStack: [
+      "Next.js",
+      "tRPC",
+      "Vercel AI SDK",
+      "OpenAI",
+      "Chroma",
+      "PostgreSQL",
+    ],
+  },
+  {
+    id: "wandace",
+    title: "Wandace · Multi-channel Retail Platform",
+    description:
+      "A retail platform for small merchants in Latin America: online stores, a point-of-sale app, inventory, orders, and catalog sync to marketplaces and messaging channels.",
+    imagePublicId: "portfolio/wandace-bg",
+    logoPublicId: "portfolio/wandace-logo",
+    techStack: [
+      "Next.js",
+      "NestJS",
+      "GraphQL",
+      "RabbitMQ",
+      "PostgreSQL",
+      "Stripe",
+    ],
+  },
+  {
+    id: "modern-nextjs-stack",
+    title: "Modern Next.js Stack · Open Source Boilerplate",
+    description:
+      "A production-ready Next.js starter with auth, a type-safe database, and a polished UI out of the box, so you skip the setup week.",
+    imagePublicId: "portfolio/modern-nextjs-stack-bg",
+    logoPublicId: "portfolio/logo-modern-nextjs-stack",
+    techStack: ["Next.js", "TypeScript", "Prisma", "Better-Auth", "Zod", "Tailwind"],
+  },
+  {
+    id: "foodie",
+    title: "Foodie · Digital Menu Platform",
+    description:
+      "Restaurants upload a photo or PDF of their menu and AI turns it into a digital menu with QR ordering and payment at the table.",
+    imagePublicId: "portfolio/foodie-bg",
+    logoPublicId: "portfolio/logo-foodie",
+    techStack: ["Next.js", "TypeScript", "OpenAI", "Prisma", "Stripe Connect", "AWS"],
+  },
+];
 
 function ProjectCard({ project }: { project: Project }) {
   const t = useTranslations(`home.projects.items.${project.id}`);
@@ -21,14 +74,16 @@ function ProjectCard({ project }: { project: Project }) {
   const teckStack = project.techStack.join(", ");
 
   return (
-    <div className="group flex w-full flex-col gap-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+    <Link
+      href={`/projects/${project.id}`}
+      className="group flex w-full flex-col gap-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
       <div className="relative w-full aspect-square">
         <CldImage
           src={project.imagePublicId}
           alt={t("title")}
           fill={true}
           sizes="50vw"
-          loading="eager"
         />
 
         <div
@@ -73,8 +128,18 @@ function ProjectCard({ project }: { project: Project }) {
         <span className="text-foreground/45 text-tag uppercase">
           {teckStack}
         </span>
-        <h3 className="text-body-l text-foreground/80">{t("description")}</h3>
+        <p className="text-body-l text-foreground/80">{t("description")}</p>
       </div>
+    </Link>
+  );
+}
+
+export function ProjectsGrid() {
+  return (
+    <div className="grid grid-cols-1 gap-x-2 gap-y-12 md:grid-cols-2 md:gap-x-2 md:gap-y-24">
+      {PROJECTS.map((project) => (
+        <ProjectCard key={project.id} project={project} />
+      ))}
     </div>
   );
 }
@@ -82,80 +147,11 @@ function ProjectCard({ project }: { project: Project }) {
 export function Projects() {
   const t = useTranslations("home.projects");
 
-  const projects: Project[] = [
-    {
-      id: "mantel-azul",
-      title: "Mantel Azul · AI Cooking Assistant",
-      description:
-        "A social cooking platform where AI turns any photo into a recipe — built full stack, from computer vision integrations to real-time sharing and image generation.",
-      url: "https://mantelazul.com",
-      imagePublicId: "portfolio/mantel-azul-bg",
-      logoPublicId: "portfolio/mantel-azul-logo",
-      techStack: [
-        "Next.js",
-        "tRPC",
-        "Vercel AI SDK",
-        "OpenAI",
-        "Flux",
-        "PostgreSQL",
-      ],
-    },
-    {
-      id: "wandace",
-      title: "Wandace · Unified Commerce Platform",
-      description:
-        "A full-featured commerce SaaS for retail, built from scratch — I owned the architecture end-to-end, from database design to cloud infrastructure, payments, and marketing integrations.",
-      url: "https://wandace.com",
-      imagePublicId: "portfolio/wandace-bg",
-      logoPublicId: "portfolio/wandace-logo",
-      techStack: [
-        "Next.js",
-        "NestJS",
-        "GraphQL",
-        "PostgreSQL",
-        "Stripe",
-        "Azure",
-        "Docker",
-      ],
-    },
-    {
-      id: "modern-nextjs-stack",
-      title: "Modern Next.js Stack · Open Source Boilerplate",
-      description:
-        "A production-ready Next.js starter with auth, type-safe DB, and a polished UI out of the box — zero setup overhead.",
-      url: "https://github.com/jonathanfreiredev/modern-nextjs-stack",
-      imagePublicId: "portfolio/modern-nextjs-stack-bg",
-      logoPublicId: "portfolio/logo-modern-nextjs-stack",
-      techStack: [
-        "Next.js",
-        "TypeScript",
-        "Prisma",
-        "Better-Auth",
-        "Zod",
-        "Tailwind",
-      ],
-    },
-    {
-      id: "foodie",
-      title: "Foodie · Digital Menu Platform",
-      description:
-        "Restaurants upload a photo or PDF of their physical menu — AI parses it into a fully branded digital experience with ordering and payment at the table.",
-      url: null,
-      imagePublicId: "portfolio/foodie-bg",
-      logoPublicId: "portfolio/logo-foodie",
-      techStack: ["Next.js", "TypeScript", "OpenAI API", "Prisma", "Vercel"],
-    },
-  ];
-
   return (
     <section id="projects" className="flex w-full flex-col gap-12 md:gap-24">
       <SectionHeader title={t("title")} text={t("text")} />
 
-      <div className="grid grid-cols-1 gap-x-2 gap-y-12 md:grid-cols-2 md:gap-x-2 md:gap-y-24">
-        {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
-      </div>
+      <ProjectsGrid />
     </section>
   );
 }

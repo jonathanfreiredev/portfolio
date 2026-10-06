@@ -8,7 +8,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Project
 
-Business website for Jonathan Freire, freelance Digital Product Architect (sole trader, Berlin).
+Business website for Jonathan Freire, freelance AI engineer and software engineer (sole trader, Berlin).
 
 ## Brand context
 
@@ -29,7 +29,7 @@ Blog content is local MDX under `posts/<locale>/*.mdx`, read by `lib/posts.ts` a
 
 ## Copy and voice
 
-Public-facing copy is English. Legal and admin is German. Spanish only when the context requires it, never mixed with English in the same piece. First-person singular only — no team language, no studio, no agency. Banned vocabulary (end-to-end solution, synergy, disruptive, ecosystem unless literal, "expert in", "passionate about") is enforced via `../brand/strategy.md` §8.
+Public-facing copy is English. Legal and admin is German. Spanish only when the context requires it, never mixed with English in the same piece. First-person singular only — no team language, no studio, no agency. Banned vocabulary (end-to-end solution, synergy, disruptive, ecosystem unless literal, "expert in", "passionate about", "AI-powered" as filler, revolutionary, "cutting-edge AI") is enforced via `../brand/strategy.md` §8.
 
 ## Internationalization (next-intl)
 

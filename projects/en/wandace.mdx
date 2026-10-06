@@ -1,0 +1,74 @@
+---
+title: "Wandace"
+tagline: "A retail platform that keeps online, in-store and marketplace stock in sync."
+description: "Wandace is a multi-channel retail platform for SMBs in Latin America: online stores, a point-of-sale app, inventory, orders and marketplace sync."
+role: "Co-founder and technical lead"
+timeline: "September 2023 to February 2026"
+context: "Wandace UG"
+statusLabel: "Live"
+highlights:
+  - "One catalog pushed to five sales channels through an event-driven integrations service"
+  - "Two payment rails, Stripe and Kushki, behind a single order model"
+  - "Per-market pricing and multi-currency support for cross-border LATAM retail"
+  - "An instant online storefront per merchant, resolved by subdomain"
+  - "Order totals with explicit tax breakdowns and decimal normalization"
+  - "Integration credentials encrypted at rest, decrypted only when a call needs them"
+updatedAt: "2026-06-17"
+slug: "wandace"
+---
+
+## The brief
+
+A small shop in Latin America usually runs on a notebook, a spreadsheet, and a handful of apps that don't talk to each other. Stock lives in one place, orders in another, and the moment a seller lists the same product on Instagram and in the physical shop, the counts drift. Wandace puts it in one system: a catalog, a point-of-sale app for the counter, an instant online store, and connections that push products out to channels like WhatsApp, Meta, Google, WooCommerce and Mailchimp.
+
+I was co-founder and led the software side with a full-stack engineer, working next to the CEO. I left the company in early 2026, and the product is still running.
+
+## How it works
+
+Wandace is six applications. The core is a NestJS GraphQL API with Postgres and TypeORM. An addons service handles everything that leaves the system. The merchant admin and the point-of-sale app talk to the API over GraphQL, the public storefronts are a newer Next.js app that went with tRPC, and the marketing site is its own Next.js app.
+
+The integrations live in their own service for a plain reason: marketplaces are slow and they fail. When a product changes, the API emits an event and moves on. The addons service picks it up, maps the internal shape into whatever each channel expects, and retries on its own time. RabbitMQ sits in between, so a marketplace having a bad morning never slows down a sale at the counter.
+
+Payments follow the same idea. Subscriptions run through Stripe. On the checkout side, cards, cash and bank transfers run through Kushki, which covers the methods people actually use in the region. Both feed a single payment record. Kushki webhooks are verified with an HMAC signature and an origin check, then pushed onto a queue instead of being processed inline.
+
+Prices are per market. The same product can carry a different price and currency depending on the store and the channel, which is what cross-border selling needs.
+
+## What shipped
+
+- A product catalog with variants, attributes, categories, brands and images.
+- Inventory with transfers, replenishments and supplier shipments.
+- A point-of-sale app with cash registers and shifts.
+- Orders, with returns, refunds, vouchers, shipments and taxes.
+- Online storefronts, one per merchant, served on a subdomain.
+- Connections to WooCommerce, Meta, Google Merchant Center, Mailchimp and WhatsApp Business.
+- AI-assisted catalog copy: descriptions, SEO metadata, slugs and translation, with structured JSON output.
+
+## Engineering highlights
+
+### An anti-corruption layer for integrations
+
+The addons manager maps internal products, categories, attributes and customers into a separate DTO per channel, then emits an event that the right integration consumes. Adding a channel means adding a mapper, not touching the catalog. It's the part of the system that keeps five external platforms from leaking their quirks into the core.
+
+### Two payment providers, one order
+
+Stripe handles subscriptions and connected accounts; Kushki handles the local methods. An order stores one payment record whether the money arrived by card, cash or transfer, and the async webhook handling keeps the checkout fast. The trade-off is eventual consistency: a payment can take a moment to show up as completed.
+
+### Per-market pricing
+
+A market pricing record lets one product carry different prices and currencies per store and channel. Cross-border selling needs it, and it's also the reason prices are read through a join rather than a column.
+
+### Totals that add up
+
+Order totals are stored as subtotals, discounts and tax breakdowns at two to four decimal places, and decimals come back from the driver as strings, which is a classic source of silent money bugs. The code normalises them on load and converts to cents only at the edges.
+
+### Credentials encrypted at rest
+
+Each integration stores its own API keys and tokens, encrypted with AES before they hit the database and decrypted only when a request needs them. The key and IV come from the environment; nothing sensitive is stored in plain text.
+
+## What I'd do differently
+
+Settle on one API style. GraphQL, tRPC and REST in one suite works, but it's three things to learn, document and hold in your head.
+
+Invest earlier in tests and observability on the paths that handle money. Orders and payments are where a bug hurts most.
+
+Treat security at the boundary as part of the design from the start: service auth, rate limiting, and a trust model for webhooks that doesn't lean on a header.

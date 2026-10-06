@@ -4,7 +4,9 @@ import {
   type Options as RehypePrettyCodeOptions,
 } from "rehype-pretty-code";
 
+import { CodeCopyButton } from "@/components/code-copy-button";
 import { headingIdFromText } from "@/lib/posts";
+import { cn } from "@/lib/utils";
 
 export const rehypePrettyCodeOptions: Partial<RehypePrettyCodeOptions> = {
   theme: {
@@ -63,23 +65,32 @@ function MdxLink({ href = "", children, ...rest }: LinkProps) {
 
 type PreProps = ComponentProps<"pre"> & {
   "data-language"?: string;
-  "data-meta"?: string;
+  "data-title"?: string;
 };
 
-function MdxPre(props: PreProps) {
-  const { children, ...rest } = props;
-  const language = props["data-language"];
-  const meta = props["data-meta"];
-  const label = meta?.trim() || language || "code";
+function MdxPre({
+  children,
+  className,
+  "data-language": language,
+  "data-title": dataTitle,
+  ...rest
+}: PreProps) {
+  const label = dataTitle?.trim() || language || "code";
 
   return (
-    <div className="my-6 max-w-full overflow-hidden rounded-[2px] border border-primary/10 text-sm">
-      <div className="flex items-center justify-between border-b border-primary/10 bg-card px-4 py-2">
-        <span className="block max-w-full truncate text-eyebrow text-muted-foreground">
+    <div
+      data-code-block=""
+      className="my-6 min-w-0 max-w-full overflow-hidden rounded-[2px] border border-primary/10 text-sm"
+    >
+      <div className="flex items-center justify-between gap-4 border-b border-primary/10 bg-card px-4 py-2">
+        <span className="block min-w-0 truncate text-eyebrow text-muted-foreground">
           {label}
         </span>
+        <CodeCopyButton />
       </div>
-      <pre {...rest}>{children}</pre>
+      <pre {...rest} className={cn("max-w-full", className)}>
+        {children}
+      </pre>
     </div>
   );
 }
@@ -141,9 +152,17 @@ export const mdxComponents = {
     </blockquote>
   ),
 
-  code: ({ children, className }: ComponentProps<"code">) => {
-    const isBlock = typeof className === "string" && className.startsWith("language-");
-    if (isBlock) return <code className={className}>{children}</code>;
+  code: ({ children, className, ...rest }: ComponentProps<"code">) => {
+    const isBlock =
+      (typeof className === "string" && className.startsWith("language-")) ||
+      (rest as Record<string, unknown>)["data-language"] !== undefined;
+    if (isBlock) {
+      return (
+        <code className={className} {...rest}>
+          {children}
+        </code>
+      );
+    }
     return (
       <code className="rounded-[2px] bg-primary/10 px-[0.3rem] py-[0.1rem] font-mono text-sm text-foreground">
         {children}

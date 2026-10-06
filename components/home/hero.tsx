@@ -76,7 +76,8 @@ export function Hero() {
             alt={t("title")}
             fill={true}
             sizes="100vw"
-            loading="eager"
+            priority
+            fetchPriority="high"
             className="object-cover"
           />
         </div>

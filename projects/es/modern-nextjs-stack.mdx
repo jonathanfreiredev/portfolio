@@ -1,0 +1,80 @@
+---
+title: "Modern Next.js Stack"
+tagline: "Un starter que te entrega auth, base de datos y server actions tipadas ya conectadas."
+description: "Un starter de Next.js 16 listo para producción con Better-Auth, Prisma 7, next-safe-action y Tailwind 4 conectados en una base tipada."
+role: "Solo, creador y mantenedor"
+timeline: "Tres semanas, de abril a mayo de 2026"
+context: "Proyecto propio"
+statusLabel: "Código abierto"
+highlights:
+  - "Datos de auth en tu propio Postgres: usuarios, sesiones y cuentas, sin proveedor por medio"
+  - "Server actions tras una capa de procedimientos consciente de la sesión"
+  - "Prisma 7 sobre el driver adapter de pg, sin motor de Rust que desplegar"
+  - "Migraciones aplicadas automáticamente al hacer merge en main"
+  - "Tokens de Tailwind 4 en CSS, con componentes de shadcn dentro del repo"
+  - "Next.js 16, React 19, Prisma 7 y Zod 4, verificados para compilar juntos"
+updatedAt: "2026-05-11"
+slug: "modern-nextjs-stack"
+---
+
+## El punto de partida
+
+Todo proyecto nuevo en Next.js empieza con la misma semana de fontanería. Auth, un esquema de base de datos, validación de formularios, llamadas al servidor tipadas, migraciones y unos cuantos componentes de UI. Las piezas existen, pero conectarlas es la parte aburrida, y la versión más nueva de cada una casi nunca tiene documentación que coincida con el código.
+
+Modern Next.js Stack es mi respuesta a esa semana. Lo clonas, lo apuntas a una base de datos Postgres y empiezas por la funcionalidad que te importa de verdad. Es una plantilla pública bajo licencia MIT, pensada para desarrolladores en solitario y equipos pequeños que arrancan un proyecto con App Router.
+
+## Cómo funciona
+
+La app es Next.js 16 con React 19 y el App Router. Los Server Components leen datos, y los Client Components se limitan a lo que necesita interacción, como formularios y menús.
+
+El auth es Better-Auth con el adaptador de Prisma, así que usuarios, sesiones y cuentas viven en tu propia base de datos y no en la de un proveedor. El registro por email y contraseña pasa por validación con Zod, las sesiones viven en la base de datos con opción de recordarme, y cambiar la contraseña revoca las demás sesiones. Las rutas protegidas se comprueban en el servidor y redirigen antes de renderizar nada.
+
+Las server actions pasan por un pequeño cliente de procedimientos. Hay un procedimiento público y uno protegido, y el protegido inyecta la sesión antes de ejecutar tu acción. Es la idea del middleware de tRPC sin meter tRPC dentro.
+
+```ts lib/safe-action.ts
+export const protectedProcedure = actionClient.use(async ({ next }) => {
+  const session = await getSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized: You must be logged in to perform this action");
+  }
+  return next({ ctx: { user: session.user, session } });
+});
+```
+
+Prisma 7 corre con el driver adapter de pg, lo que significa que no hay motor de consultas en Rust que desplegar. El cliente se genera dentro del repo y se cachea en el objeto global en desarrollo para que el hot reload no abra una conexión nueva en cada guardado.
+
+Una única GitHub Action aplica las migraciones al hacer merge en main. Ese es todo el pipeline hoy.
+
+## Lo que hay
+
+- Auth por email y contraseña con sesiones en base de datos y cambio de email.
+- Un perfil protegido: actualizar nombre y email, o cambiar la contraseña.
+- Guardas de ruta para la página de perfil y las de auth.
+- Una cabecera responsive con menú lateral en móvil.
+- Un hero animado con Motion.
+- Componentes de shadcn/ui sobre un sistema de tokens de Tailwind 4 en CSS.
+- pnpm y TypeScript en modo estricto.
+
+## Detalles de ingeniería
+
+### Ser dueño de los datos de auth
+
+Mantener usuarios y sesiones en tu propio Postgres es más trabajo que llamar a un servicio de auth alojado, y a cambio ningún proveedor guarda las cuentas. También te deja las tablas a mano cuando las necesitas, para migraciones, rellenos o una consulta que no habías planeado.
+
+### Un cliente de procedimientos antes de la primera acción
+
+Es raro construir la capa de server actions antes de escribir una acción que la use. La apuesta era que un procedimiento tipado y consciente de la sesión es infraestructura, no una funcionalidad, y que conviene decidir su forma una sola vez. La parte honesta: la capa sigue sin consumidores.
+
+### Prisma sin el motor
+
+El driver adapter y el nuevo generador de cliente se llevan por delante el binario del motor, así que el despliegue es más pequeño y la conexión pasa por un pool estándar de pg. Menos piezas móviles, y una configuración que casi ninguna plantilla había adoptado todavía.
+
+### Tokens de diseño en CSS
+
+Tailwind 4 mueve la configuración al CSS. Los tokens de diseño, con el set completo de oklch claro y oscuro, viven en un archivo con `@theme inline`, y components.json fija el registro, así que los componentes de UI son del repo y no de una caja negra.
+
+## Qué haría distinto
+
+Publicar infraestructura con un consumidor real. Una abstracción sin llamadas es una apuesta, y esta todavía no tiene ninguna.
+
+Hacer que el CI demuestre que compila, no solo que aplique migraciones.

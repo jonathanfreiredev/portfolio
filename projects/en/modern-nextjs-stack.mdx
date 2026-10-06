@@ -1,0 +1,80 @@
+---
+title: "Modern Next.js Stack"
+tagline: "A starter that hands you auth, a database and typed server actions already wired."
+description: "A production-ready Next.js 16 starter with Better-Auth, Prisma 7, next-safe-action and Tailwind 4 wired into one typed foundation."
+role: "Solo, creator and maintainer"
+timeline: "Three weeks, April to May 2026"
+context: "Personal project"
+statusLabel: "Open source"
+highlights:
+  - "Auth data in your own Postgres: users, sessions and accounts, with no vendor in between"
+  - "Server actions behind a session-aware procedure layer"
+  - "Prisma 7 on the pg driver adapter, with no Rust engine to ship"
+  - "Migrations applied automatically when they merge to main"
+  - "Tailwind 4 CSS-first tokens, with shadcn components owned in the repo"
+  - "Next.js 16, React 19, Prisma 7 and Zod 4, verified to build together"
+updatedAt: "2026-05-11"
+slug: "modern-nextjs-stack"
+---
+
+## The brief
+
+Every new Next.js project starts with the same week of plumbing. Auth, a database schema, form validation, typed server calls, migrations and a few UI primitives. The pieces all exist, but wiring them together is the boring part, and the newest version of each rarely has documentation that matches the code.
+
+Modern Next.js Stack is my answer to that week. Clone it, point it at a Postgres database, and start on the feature you actually care about. It's a public template under MIT, meant for solo developers and small teams starting an App Router project.
+
+## How it works
+
+The app is Next.js 16 with React 19 and the App Router. Server Components read data, and Client Components are limited to the parts that need interaction, like forms and menus.
+
+Auth is Better-Auth with the Prisma adapter, so users, sessions and accounts live in your own database instead of a vendor's. Email and password sign-up runs through Zod validation, sessions live in the database with a remember-me option, and a password change revokes your other sessions. Protected routes are checked on the server and redirect before anything renders.
+
+Server actions go through a small procedure client. There's a public procedure and a protected one, and the protected one injects the session before your action runs. It's the idea behind tRPC middleware without pulling tRPC in.
+
+```ts lib/safe-action.ts
+export const protectedProcedure = actionClient.use(async ({ next }) => {
+  const session = await getSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized: You must be logged in to perform this action");
+  }
+  return next({ ctx: { user: session.user, session } });
+});
+```
+
+Prisma 7 runs through the pg driver adapter, which means there's no Rust query engine to ship. The client is generated into the repo and cached on the global object in development so hot reload doesn't open a new connection on every save.
+
+One GitHub Action applies migrations when they merge to main. That's the whole pipeline today.
+
+## What shipped
+
+- Email and password auth with database sessions and email-change support.
+- A protected profile: update your name and email, or change your password.
+- Route guards for the profile page and the auth pages.
+- A responsive header with a mobile sheet menu.
+- An animated hero built with Motion.
+- shadcn/ui components on a Tailwind 4 CSS-first token setup.
+- pnpm and TypeScript in strict mode.
+
+## Engineering highlights
+
+### Owning the auth data
+
+Keeping users and sessions in your own Postgres is more wiring than calling a hosted auth service, and it means no vendor holds the accounts. It also gives you the tables when you need them, for migrations, backfills, or a query you didn't plan for.
+
+### A procedure client before the first action
+
+It's unusual to build the server-action layer before writing an action that uses it. The bet was that a typed, session-aware procedure is infrastructure, not a feature, and that it's better to decide its shape once. The honest part: the layer still has no consumers.
+
+### Prisma without the engine
+
+The driver adapter and the new client generator drop the engine binary, so the deployment is smaller and the connection goes through a standard pg pool. Fewer moving parts, and a setup most templates hadn't adopted yet.
+
+### Design tokens in CSS
+
+Tailwind 4 moves configuration into CSS. The design tokens, including the full light and dark oklch set, live in one file with `@theme inline`, and components.json pins the registry, so the UI primitives are owned in the repo rather than imported from a black box.
+
+## What I'd do differently
+
+Ship infrastructure with a real consumer. An abstraction with no caller is a guess, and this one still has none.
+
+Make CI prove the build, not just apply migrations.

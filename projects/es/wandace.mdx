@@ -1,0 +1,74 @@
+---
+title: "Wandace"
+tagline: "Una plataforma de retail que mantiene sincronizado el stock online, en tienda y en marketplaces."
+description: "Wandace es una plataforma de retail multicanal para pymes de Latinoamérica: tiendas online, app de punto de venta, inventario, pedidos y sincronización con marketplaces."
+role: "Cofundador y responsable técnico"
+timeline: "De septiembre de 2023 a febrero de 2026"
+context: "Wandace UG"
+statusLabel: "En producción"
+highlights:
+  - "Un catálogo empujado a cinco canales de venta a través de un servicio de integraciones por eventos"
+  - "Dos pasarelas de pago, Stripe y Kushki, tras un único modelo de pedido"
+  - "Precios por mercado y soporte multidivisa para el retail transfronterizo de LATAM"
+  - "Una tienda online instantánea por comercio, resuelta por subdominio"
+  - "Totales con desglose de impuestos explícito y normalización de decimales"
+  - "Credenciales de integración cifradas, descifradas solo cuando una llamada las necesita"
+updatedAt: "2026-06-17"
+slug: "wandace"
+---
+
+## El punto de partida
+
+Un comercio pequeño en Latinoamérica suele funcionar con un cuaderno, una hoja de cálculo y un puñado de apps que no se hablan entre sí. El stock vive en un sitio, los pedidos en otro, y en cuanto el vendedor publica el mismo producto en Instagram y en la tienda física, los números se desajustan. Wandace lo mete todo en un sistema: un catálogo, una app de punto de venta para el mostrador, una tienda online lista en minutos y conexiones que empujan los productos a canales como WhatsApp, Meta, Google, WooCommerce y Mailchimp.
+
+Fui cofundador y llevé la parte de software con otra ingeniera full-stack, al lado del CEO. Dejé la empresa a principios de 2026 y el producto sigue funcionando.
+
+## Cómo funciona
+
+Wandace son seis aplicaciones. El núcleo es una API GraphQL en NestJS con Postgres y TypeORM. Un servicio de addons se encarga de todo lo que sale del sistema. El panel del comercio y la app de punto de venta hablan con la API por GraphQL, las tiendas públicas son una app de Next.js más nueva que se fue a tRPC, y la web de marketing es otra app de Next.js.
+
+Las integraciones viven en su propio servicio por una razón simple: los marketplaces son lentos y fallan. Cuando cambia un producto, la API emite un evento y sigue a lo suyo. El servicio de addons lo recoge, traduce la forma interna a lo que espera cada canal y reintenta a su ritmo. RabbitMQ se sienta en medio, así que un marketplace que va mal por la mañana nunca frena una venta en el mostrador.
+
+Los pagos siguen la misma idea. Las suscripciones van por Stripe. En el checkout, tarjeta, efectivo y transferencia van por Kushki, que cubre los métodos que la gente usa de verdad en la región. Ambos alimentan un único registro de pago. Los webhooks de Kushki se verifican con una firma HMAC y una comprobación de origen, y luego se encolan en lugar de procesarse en línea.
+
+Los precios son por mercado. Un mismo producto puede llevar un precio y una moneda distintos según la tienda y el canal, que es lo que necesita la venta transfronteriza.
+
+## Lo que hay
+
+- Un catálogo con variantes, atributos, categorías, marcas e imágenes.
+- Inventario con traspasos, reposiciones y envíos de proveedores.
+- Una app de punto de venta con cajas y turnos.
+- Pedidos, con devoluciones, reembolsos, vales, envíos e impuestos.
+- Tiendas online, una por comercio, servidas en un subdominio.
+- Conexiones con WooCommerce, Meta, Google Merchant Center, Mailchimp y WhatsApp Business.
+- Texto de catálogo asistido por IA: descripciones, metadatos SEO, slugs y traducción, con salida JSON estructurada.
+
+## Detalles de ingeniería
+
+### Una capa que aísla las integraciones
+
+El gestor de addons traduce productos, categorías, atributos y clientes internos a un DTO distinto por canal, y luego emite un evento que consume la integración correspondiente. Añadir un canal es añadir un traductor, no tocar el catálogo. Es la pieza que evita que cinco plataformas externas metan sus manías en el núcleo.
+
+### Dos pasarelas, un pedido
+
+Stripe gestiona suscripciones y cuentas conectadas; Kushki, los métodos locales. Un pedido guarda un solo registro de pago, llegue el dinero por tarjeta, efectivo o transferencia, y el manejo asíncrono de los webhooks mantiene el checkout rápido. El precio es la consistencia eventual: un pago puede tardar un momento en aparecer como completado.
+
+### Precios por mercado
+
+Un registro de precios por mercado permite que un producto lleve precios y monedas distintos por tienda y canal. La venta transfronteriza lo necesita, y también es la razón de que los precios se lean con un join y no de una columna.
+
+### Totales que cuadran
+
+Los totales del pedido se guardan como subtotales, descuentos e impuestos con dos a cuatro decimales, y los decimales vuelven del driver como texto, que es una fuente clásica de errores silenciosos de dinero. El código los normaliza al cargar y convierte a céntimos solo en los bordes.
+
+### Credenciales cifradas
+
+Cada integración guarda sus claves y tokens cifrados con AES antes de tocar la base de datos, y se descifran solo cuando una petición los necesita. La clave y el IV vienen del entorno; nada sensible se guarda en texto plano.
+
+## Qué haría distinto
+
+Quedarme con un solo estilo de API. GraphQL, tRPC y REST en un mismo conjunto funciona, pero son tres cosas que aprender, documentar y tener en la cabeza.
+
+Invertir antes en tests y observabilidad en los caminos que tocan dinero. Pedidos y pagos son donde más duele un error.
+
+Tratar la seguridad del borde como parte del diseño desde el principio: autenticación entre servicios, límite de peticiones y un modelo de confianza para los webhooks que no dependa de una cabecera.

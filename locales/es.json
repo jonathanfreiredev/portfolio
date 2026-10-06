@@ -1,10 +1,11 @@
 {
   "metadata": {
-    "siteTitle": "Jonathan Freire — Freelance Product Engineer & Desarrollador Full-Stack",
-    "siteDescription": "Freelance Digital Product Engineer. Ayudo a startups y scale-ups a construir plataformas web, integraciones de IA y landing pages. De la estrategia al producto final."
+    "siteTitle": "Jonathan Freire · AI Engineer · Software Engineer",
+    "siteDescription": "Ingeniero de IA e ingeniero de software en Berlín. Construyo aplicaciones LLM de producción: RAG, agentes e integraciones MCP, con TypeScript y Python."
   },
   "nav": {
     "home": "Inicio",
+    "projects": "Proyectos",
     "blog": "Blog",
     "contact": "Contacto",
     "openMenu": "Abrir menú",
@@ -18,12 +19,37 @@
   },
   "blog": {
     "title": "Blog",
-    "description": "Reflexiones sobre arquitectura de producto, ingeniería full-stack e IA aplicada.",
+    "description": "Reflexiones sobre ingeniería de IA, aplicaciones LLM de producción y arquitectura de software.",
     "empty": "Todavía no hay artículos",
     "emptyDescription": "Añade tu primer artículo en {folder} para publicarlo aquí.",
     "readingTime": "min de lectura",
     "postNotFoundTitle": "Artículo no encontrado",
     "postNotFoundDescription": "El artículo solicitado no existe."
+  },
+  "projects": {
+    "hubTitle": "Proyectos",
+    "hubDescription": "Casos de estudio de productos que he diseñado, construido y lanzado. La arquitectura, las decisiones detrás y qué haría distinto.",
+    "allProjects": "Todos los proyectos",
+    "highlights": "Aspectos clave",
+    "visitSite": "Ver la web",
+    "viewRepo": "Ver en GitHub",
+    "nextProject": "Siguiente proyecto",
+    "viewCase": "Ver caso de estudio",
+    "ctaText": "¿Estás construyendo algo parecido? Puedo ayudarte a definirlo.",
+    "startProject": "Empezar un proyecto",
+    "notFoundTitle": "Proyecto no encontrado",
+    "notFoundDescription": "El proyecto que buscas no existe.",
+    "status": {
+      "live": "En producción",
+      "open-source": "Código abierto",
+      "archived": "Archivado"
+    },
+    "meta": {
+      "role": "Rol",
+      "timeline": "Periodo",
+      "for": "Para",
+      "status": "Estado"
+    }
   },
   "tableOfContents": {
     "title": "Contenidos"
@@ -44,9 +70,9 @@
   },
   "home": {
     "hero": {
-      "title": "Digital Product Engineer",
-      "subTagline": "Estrategia. Tecnología. Inteligencia.",
-      "tagline": "Claro desde el primer día. Construido para crecer.",
+      "title": "AI Engineer",
+      "subTagline": "Inteligencia. Ingeniería. Producción.",
+      "tagline": "Sistemas inteligentes, listos para producción.",
       "ctaPrimary": "Empezar proyecto",
       "ctaSecondary": "Servicios",
       "responseTimeLabel": "tiempo de respuesta",
@@ -56,35 +82,35 @@
     },
     "aboutIntro": {
       "badge": "Quién soy",
-      "text": "Ayudo a empresas ambiciosas a convertir ideas y retos de negocio en productos digitales claros, inteligentes y construidos para crecer. No soy una agencia ni una consultora de desarrollo. Soy un único punto de pensamiento y ejecución.",
+      "text": "Soy ingeniero de IA e ingeniero de software en Berlín. Construyo aplicaciones LLM que llegan a producción: RAG, agentes con uso de herramientas e integraciones MCP, con evaluación, trazabilidad y control de costes. Trabajas directamente conmigo, de la primera llamada a producción.",
       "button1": "Proyectos",
       "button2": "Servicios"
     },
     "projects": {
       "title": "Proyectos",
-      "text": "Casos de estudio que recorren mi enfoque y su impacto.",
+      "text": "Productos que he construido y lanzado. Cada tarjeta abre un caso de estudio completo.",
       "items": {
         "mantel-azul": {
           "title": "Mantel Azul · Asistente de cocina con IA",
-          "description": "Una plataforma social de cocina donde la IA convierte cualquier foto en una receta, construida full stack, desde integraciones de visión por computador hasta compartición en tiempo real y generación de imágenes."
+          "description": "Una app de recetas multilingüe con un asistente de cocina con IA. Convierte una foto o una tarjeta escrita a mano en una receta, busca por significado en tu propia colección y planifica la semana en familia."
         },
         "wandace": {
-          "title": "Wandace · Plataforma de comercio unificado",
-          "description": "Un SaaS de comercio completo para retail, construido desde cero. Asumí la arquitectura de principio a fin, desde el diseño de la base de datos hasta la infraestructura en la nube, los pagos y las integraciones de marketing."
+          "title": "Wandace · Plataforma de retail multicanal",
+          "description": "Una plataforma de retail para pequeños comercios de Latinoamérica: tiendas online, app de punto de venta, inventario, pedidos y sincronización de catálogo con marketplaces y canales de mensajería."
         },
         "modern-nextjs-stack": {
           "title": "Modern Next.js Stack · Boilerplate de código abierto",
-          "description": "Un starter de Next.js listo para producción con autenticación, base de datos type-safe y una interfaz pulida desde el primer momento, sin configuración adicional."
+          "description": "Un starter de Next.js listo para producción con autenticación, base de datos type-safe y una interfaz pulida desde el primer momento, para que te saltes la semana de configuración."
         },
         "foodie": {
           "title": "Foodie · Plataforma de menús digitales",
-          "description": "Los restaurantes suben una foto o un PDF de su carta física y la IA la convierte en una experiencia digital totalmente personalizada, con pedidos y pago en la mesa."
+          "description": "Los restaurantes suben una foto o un PDF de su carta y la IA la convierte en un menú digital con pedidos por QR y pago en la mesa."
         }
       }
     },
     "moreAboutMe": {
       "badge": "Más sobre mí",
-      "text": "Ubicado en Berlín, trabajo de forma independiente con fundadores y equipos que necesitan algo más que ejecución. Estrategia, ingeniería full-stack e integración de IA, sin la capa de agencia de por medio.",
+      "text": "Ubicado en Berlín, trabajo de forma independiente con fundadores y equipos. IA aplicada e ingeniería de software, sin ninguna capa de agencia entre tú y el código.",
       "button1": "Sobre mí",
       "button2": "Proyectos",
       "videoBadge": "2026",
@@ -100,42 +126,42 @@
     },
     "services": {
       "title": "Servicios",
-      "text": "Trabajo en estrategia, diseño de producto, ingeniería full-stack e integraciones de IA.",
+      "text": "Trabajo en IA aplicada, ingeniería de software, arquitectura de producto y estrategia.",
       "items": {
         "0": {
+          "title": "Ingeniería de IA",
+          "listItem1": "Aplicaciones LLM",
+          "listItem2": "RAG y agentes",
+          "listItem3": "MCP y uso de herramientas",
+          "text": "Aplicaciones LLM de producción: RAG, agentes con uso de herramientas e integraciones MCP, con evaluación, trazabilidad y control de costes. IA que funciona en producción, no una demo."
+        },
+        "1": {
+          "title": "Ingeniería de software",
+          "listItem1": "TypeScript · Python",
+          "listItem2": "Servicios en la nube",
+          "listItem3": "Integración de servicios",
+          "text": "Plataformas web con frontend, backend, APIs y base de datos pensados para crecer juntos desde el primer día. Las nuevas funcionalidades encajan en la estructura en lugar de pelearse con ella."
+        },
+        "2": {
           "title": "Arquitectura de producto",
           "listItem1": "Arquitectura de la información",
           "listItem2": "Flujos de usuario",
           "listItem3": "Bases técnicas",
-          "text": "Convertir una idea en un sistema claro y construible. Dando forma al producto, definiendo cómo se conectan las piezas y las decisiones técnicas que marcarán el código durante años."
-        },
-        "1": {
-          "title": "Ingeniería Full-Stack",
-          "listItem1": "TypeScript · Python",
-          "listItem2": "Servicios en la nube",
-          "listItem3": "Integración de servicios",
-          "text": "Plataformas web construidas para escalar, no para reconstruirse. Frontend, backend, APIs y base de datos, todo pensado para crecer junto desde el primer día."
-        },
-        "2": {
-          "title": "Integración de IA",
-          "listItem1": "Integración de LLM",
-          "listItem2": "Flujos de trabajo inteligentes",
-          "listItem3": "IA aplicada",
-          "text": "Aplicada donde genera un valor medible para el producto, no como tendencia, sino como una palanca que lo hace realmente más inteligente."
+          "text": "Convertir una idea en un sistema claro y construible. Definimos qué es el producto, cómo se conectan las piezas y las decisiones técnicas con las que vivirá el código."
         },
         "3": {
+          "title": "Estrategia de IA",
+          "listItem1": "Dónde aporta valor la IA",
+          "listItem2": "Secuenciación del desarrollo",
+          "listItem3": "Alineación de equipos",
+          "text": "Antes de escribir código, definimos dónde aporta valor real la IA y qué merece la pena construir primero. Después secuenciamos el trabajo y hacemos que producto, diseño e ingeniería tiren en la misma dirección."
+        },
+        "4": {
           "title": "Landing pages",
           "listItem1": "Framer o código a medida",
           "listItem2": "Diseño responsive",
           "listItem3": "Carga rápida",
-          "text": "Webs de marketing y landing pages diseñadas para convertir y pensadas para durar. El mismo enfoque de producto que aplico a las plataformas, llevado a la primera impresión."
-        },
-        "4": {
-          "title": "Estrategia digital",
-          "listItem1": "Replantear el problema",
-          "listItem2": "Secuenciación del desarrollo",
-          "listItem3": "Alineación de equipos",
-          "text": "Antes de escribir código, definir qué es lo correcto que construir. Replanteando la oportunidad, secuenciando el trabajo y alineando producto, diseño e ingeniería en torno a una dirección común."
+          "text": "Webs de marketing y landing pages que cargan rápido y convierten. La misma forma de pensar el producto que aplico a las plataformas, llevada a la primera impresión."
         }
       },
       "infoCard": {
@@ -145,7 +171,7 @@
     },
     "workflow": {
       "title": "Flujo",
-      "text": "Proceso para convertir ideas en soluciones reales y funcionales que ofrecen resultados excelentes.",
+      "text": "Cómo una idea se convierte en un producto que funciona, paso a paso.",
       "processLabel": "Proceso:",
       "processValue": "4 pasos",
       "durationLabel": "Duración:",
@@ -153,7 +179,7 @@
       "steps": {
         "0": {
           "title": "Descubrir",
-          "text": "Antes de proponer nada, me tomo el tiempo necesario para entender qué es lo que realmente quieres resolver."
+          "text": "Antes de proponer nada, me tomo el tiempo de entender qué quieres resolver de verdad."
         },
         "1": {
           "title": "Diseñar",
@@ -165,7 +191,7 @@
         },
         "3": {
           "title": "Lanzar",
-          "text": "Publico, superviso y me mantengo cerca después del lanzamiento para asegurarme de que todo funciona como debe."
+          "text": "Publico, superviso y me mantengo cerca después del lanzamiento, para detectar cualquier problema pronto."
         }
       }
     },
@@ -208,13 +234,13 @@
       "badge": "FAQ",
       "infoCard": {
         "title": "¿No encuentras respuestas?",
-        "text": "Escríbeme cuando quieras. Estaré encantado de resolver cualquier duda antes de que decidas trabajar conmigo.",
+        "text": "Escríbeme cuando quieras. Pregúntame lo que necesites antes de decidir si trabajamos juntos.",
         "button": "Contactar"
       },
       "questions": {
         "0": {
           "question": "¿Cuánto cuesta normalmente un proyecto?",
-          "answer": "Cada proyecto se dimensiona según el trabajo real, no según las horas. Después de una primera conversación, envío una propuesta cerrada con un entregable, un plazo y un precio claros. Sin tarifas fijas mensuales, sin facturas abiertas, sin sorpresas una vez acordado el alcance."
+          "answer": "Cada proyecto se dimensiona según el trabajo real. Después de una primera conversación, envío una propuesta cerrada con un entregable, un plazo y un precio claros. El precio no se mueve una vez acordado el alcance."
         },
         "1": {
           "question": "¿Cuánto tiempo dura un proyecto?",
@@ -222,15 +248,15 @@
         },
         "2": {
           "question": "¿Cómo empieza un proyecto?",
-          "answer": "Reserva una llamada gratuita de 20 minutos, o envía una nota breve si prefieres escribir primero. Si parece un buen encaje, te respondo con una propuesta por escrito, sin ningún compromiso de continuar."
+          "answer": "Reserva una llamada gratuita de 20 minutos, o envía una nota breve si prefieres escribir primero. Si parece un buen encaje, te respondo con una propuesta por escrito, y decides tú."
         },
         "3": {
           "question": "¿Trabajas con mi código base, mi stack o mi equipo actual?",
-          "answer": "Sí. Trabajo dentro de lo que ya tienes: tu stack, tu sistema de diseño, el proceso de tu equipo, e integro con las personas implicadas. Si algo necesita reemplazarse o refactorizarse, lo señalo claramente antes de hacer ningún cambio."
+          "answer": "Sí. Trabajo dentro de lo que ya tienes: tu stack, tu sistema de diseño, el proceso de tu equipo. Si algo necesita reemplazarse o refactorizarse, lo digo antes de cambiar nada."
         },
         "4": {
           "question": "¿Y si solo tengo una idea poco definida?",
-          "answer": "Ahí es donde más valor aporto. Tener un brief claro ayuda, pero no es imprescindible: ayudo a dar forma a la idea y a definir qué merece realmente la pena construir antes de que te comprometas con nada."
+          "answer": "Tener un brief claro ayuda, pero no es imprescindible. Ayudo a dar forma a la idea y a definir qué merece la pena construir antes de que te comprometas con nada."
         },
         "5": {
           "question": "¿Debería empezar con un MVP o construir el producto completo?",
@@ -238,18 +264,19 @@
         },
         "6": {
           "question": "¿Qué pasa después del lanzamiento?",
-          "answer": "No desaparezco. La mayoría de los proyectos incluyen una ventana de soporte breve para correcciones y ajustes. Después de eso, cualquier trabajo continuado (nuevas funcionalidades, mantenimiento, optimización) se dimensiona y cotiza de forma individual, según lo que realmente necesites. Te vas con un sistema que es tuyo para gestionar, conmigo o sin mí."
+          "answer": "No desaparezco. La mayoría de los proyectos incluyen una ventana de soporte breve para correcciones y ajustes. Después de eso, el trabajo continuado, como nuevas funcionalidades o mantenimiento, se dimensiona y cotiza por separado. Te vas con un sistema que es tuyo, que puedes gestionar conmigo o sin mí."
         }
       }
     },
     "cta": {
       "badge": "Llamada inicial gratuita de 20 min",
       "title": "Cuéntame qué estás construyendo",
-      "text": "Trabaja con alguien que aporta claridad, cuidado y creatividad a cada proyecto.",
+      "text": "No hace falta que lo tengas todo claro para una primera llamada.",
       "button": "Reservar una llamada"
     },
     "footer": {
       "city": "Berlín, Alemania",
+      "projects": "Proyectos",
       "blog": "Blog",
       "contact": "Contacto",
       "services": "Servicios",
@@ -262,8 +289,8 @@
   },
   "contact": {
     "metadata": {
-      "title": "Contacto | Jonathan Freire",
-      "description": "Contacta con Jonathan Freire, Digital Product Engineer ubicado en Berlín. Reserva una llamada o envía un mensaje para hablar de tu próxima web app o proyecto de IA."
+      "title": "Contacto",
+      "description": "Contacta con Jonathan Freire, ingeniero de IA e ingeniero de software en Berlín. Reserva una llamada o envía un mensaje sobre tu próximo proyecto de IA o de software."
     },
     "header": {
       "title": "Contacto",

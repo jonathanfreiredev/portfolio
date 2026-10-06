@@ -1,5 +1,6 @@
 type SectionHeaderProps = {
   variant?: "default" | "small";
+  as?: "h1" | "h2";
   title: string;
   text: string;
   badge?: string;
@@ -7,6 +8,7 @@ type SectionHeaderProps = {
 
 export function SectionHeader({
   variant = "default",
+  as: Heading = "h2",
   title,
   text,
   badge,
@@ -20,7 +22,9 @@ export function SectionHeader({
               {badge}
             </span>
           ) : null}
-          <h2 className="text-h2 text-foreground uppercase">{title}</h2>
+          <Heading className="text-h2 text-foreground uppercase break-words max-w-full">
+            {title}
+          </Heading>
         </div>
       </div>
     );
@@ -28,8 +32,10 @@ export function SectionHeader({
 
   return (
     <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end md:gap-6">
-      <div className="flex w-full flex-col items-start gap-2 md:w-3/4 md:flex-row md:items-center md:gap-2">
-        <h2 className="text-display-l text-foreground">{title}</h2>
+      <div className="flex w-full min-w-0 flex-col items-start gap-2 md:w-3/4 md:flex-row md:items-center md:gap-2">
+        <Heading className="text-display-l text-foreground break-words max-w-full">
+          {title}
+        </Heading>
         {badge ? (
           <span className="text-tag text-foreground uppercase">{badge}</span>
         ) : null}

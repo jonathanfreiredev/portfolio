@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { SectionHeader } from "@/components/home/section-header";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
+import { SERVICE_COUNT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -20,8 +21,6 @@ const ShaderBackground = dynamic(
   () => import("../shader-background").then((mod) => mod.ShaderBackground),
   { ssr: false }
 );
-
-const SERVICE_COUNT = 5;
 
 function padIndex(n: number) {
   return String(n + 1).padStart(2, "0");
@@ -40,9 +39,9 @@ function ServiceRow({ index }: { index: number }) {
           <span className="text-tag-bold text-foreground uppercase">
             {padIndex(index)}
           </span>
-          <h4 className="sm:col-span-2 text-3xl md:text-4xl text-foreground uppercase">
+          <h3 className="sm:col-span-2 text-3xl md:text-4xl text-foreground uppercase">
             {t("title")}
-          </h4>
+          </h3>
         </div>
       </AccordionTrigger>
       <AccordionContent className="text-base text-foreground pl-3 pr-7 pb-10">

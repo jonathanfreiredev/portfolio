@@ -6,6 +6,7 @@ import { Fragment } from "react";
 
 import { SectionHeader } from "@/components/home/section-header";
 import { Reveal } from "@/components/motion/reveal";
+import { WORKFLOW_STEP_COUNT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import type { RGB } from "../aurora-shader-background";
 import { Progress } from "../ui/progress";
@@ -18,7 +19,7 @@ const AuroraShaderBackground = dynamic(
   { ssr: false }
 );
 
-const STEP_COUNT = 4;
+const STEP_COUNT = WORKFLOW_STEP_COUNT;
 
 const STEP_TOP_PADDING = ["pt-5", "md:pt-28", "md:pt-50", "md:pt-72"] as const;
 

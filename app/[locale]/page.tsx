@@ -7,9 +7,12 @@ import { Cta } from "@/components/home/cta";
 import { Faq } from "@/components/faq";
 import { Hero } from "@/components/home/hero";
 import { MoreAboutMe } from "@/components/home/more-about-me";
-import { Pricing } from "@/components/home/pricing";
+// Pricing section temporarily removed from the page. The component is kept at
+// components/home/pricing.tsx. Re-enable this import and the <Pricing /> render below to restore it.
+// import { Pricing } from "@/components/home/pricing";
 import { Separator } from "@/components/ui/separator";
-import { buildAlternates } from "@/lib/seo";
+import { FAQ_COUNT } from "@/lib/constants";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 const Projects = dynamic(() =>
   import("@/components/home/projects").then((mod) => mod.Projects),
@@ -33,13 +36,13 @@ export async function generateMetadata({
   return {
     title: t("siteTitle"),
     description: t("siteDescription"),
-    robots: { index: true, follow: true },
     alternates: buildAlternates("/", locale),
-    openGraph: {
+    openGraph: buildOpenGraph({
       title: t("siteTitle"),
       description: t("siteDescription"),
-      type: "website",
-    },
+      locale,
+      path: "/",
+    }),
   };
 }
 
@@ -51,7 +54,7 @@ export default async function Home({ params }: HomePageProps) {
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: Array.from({ length: 7 }).map((_, i) => ({
+    mainEntity: Array.from({ length: FAQ_COUNT }).map((_, i) => ({
       "@type": "Question",
       name: t(`${i}.question`),
       acceptedAnswer: {
@@ -78,7 +81,8 @@ export default async function Home({ params }: HomePageProps) {
         <Separator />
         <Workflow />
         <Separator />
-        <Pricing />
+        {/* Pricing section temporarily removed. Re-enable the import and this line to restore it. */}
+        {/* <Pricing /> */}
         <Faq />
         <Separator />
         <Cta />

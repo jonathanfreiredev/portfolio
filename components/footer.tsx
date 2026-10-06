@@ -5,9 +5,10 @@ import { Separator } from "./ui/separator";
 import { LinkedInIcon } from "./linkedin-icon";
 
 const SECTION_LINKS = [
+  { href: "/projects", key: "projects" },
   { href: "/#services", key: "services" },
   { href: "/#workflow", key: "workflow" },
-  { href: "/#pricing", key: "pricing" },
+  // { href: "/#pricing", key: "pricing" }, // Pricing section temporarily removed.
   { href: "/blog", key: "blog" },
 ] as const;
 

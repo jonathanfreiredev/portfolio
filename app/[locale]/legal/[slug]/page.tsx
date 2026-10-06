@@ -3,6 +3,7 @@ import { routing } from "@/i18n/routing";
 import { getLegalBySlug, getLegalSlugs } from "@/lib/legal";
 import { mdxComponents } from "@/lib/mdx-components";
 import { remarkUnwrapImages } from "@/lib/mdx-plugins";
+import { buildAlternates, buildOpenGraph, siteUrl } from "@/lib/seo";
 import type { Metadata } from "next";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -37,17 +38,20 @@ export async function generateMetadata({
     return {
       title: t("metadata.notFoundTitle"),
       description: t("metadata.notFoundDescription"),
+      robots: { index: false, follow: false },
     };
   }
-  const t = await getTranslations({ locale, namespace: "legal" });
   return {
-    title: `${doc.title}${t("metadata.titleSuffix")}`,
+    title: doc.title,
     description: doc.description,
-    openGraph: {
+    alternates: buildAlternates(`/legal/${slug}`, locale),
+    openGraph: buildOpenGraph({
       title: doc.title,
       description: doc.description,
+      locale,
+      path: `/legal/${slug}`,
       type: "article",
-    },
+    }),
   };
 }
 
@@ -59,10 +63,25 @@ export default async function LegalPage({ params }: LegalPageProps) {
   const doc = await getLegalBySlug(slug, locale);
   if (!doc) notFound();
 
+  const legalUrl = `${siteUrl}${buildAlternates(`/legal/${slug}`, locale).canonical}`;
+  const homeUrl = `${siteUrl}${buildAlternates("/", locale).canonical}`;
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: homeUrl },
+      { "@type": "ListItem", position: 2, name: doc.title, item: legalUrl },
+    ],
+  };
+
   return (
     <main className="flex flex-col w-full items-center gap-20 pb-12 pt-20 max-w-380 md:gap-24 md:py-16 lg:gap-40 lg:pb-24 lg:py-32 px-5 md:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div id="projects" className="flex w-full flex-col gap-12 md:gap-24">
-        <SectionHeader title={doc.title} text={doc.description} />
+        <SectionHeader as="h1" title={doc.title} text={doc.description} />
 
         <article className="px-5 w-full pt-5 pb-10">
           <div className="mx-auto w-full">

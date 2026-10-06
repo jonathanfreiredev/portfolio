@@ -1,0 +1,69 @@
+---
+title: "Mantel Azul"
+tagline: "Recetas, planificación de comidas y un asistente de cocina que convierte la foto de un plato en algo que puedes cocinar."
+description: "Mantel Azul es una app de recetas con un asistente de cocina con IA: de foto a receta, búsqueda por significado en tu propia colección y planificación de comidas en familia."
+role: "Solo, diseño e ingeniería"
+timeline: "De julio a septiembre de 2026"
+context: "Proyecto propio"
+statusLabel: "En producción"
+highlights:
+  - "Una foto o una tarjeta escrita a mano se convierte en receta estructurada, con imagen de portada incluida"
+  - "Búsqueda anclada en tu propia colección, con un umbral que bloquea resultados inventados"
+  - "Una receta, tres idiomas, con la redacción original de quien la escribió"
+  - "Fracciones exactas en los ingredientes por paso, para que escalar raciones no descuadre nada"
+  - "Un calendario compartido en familia para planificar las comidas de la semana"
+  - "Cada turno del agente trazado con su coste, con OpenTelemetry y Langfuse"
+updatedAt: "2026-09-29"
+slug: "mantel-azul"
+---
+
+## El punto de partida
+
+La mayoría de las apps de recetas dan por hecho que empiezas con la página en blanco. Cocinar no funciona así. Encuentras un plato en un restaurante, le haces una captura, o te llega una tarjeta escrita a mano de un familiar, y la receta acaba repartida entre notas, fotos y memoria. Mantel Azul es un sitio para guardarlo todo: un catálogo público que puedes explorar y un asistente que convierte la foto de un plato o una tarjeta escrita a mano en algo que puedes cocinar de verdad.
+
+El proyecto es personal. Lo uso yo, y quería que las recetas se leyeran con naturalidad en inglés, español y alemán, y no como una interfaz traducida.
+
+## Cómo funciona
+
+Mantel Azul separa lo que es una receta de cómo se lee. La estructura vive una sola vez por receta: cantidades, unidades, tiempos, nutrición, raciones, imágenes. Las palabras viven en su propio registro, indexadas por idioma y por orden. Ese corte es lo que hace que las cantidades sigan cuadrando cuando cambias las raciones, y que un traductor no pueda cambiar sin querer cuánta harina necesita un paso.
+
+Cuando guardas una receta, el servidor la traduce a todos los idiomas en una sola llamada, restaura tu redacción original en el idioma en el que escribiste y rechaza cualquier traducción en la que no cuadre el número de ingredientes o de pasos.
+
+La búsqueda funciona con embeddings. Cada receta publicada se convierte en un documento, se vectoriza y se guarda en Chroma, mientras Postgres sigue siendo la fuente de verdad. Una pregunta como "algo rápido y vegano" se convierte en un vector y vuelven las recetas más cercanas. La búsqueda vectorial siempre tiene un vecino más cercano, aunque la respuesta correcta no esté en el catálogo, así que hay un umbral de similitud: 0,15 para peticiones abiertas y 0,45 cuando alguien nombra un plato concreto. Por debajo de eso, responde que no lo tiene en lugar de ofrecer algo parecido.
+
+El asistente es un agente con diez herramientas. Busca recetas, lee favoritos, lee y escribe tu plan de comidas, crea y actualiza recetas y genera una imagen de portada. Actualizar y borrar necesitan tu aprobación en el chat. Los resultados de las herramientas vuelven al modelo como resúmenes cortos mientras la interfaz pinta las tarjetas reales, así que el modelo nunca parafrasea datos que no puede ver.
+
+El coste importa aquí, porque un solo turno puede tocar varios modelos. Cada turno se registra en Langfuse a través de OpenTelemetry, las recetas que no cambian se saltan el vectorizado gracias a un hash del contenido, y el agente se detiene a los quince pasos.
+
+## Lo que hay
+
+- Explorar recetas por categoría, con una búsqueda que recorre todas las traducciones, así que "peruano" y "peruvian" encuentran lo mismo.
+- Registro por email con verificación, o con Google. Recuperar la contraseña o borrar la cuenta con todo lo que contiene.
+- Escribir una receta en un formulario por pasos: ingredientes, pasos, etiquetas, nutrición, tiempos, imágenes. Un paso puede usar parte de un ingrediente, como la mitad de los tomates, con fracciones exactas.
+- Dar me gusta, guardar recetas en recetarios y compartirlas.
+- Hablar con el asistente. Lee fotos y dictado, busca en tu colección y planifica comidas.
+- Crear un hogar, invitar a gente por email y compartir un calendario semanal con comidas que se reordenan arrastrando.
+
+## Detalles de ingeniería
+
+### Traducciones que no pueden corromper la receta
+
+Como los ingredientes y los pasos viven en dos sitios, solo uno de ellos es texto. Las cantidades, las unidades y el orden están en la estructura; la redacción está en el registro de traducción. Al guardar se reconstruyen las traducciones en una sola llamada y se comprueba la estructura, así que una traducción que pierde un ingrediente se rechaza antes de llegar a la base de datos.
+
+### Fracciones que cuadran
+
+Un paso puede usar parte de un ingrediente, guardado como fracción y no como decimal: `{ part, of }`. Sumar 1/3 y 2/3 da exactamente 1, no 0,999. Cuando reordenas la lista de ingredientes, las referencias de los pasos se recolocan por nombre, y las referencias a un ingrediente borrado se eliminan en lugar de apuntar en silencio al que no toca.
+
+### Un umbral de relevancia
+
+Un almacén vectorial siempre devuelve vecinos, y eso es un problema cuando pides un plato que no tienes. El umbral separa las peticiones abiertas de las concretas, y salió de medir la distancia: las coincidencias reales puntuaban entre 0,55 y 0,70, mientras que el vecino más cercano de un plato que faltaba se quedaba en 0,40 o menos. El "ver más" además pagina excluyendo los ids ya vistos, lo que mantiene la lista estable cuando cambia el catálogo.
+
+### Borrar una cuenta en cuatro sistemas
+
+Un borrado toca la base de datos, Cloudinary, el índice vectorial y las invitaciones pendientes. El flujo reasigna la propiedad del hogar, recalcula los me gusta de las recetas que sobreviven, elimina y desindexa las recetas sin publicar con sus imágenes, revoca las invitaciones pendientes y limpia los hogares vacíos. Es el tipo de operación que deja contadores huérfanos si no la planeas.
+
+## Qué haría distinto
+
+Escribir tests de la lógica que decide resultados: traducciones, ingredientes por paso, umbrales de búsqueda. Es donde un error queda escondido más tiempo.
+
+Tratar los prompts y los ajustes de recuperación como parte del producto, versionados y evaluados, no como constantes enterradas en el código.

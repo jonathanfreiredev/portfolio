@@ -1,10 +1,11 @@
 {
   "metadata": {
-    "siteTitle": "Jonathan Freire — Freelance Product Engineer & Full-Stack Developer",
-    "siteDescription": "Freelance Digital Product Engineer. I help startups and scale-ups build web platforms, AI integrations, and landing pages. From strategy to shipped product."
+    "siteTitle": "Jonathan Freire · AI Engineer · Software Engineer",
+    "siteDescription": "AI engineer and software engineer based in Berlin. I build production LLM applications: RAG, agents and MCP integrations, in TypeScript and Python."
   },
   "nav": {
     "home": "Home",
+    "projects": "Projects",
     "blog": "Blog",
     "contact": "Contact",
     "openMenu": "Open menu",
@@ -18,12 +19,37 @@
   },
   "blog": {
     "title": "Blog",
-    "description": "Thoughts on product architecture, full-stack engineering, and applied AI.",
+    "description": "Thoughts on AI engineering, production LLM applications and software architecture.",
     "empty": "No posts yet",
     "emptyDescription": "Add your first post in {folder} to publish it here.",
     "readingTime": "min read",
     "postNotFoundTitle": "Post not found",
     "postNotFoundDescription": "The requested article does not exist."
+  },
+  "projects": {
+    "hubTitle": "Projects",
+    "hubDescription": "Case studies from products I've designed, built and shipped. The architecture, the decisions behind it, and what I'd do differently.",
+    "allProjects": "All projects",
+    "highlights": "Highlights",
+    "visitSite": "Visit the site",
+    "viewRepo": "View on GitHub",
+    "nextProject": "Next project",
+    "viewCase": "View case study",
+    "ctaText": "Building something similar? I can help you scope it.",
+    "startProject": "Start a project",
+    "notFoundTitle": "Project not found",
+    "notFoundDescription": "The project you're looking for doesn't exist.",
+    "status": {
+      "live": "Live",
+      "open-source": "Open source",
+      "archived": "Archived"
+    },
+    "meta": {
+      "role": "Role",
+      "timeline": "Timeline",
+      "for": "For",
+      "status": "Status"
+    }
   },
   "tableOfContents": {
     "title": "Contents"
@@ -44,9 +70,9 @@
   },
   "home": {
     "hero": {
-      "title": "Digital Product Engineer",
-      "subTagline": "Strategy. Technology. Intelligence.",
-      "tagline": "Clear from day one. Built to grow.",
+      "title": "AI Engineer",
+      "subTagline": "Intelligence. Engineering. Production.",
+      "tagline": "Intelligent systems, built to ship.",
       "ctaPrimary": "Start project",
       "ctaSecondary": "Services",
       "responseTimeLabel": "response time",
@@ -56,35 +82,35 @@
     },
     "aboutIntro": {
       "badge": "Who I am",
-      "text": "I help ambitious companies turn ideas and business challenges into digital products that are clear, intelligent and built to grow. Not a dev shop. Not an agency. A single point of thinking and execution.",
+      "text": "I am an AI engineer and software engineer based in Berlin. I build LLM applications that ship: RAG, tool-calling agents and MCP integrations, with evaluation, tracing and cost under control. You work with me directly, from the first call to production.",
       "button1": "Works",
       "button2": "Services"
     },
     "projects": {
       "title": "Projects",
-      "text": "Case studies that walk through my approach and impact.",
+      "text": "Products I've built and shipped. Each card opens a full case study.",
       "items": {
         "mantel-azul": {
           "title": "Mantel Azul · AI Cooking Assistant",
-          "description": "A social cooking platform where AI turns any photo into a recipe — built full stack, from computer vision integrations to real-time sharing and image generation."
+          "description": "A multilingual recipe app with an AI cooking assistant. Turn a photo or a handwritten card into a recipe, search your own collection by meaning, and plan the week with your household."
         },
         "wandace": {
-          "title": "Wandace · Unified Commerce Platform",
-          "description": "A full-featured commerce SaaS for retail, built from scratch — I owned the architecture end-to-end, from database design to cloud infrastructure, payments, and marketing integrations."
+          "title": "Wandace · Multi-channel Retail Platform",
+          "description": "A retail platform for small merchants in Latin America: online stores, a point-of-sale app, inventory, orders, and catalog sync to marketplaces and messaging channels."
         },
         "modern-nextjs-stack": {
           "title": "Modern Next.js Stack · Open Source Boilerplate",
-          "description": "A production-ready Next.js starter with auth, type-safe DB, and a polished UI out of the box — zero setup overhead."
+          "description": "A production-ready Next.js starter with auth, a type-safe database, and a polished UI out of the box, so you skip the setup week."
         },
         "foodie": {
           "title": "Foodie · Digital Menu Platform",
-          "description": "Restaurants upload a photo or PDF of their physical menu — AI parses it into a fully branded digital experience with ordering and payment at the table."
+          "description": "Restaurants upload a photo or PDF of their menu and AI turns it into a digital menu with QR ordering and payment at the table."
         }
       }
     },
     "moreAboutMe": {
       "badge": "More about me",
-      "text": "Based in Berlin, I work independently with founders and teams who need more than execution. Strategy, full-stack engineering and AI integration, without the agency layer in between.",
+      "text": "Based in Berlin, I work independently with founders and teams. Applied AI and software engineering, with no account manager between you and the code.",
       "button1": "About me",
       "button2": "Works",
       "videoBadge": "2026",
@@ -100,42 +126,42 @@
     },
     "services": {
       "title": "Services",
-      "text": "I work across strategy, product design, full-stack engineering, and AI integrations.",
+      "text": "I work across applied AI, software engineering, product architecture and strategy.",
       "items": {
         "0": {
+          "title": "AI Engineering",
+          "listItem1": "LLM applications",
+          "listItem2": "RAG & agents",
+          "listItem3": "MCP & tool calling",
+          "text": "Production LLM applications: RAG, tool-calling agents and MCP integrations, with evaluation, tracing and cost under control. AI that runs in production, not a demo."
+        },
+        "1": {
+          "title": "Software Engineering",
+          "listItem1": "TypeScript · Python",
+          "listItem2": "Cloud services",
+          "listItem3": "Service integrations",
+          "text": "Web platforms with frontend, backend, APIs and database designed to grow together from day one. New features fit the structure instead of fighting it."
+        },
+        "2": {
           "title": "Product Architecture",
           "listItem1": "Information architecture",
           "listItem2": "User flows",
           "listItem3": "Tech foundations",
-          "text": "Turning an idea into a clear, buildable system. Shaping the product, defining how the pieces connect, and the technical decisions that will define the codebase for years to come."
-        },
-        "1": {
-          "title": "Full-Stack Engineering",
-          "listItem1": "TypeScript · Python",
-          "listItem2": "Cloud services",
-          "listItem3": "Service integrations",
-          "text": "Web platforms built to scale, not to be rebuilt. Frontend, backend, APIs and database, all designed to grow together from day one."
-        },
-        "2": {
-          "title": "AI Integration",
-          "listItem1": "LLM integration",
-          "listItem2": "Intelligent workflows",
-          "listItem3": "Applied AI",
-          "text": "Applied where it creates measurable product value — not as a trend, but as a lever that makes the product genuinely smarter."
+          "text": "Turning an idea into a clear, buildable system. We define what the product is, how the pieces connect, and the technical choices the codebase will live with."
         },
         "3": {
+          "title": "AI Strategy",
+          "listItem1": "Where AI creates value",
+          "listItem2": "Build sequencing",
+          "listItem3": "Team alignment",
+          "text": "Before any code, we define where AI actually pays off and what's worth building first. Then we sequence the work and get product, design and engineering pulling in the same direction."
+        },
+        "4": {
           "title": "Landing Pages",
           "listItem1": "Framer or custom code",
           "listItem2": "Responsive build",
           "listItem3": "Fast loading",
-          "text": "Marketing sites and landing pages built to convert and designed to last. The same product thinking I bring to platforms, applied to the first impression."
-        },
-        "4": {
-          "title": "Digital Strategy",
-          "listItem1": "Problem reframing",
-          "listItem2": "Build sequencing",
-          "listItem3": "Team alignment",
-          "text": "Before any code, defining what the right thing to build is. Reframing the opportunity, sequencing the work, and aligning product, design and engineering around a shared direction."
+          "text": "Marketing sites and landing pages that load fast and convert. The same product thinking I bring to platforms, applied to the first impression."
         }
       },
       "infoCard": {
@@ -145,7 +171,7 @@
     },
     "workflow": {
       "title": "Flow",
-      "text": "Process for turning ideas into real, working solutions that deliver amazing results.",
+      "text": "How an idea becomes a working product, step by step.",
       "processLabel": "Process:",
       "processValue": "4 steps",
       "durationLabel": "Duration:",
@@ -165,7 +191,7 @@
         },
         "3": {
           "title": "Launch",
-          "text": "I ship, monitor, and stay close after launch to make sure everything lands right."
+          "text": "I ship, monitor, and stay close after launch, so problems get caught early."
         }
       }
     },
@@ -177,7 +203,7 @@
       "items": {
         "0": {
           "title": "Custom Software & AI",
-          "text": "Admin panels, platforms, API integrations, and AI-powered automation, scoped to what the project actually needs.",
+          "text": "Admin panels, platforms, API integrations, and AI automation, scoped to what the project actually needs.",
           "price": "5000",
           "pricePreffix": "from",
           "priceSuffix": "/project · 6-12 weeks",
@@ -208,13 +234,13 @@
       "badge": "FAQ",
       "infoCard": {
         "title": "Not finding answers?",
-        "text": "Reach out anytime. I'm happy to answer any questions before you commit to working together.",
+        "text": "Reach out anytime. Ask me anything before you decide to work together.",
         "button": "Contact me"
       },
       "questions": {
         "0": {
           "question": "What does a project typically cost?",
-          "answer": "Every project is scoped to the actual work, not the hours. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. No retainers, no open-ended invoices, no surprises once the scope is agreed."
+          "answer": "Every project is scoped to the actual work. After a first conversation I send a fixed proposal with a clear deliverable, timeline and price. The price doesn't move once we agree the scope."
         },
         "1": {
           "question": "How long does a project take?",
@@ -222,15 +248,15 @@
         },
         "2": {
           "question": "How does a project get started?",
-          "answer": "Book a free 20-minute call, or send a short note if you'd rather write first. If it looks like a fit, I follow up with a written proposal — no obligation to move forward."
+          "answer": "Book a free 20-minute call, or send a short note if you'd rather write first. If it looks like a fit, I follow up with a written proposal, and you decide from there."
         },
         "3": {
           "question": "Do you work with my existing codebase, stack or team?",
-          "answer": "Yes. I work inside what you already have — your stack, your design system, your team's process — and integrate with the people involved. If something needs to be replaced or refactored, I flag it clearly before any change."
+          "answer": "Yes. I work inside what you already have: your stack, your design system, your team's process. If something needs to be replaced or refactored, I say so before changing anything."
         },
         "4": {
           "question": "What if I only have a rough idea?",
-          "answer": "That's where I add the most value. A clear brief helps, but it isn't required — I help shape the idea and define what's actually worth building before you commit to anything."
+          "answer": "A clear brief helps, but it isn't required. I help shape the idea and define what's worth building before you commit to anything."
         },
         "5": {
           "question": "Should I start with an MVP or build the full product?",
@@ -238,18 +264,19 @@
         },
         "6": {
           "question": "What happens after launch?",
-          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, any ongoing work — new features, maintenance, optimization — is scoped and priced individually, based on what you actually need. You leave with a system that's yours to run, with or without me."
+          "answer": "I don't disappear. Most projects include a short support window for fixes and adjustments. After that, ongoing work like new features or maintenance is scoped and priced individually. You leave with a system that's yours to run, with or without me."
         }
       }
     },
     "cta": {
       "badge": "Free 20-min intro call",
       "title": "Tell me what you're building",
-      "text": "Work with someone that brings clarity, care, and creativity to every project.",
+      "text": "You don't need it all figured out for a first call.",
       "button": "Book a call"
     },
     "footer": {
       "city": "Berlin, Germany",
+      "projects": "Projects",
       "blog": "Blog",
       "contact": "Contact",
       "services": "Services",
@@ -262,8 +289,8 @@
   },
   "contact": {
     "metadata": {
-      "title": "Contact | Jonathan Freire",
-      "description": "Contact Jonathan Freire, Digital Product Engineer based in Berlin. Book a call or send a message to talk about your next web app or AI project."
+      "title": "Contact",
+      "description": "Contact Jonathan Freire, AI engineer and software engineer based in Berlin. Book a call or send a message about your next AI or software project."
     },
     "header": {
       "title": "Contact",

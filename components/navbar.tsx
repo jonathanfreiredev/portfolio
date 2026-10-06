@@ -17,16 +17,18 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
+  { href: "/projects", key: "projects" },
   { href: "/blog", key: "blog" },
   { href: "/contact", key: "contact" },
 ] as const;
 
 const SHEET_ITEMS = [
   { href: "/", key: "home" },
+  { href: "/projects", key: "projects" },
 
   { href: "/#services", key: "services" },
   { href: "/#workflow", key: "workflow" },
-  { href: "/#pricing", key: "pricing" },
+  // { href: "/#pricing", key: "pricing" }, // Pricing section temporarily removed.
 
   { href: "/blog", key: "blog" },
   { href: "/contact", key: "contact" },
@@ -52,6 +54,7 @@ export function Navbar() {
 
   const labelFor = (key: string) => {
     if (key === "home") return t("home");
+    if (key === "projects") return t("projects");
     if (key === "blog") return t("blog");
     if (key === "contact") return t("contact");
     if (key === "services") return tFooter("services");

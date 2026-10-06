@@ -1,0 +1,72 @@
+---
+title: "Foodie"
+tagline: "Restaurants turn a photo of their menu into a QR ordering experience."
+description: "Foodie is a multi-tenant platform that turns a restaurant's menu into QR-code ordering, with AI menu generation and kitchen printing."
+role: "Full-stack engineering"
+timeline: "About a year, 2022 to 2023"
+context: "Jatidevelopments"
+statusLabel: "Archived"
+highlights:
+  - "A complete menu generated from a photo or a PDF, dish images included"
+  - "Menus written once and served in twenty-seven languages"
+  - "From the table QR to the kitchen printer, with idempotent print jobs"
+  - "Stripe Connect payments with tips, settling into the restaurant's account"
+  - "Product options that carry their own price, and cart lines that keep theirs"
+  - "A multi-tenant model: one workspace, many venues"
+updatedAt: "2023-12-11"
+slug: "foodie"
+---
+
+## The brief
+
+A restaurant that wants a digital menu usually has two options: pay a monthly fee and type every item in by hand, or live with a PDF nobody can order from. Foodie took a third path. Upload a photo or a PDF of the printed menu, and the platform reads it, builds the categories and products, writes a description and generates an image for each dish, then serves the result as a QR menu guests can order from at the table.
+
+The first market was Germany, but the guests are often tourists, so the menu had to work in many languages from the start. I worked on the product across the stack with a small team.
+
+## How it works
+
+The whole product is one Next.js app. The customer side and the restaurant admin share the codebase, and the API layer is tRPC, so types flow from the database to the browser without a schema written twice.
+
+When a menu is uploaded, the request returns right away and a worker takes over. The worker runs OCR on the images or pulls text out of the PDF, sends the raw text to GPT with a function schema, and gets back categories and products with prices. Then it generates an image per dish, uploads everything to S3, and writes to Postgres in batches of twenty. Dozens of AI calls are involved, so the batching and the retries are the difference between a feature and a support ticket.
+
+Translation is part of the data model. Every string points at a translation group, and a new menu item is translated into twenty-seven languages when it's created. Reads stay cheap. The write is slow and expensive, and that's the trade-off I'd revisit.
+
+Ordering closes the loop. A guest scans the table QR, gets a session cookie, builds a cart and pays. For card payments the server creates a Stripe invoice and a payment intent on the restaurant's connected account. When checkout completes, the order is confirmed, a receipt goes to the kitchen printer through PrintNode, and an invoice lands in the guest's inbox.
+
+## What shipped
+
+- QR menus per table, with a session per guest.
+- Menus in twenty-seven languages, written automatically.
+- AI menu generation from a photo or a PDF, with dish images.
+- Product options that carry their own price.
+- Card, Apple Pay, Google Pay and pay-at-the-counter flows, with tips.
+- Kitchen and receipt printing, plus an emailed invoice.
+- A multi-tenant model: one workspace, many venues.
+
+## Engineering highlights
+
+### From a photo to a structured menu
+
+Getting a model to return a clean menu without dropping items was the hard part. The worker constrains the output with function calling, validates it, strips anything malicious, and retries on failure. Images are generated per dish and uploaded to S3 before the rows are written, in batches, so one bad item doesn't take the whole menu down.
+
+### Translation is part of the schema
+
+Instead of a column per language, every string has a translation group and one row per locale. Reads join, which is cheap, and the schema stays flat no matter how many languages are added. The cost is at write time: a new item triggers twenty-seven translation calls, so the pipeline needs a queue sooner than the schema suggests.
+
+### Payments, tips and a connected account
+
+Card payments run through Stripe Connect, so the money lands in the restaurant's account and not ours. The server builds an invoice with the line items and the tip, creates a payment intent, and reuses a cart if the guest retries checkout instead of creating a second order.
+
+### Printing to real hardware
+
+A confirmed order prints to the kitchen. Print jobs carry an idempotency key built from the order number, so a retry doesn't print the same ticket twice. Payments and printers both fail in ways that don't show up in a browser, which is why those two paths got the most defensive code.
+
+### Prices that don't drift
+
+Cart items store their own price at the moment they're added, so a later price change doesn't rewrite history. It's a small decision that keeps an old order honest.
+
+## What I'd do differently
+
+Keep secrets in a manager, never in the repository.
+
+Test the paths that handle money. Checkout and payments carried the most risk and had the least coverage.

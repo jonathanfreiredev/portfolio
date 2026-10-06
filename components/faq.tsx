@@ -11,10 +11,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { FAQ_COUNT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
-
-const QUESTION_COUNT = 7;
 
 function InfoCard() {
   const t = useTranslations("home.faq.infoCard");
@@ -44,7 +43,7 @@ function FaqItem({ index }: { index: number }) {
         icon="plus"
         className="text-left text-foreground uppercase hover:no-underline hover:opacity-50 hover:cursor-pointer"
       >
-        <h6 className="text-lead px-3 py-5">{t("question")}</h6>
+        <h3 className="text-lead px-3 py-5">{t("question")}</h3>
       </AccordionTrigger>
       <AccordionContent className="text-base pl-3 pr-7 pb-8">
         <p>{t("answer")}</p>
@@ -80,7 +79,7 @@ export function Faq({ withInfoCard = true }: FaqProps) {
         </div>
 
         <Accordion type="multiple" defaultValue={["item-0"]} className="w-full">
-          {Array.from({ length: QUESTION_COUNT }).map((_, i) => (
+          {Array.from({ length: FAQ_COUNT }).map((_, i) => (
             <FaqItem key={i} index={i} />
           ))}
         </Accordion>

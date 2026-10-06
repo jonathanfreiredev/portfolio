@@ -1,13 +1,24 @@
-import type { MetadataRoute } from "next"
+import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://example.com"
+import { isProduction, siteUrl } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
+  if (!isProduction) {
+    return {
+      rules: {
+        userAgent: "*",
+        disallow: "/",
+      },
+    };
+  }
+
   return {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/api/"],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
-  }
+    host: siteUrl,
+  };
 }

@@ -1,0 +1,72 @@
+---
+title: "Foodie"
+tagline: "Los restaurantes convierten una foto de su carta en una experiencia de pedido por QR."
+description: "Foodie es una plataforma multiusuario que convierte la carta de un restaurante en pedidos por QR, con generación de menús por IA e impresión en cocina."
+role: "Ingeniería full-stack"
+timeline: "Alrededor de un año, de 2022 a 2023"
+context: "Jatidevelopments"
+statusLabel: "Archivado"
+highlights:
+  - "Una carta completa generada desde una foto o un PDF, con imágenes de plato incluidas"
+  - "Cartas escritas una vez y servidas en veintisiete idiomas"
+  - "Del QR de la mesa a la impresora de cocina, con trabajos de impresión idempotentes"
+  - "Pagos con Stripe Connect y propina, liquidando en la cuenta del restaurante"
+  - "Opciones con su propio precio, y líneas de carrito que conservan el suyo"
+  - "Un modelo multiusuario: un espacio de trabajo, muchos locales"
+updatedAt: "2023-12-11"
+slug: "foodie"
+---
+
+## El punto de partida
+
+Un restaurante que quiere una carta digital suele tener dos opciones: pagar una cuota mensual y teclear cada plato a mano, o quedarse con un PDF desde el que nadie puede pedir. Foodie tomaba un tercer camino. Subes una foto o un PDF de la carta impresa, y la plataforma la lee, construye las categorías y los productos, escribe una descripción y genera una imagen para cada plato, y sirve el resultado como una carta QR desde la que los clientes piden en la mesa.
+
+El primer mercado era Alemania, pero los clientes son a menudo turistas, así que la carta tenía que funcionar en muchos idiomas desde el principio. Trabajé en el producto a lo largo de todo el stack con un equipo pequeño.
+
+## Cómo funciona
+
+Todo el producto es una app de Next.js. La parte del cliente y el panel del restaurante comparten el código, y la capa de API es tRPC, así que los tipos van de la base de datos al navegador sin un esquema escrito dos veces.
+
+Cuando se sube una carta, la petición vuelve enseguida y un worker toma el relevo. El worker hace OCR sobre las imágenes o saca el texto del PDF, manda el texto en bruto a GPT con un esquema de función y recibe categorías y productos con precios. Después genera una imagen por plato, sube todo a S3 y escribe en Postgres en lotes de veinte. Hay decenas de llamadas a la IA metidas ahí, así que el batching y los reintentos son la diferencia entre una funcionalidad y un ticket de soporte.
+
+La traducción forma parte del modelo de datos. Cada texto apunta a un grupo de traducción, y un plato nuevo se traduce a veintisiete idiomas cuando se crea. Las lecturas salen baratas. La escritura es lenta y cara, y ese es el equilibrio que revisaría.
+
+El pedido cierra el círculo. El cliente escanea el QR de la mesa, recibe una cookie de sesión, monta un carrito y paga. Para el pago con tarjeta, el servidor crea una factura de Stripe y un payment intent sobre la cuenta conectada del restaurante. Al terminar el checkout, el pedido se confirma, un ticket sale hacia la impresora de cocina por PrintNode y una factura llega al correo del cliente.
+
+## Lo que hay
+
+- Cartas QR por mesa, con una sesión por cliente.
+- Menús en veintisiete idiomas, escritos automáticamente.
+- Generación de menús por IA desde una foto o un PDF, con imágenes de plato.
+- Opciones de producto que llevan su propio precio.
+- Flujos con tarjeta, Apple Pay, Google Pay y pago en el local, con propinas.
+- Impresión de cocina y de ticket, más la factura por email.
+- Un modelo multiusuario: un espacio de trabajo, varios locales.
+
+## Detalles de ingeniería
+
+### De una foto a una carta estructurada
+
+Conseguir que el modelo devolviera una carta limpia sin perder platos fue la parte difícil. El worker limita la salida con function calling, la valida, limpia cualquier cosa maliciosa y reintenta si falla. Las imágenes se generan por plato y se suben a S3 antes de escribir las filas, en lotes, para que un elemento malo no se lleve por delante toda la carta.
+
+### La traducción forma parte del esquema
+
+En vez de una columna por idioma, cada texto tiene un grupo de traducción y una fila por idioma. Las lecturas hacen un join, que es barato, y el esquema se mantiene plano por muchos idiomas que se añadan. El coste está en la escritura: un plato nuevo dispara veintisiete llamadas de traducción, así que el pipeline pide una cola antes de lo que sugiere el esquema.
+
+### Pagos, propinas y una cuenta conectada
+
+Los pagos con tarjeta van por Stripe Connect, así que el dinero aterriza en la cuenta del restaurante y no en la nuestra. El servidor construye una factura con las líneas y la propina, crea un payment intent y reutiliza el carrito si el cliente reintenta el checkout en lugar de crear un segundo pedido.
+
+### Imprimir en hardware de verdad
+
+Un pedido confirmado se imprime en cocina. Los trabajos de impresión llevan una clave de idempotencia construida con el número de pedido, así que un reintento no imprime el mismo ticket dos veces. Los pagos y las impresoras fallan de maneras que no se ven en un navegador, y por eso esos dos caminos se llevaron el código más defensivo.
+
+### Precios que no se mueven
+
+Las líneas del carrito guardan su propio precio en el momento de añadirse, así que un cambio de precio posterior no reescribe la historia. Es una decisión pequeña que mantiene honrado un pedido antiguo.
+
+## Qué haría distinto
+
+Guardar los secretos en un gestor, nunca en el repositorio.
+
+Testear los caminos que tocan dinero. El checkout y los pagos concentraban el riesgo y casi no tenían cobertura.

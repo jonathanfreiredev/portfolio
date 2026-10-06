@@ -1,0 +1,69 @@
+---
+title: "Mantel Azul"
+tagline: "Recipes, meal planning and a cooking assistant that turns the photo of a dish into something you can cook."
+description: "Mantel Azul is a recipe app with an AI cooking assistant: photo to recipe, semantic search over your own collection, and shared meal planning."
+role: "Solo, design and engineering"
+timeline: "July to September 2026"
+context: "Personal project"
+statusLabel: "Live"
+highlights:
+  - "A photo or a handwritten card becomes a structured recipe, cover image included"
+  - "Search grounded in your own collection, with a floor that blocks invented matches"
+  - "One recipe, three languages, with the author's original wording preserved"
+  - "Exact fractions for per-step ingredients, so scaling servings never drifts"
+  - "A shared household calendar for planning the week's meals"
+  - "Every agent turn traced with its cost, through OpenTelemetry and Langfuse"
+updatedAt: "2026-09-29"
+slug: "mantel-azul"
+---
+
+## The brief
+
+Most recipe apps assume you start from a blank page. Cooking doesn't work that way. You find a dish at a restaurant, screenshot it, or get a card from a relative in handwriting, and the recipe ends up spread across notes, photos and memory. Mantel Azul is a place to keep all of it: a public catalog you can browse, and an assistant that turns a photo of a dish or a handwritten card into something you can actually cook.
+
+The project is personal. I use it, and I wanted recipes to read naturally in English, Spanish and German instead of feeling like translated UI.
+
+## How it works
+
+Mantel Azul keeps what a recipe is separate from how it reads. The structure lives once per recipe: quantities, units, times, nutrition, servings, images. The words live in their own record, keyed by locale and by order. That split is why the amounts stay right when you change the servings, and why a translator can't accidentally change how much flour a step needs.
+
+When you save a recipe, the server translates it into every locale in one call, restores your original wording for the language you wrote in, and rejects any translation where the ingredient or step count doesn't match.
+
+Search runs on embeddings. Every published recipe becomes a document, gets embedded, and goes into Chroma, while Postgres stays the source of truth. A question like "something quick and vegan" turns into a vector and the closest recipes come back. Vector search always has a closest neighbour, even when the right answer isn't in the corpus, so the search has a similarity floor: 0.15 for open requests and 0.45 when someone names a specific dish. Below that, the search says it doesn't have the dish instead of offering something close.
+
+The assistant is an agent with ten tools. It searches recipes, reads favourites, reads and writes your meal plan, creates and updates recipes, and generates a cover image. Update and delete need your approval in the chat. Tool results come back to the model as short summaries while the interface renders the real recipe cards, so the model never paraphrases data it can't see.
+
+Cost matters here, because a single turn can hit several models. Each turn is logged to Langfuse through OpenTelemetry, unchanged recipes skip re-embedding thanks to a content hash, and the agent stops after fifteen steps.
+
+## What shipped
+
+- Browse recipes by category, with search that runs across every translation, so "peruano" and "peruvian" both land.
+- Sign up by email with verification, or with Google. Reset a password, or delete an account and everything in it.
+- Write a recipe in a multi-step form: ingredients, steps, tags, nutrition, times, images. A step can reference part of an ingredient, like half the tomatoes, using exact fractions.
+- Like recipes, save them into cookbooks, and share them.
+- Chat with the assistant. It reads photos and dictation, searches your collection, and plans meals.
+- Create a household, invite people by email, and share a week calendar with drag-to-reorder meals.
+
+## Engineering highlights
+
+### Translations that can't corrupt the recipe
+
+Because ingredients and steps live in two places, only one of them is text. Quantities, units and order sit on the structure; the wording sits in the translation record. A save rebuilds the translations in a single call and runs a structure check, so a translation that drops an ingredient is rejected before it reaches the database.
+
+### Ingredient fractions that add up
+
+A step can use part of an ingredient, stored as a fraction rather than a decimal: `{ part, of }`. Adding 1/3 and 2/3 gives exactly 1, not 0.999. When you reorder the ingredient list, the step references are remapped by ingredient name, and references to a deleted ingredient are dropped instead of silently pointing at the wrong one.
+
+### A relevance floor for retrieval
+
+A vector store always returns neighbours, which is a problem when the user asks for a dish you don't have. The floor separates open requests from specific ones, and it came from measuring the gap: real matches scored between 0.55 and 0.70, while the nearest neighbour of a missing dish sat at 0.40 or lower. "Show me more" also pages by excluding the ids you've seen, which keeps the list stable as the corpus changes.
+
+### Deleting an account across four systems
+
+One delete touches the database, Cloudinary, the vector index and pending invites. The flow reassigns household ownership, recounts likes on recipes that survive, removes and de-indexes unpublished recipes with their images, revokes pending invites, and cleans up empty households. It's the kind of operation that quietly leaves orphaned counters behind if you don't plan it.
+
+## What I'd do differently
+
+Write tests for the logic that decides outcomes: translations, per-step ingredients, retrieval thresholds. That's where a bug stays hidden longest.
+
+Treat prompts and retrieval settings as product surfaces, versioned and evaluated, not as constants buried in the code.
