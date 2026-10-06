@@ -84,6 +84,8 @@ function ProjectCard({ project }: { project: Project }) {
           alt={t("title")}
           fill={true}
           sizes="50vw"
+          crop="fill"
+          aspectRatio="1:1"
         />
 
         <div
@@ -125,7 +127,7 @@ function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="flex flex-col gap-3 mt-1">
-        <span className="text-foreground/45 text-tag uppercase">
+        <span className="text-muted-foreground text-tag uppercase">
           {teckStack}
         </span>
         <p className="text-body-l text-foreground/80">{t("description")}</p>

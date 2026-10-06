@@ -20,8 +20,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: [
-      "framer-motion",
+      "motion",
       "lucide-react",
+      "next-cloudinary",
       "@radix-ui/react-accordion",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",

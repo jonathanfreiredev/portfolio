@@ -12,21 +12,20 @@ export const isProduction = process.env.VERCEL_ENV
   : process.env.NODE_ENV === "production";
 
 export function buildAlternates(path: string, locale: string) {
+  // The default locale has no prefix ("/" not "/en") and the home path must not
+  // gain a trailing slash ("/es", not "/es/"), because "/es/" 308-redirects to
+  // "/es". A canonical pointing at a redirect is a soft error for crawlers.
+  const localize = (loc: string) =>
+    loc === routing.defaultLocale ? path : `/${loc}${path === "/" ? "" : path}`;
+
   const languages: Record<string, string> = {};
   for (const loc of routing.locales) {
-    if (loc === routing.defaultLocale) {
-      languages[loc] = path;
-    } else {
-      languages[loc] = `/${loc}${path}`;
-    }
+    languages[loc] = localize(loc);
   }
   languages["x-default"] = path;
 
-  const canonical =
-    locale === routing.defaultLocale ? path : `/${locale}${path}`;
-
   return {
-    canonical,
+    canonical: localize(locale),
     languages,
   };
 }

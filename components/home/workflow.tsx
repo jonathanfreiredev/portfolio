@@ -75,7 +75,7 @@ function StepCard({ index }: { index: number }) {
       <div className="flex w-full flex-col gap-4">
         <h3 className="text-h4 text-foreground uppercase">{t("title")}</h3>
         <p className="text-body-m text-foreground">{t("text")}</p>
-        <Progress value={percent} />
+        <Progress value={percent} aria-label={t("title")} />
       </div>
     </Reveal>
   );

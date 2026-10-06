@@ -29,6 +29,9 @@ const geistMono = Geist_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
+  // Mono is only used by code blocks (blog and case studies). Preloading it on
+  // every page, including the home page, only costs a request that is never used.
+  preload: false,
 });
 
 export async function generateMetadata({

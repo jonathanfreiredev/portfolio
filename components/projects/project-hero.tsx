@@ -48,7 +48,7 @@ export async function ProjectHero({ project, meta, locale }: ProjectHeroProps) {
             {project.tagline}
           </p>
 
-          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-tag uppercase text-foreground/45">
+          <ul className="flex flex-wrap gap-x-5 gap-y-2 text-tag uppercase text-muted-foreground">
             {meta.stack.map((item) => (
               <li key={item}>{item}</li>
             ))}
