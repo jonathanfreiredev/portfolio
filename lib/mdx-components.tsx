@@ -10,8 +10,10 @@ import { cn } from "@/lib/utils";
 
 export const rehypePrettyCodeOptions: Partial<RehypePrettyCodeOptions> = {
   theme: {
-    light: "github-light",
-    dark: "github-dark",
+    // High-contrast variants: the default github-light tokens (e.g. the
+    // constant orange #E36209) only reach ~3.5:1 on white and fail WCAG AA.
+    light: "github-light-high-contrast",
+    dark: "github-dark-high-contrast",
   },
   keepBackground: false,
   defaultLang: "plaintext",

@@ -10,6 +10,11 @@ const STATIC_ROUTES = ["/", "/projects", "/blog", "/contact"] as const;
 
 function pathFor(locale: string, path: string): string {
   const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
+  if (path === "/") {
+    // Root keeps its trailing slash, but a localized home must not: "/es/"
+    // 308-redirects to "/es", and a sitemap should only list final URLs.
+    return prefix ? `${siteUrl}${prefix}` : `${siteUrl}/`;
+  }
   return `${siteUrl}${prefix}${path}`;
 }
 
