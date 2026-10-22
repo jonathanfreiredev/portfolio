@@ -1,0 +1,83 @@
+---
+title: "Claude Code vs OpenCode: Why I Use OpenCode Daily"
+date: "2026-10-07"
+slug: "claude-code-vs-opencode-why-i-use-opencode"
+description: "An honest comparison of Claude Code and OpenCode: how they differ on model choice, configuration and cost, and why OpenCode is the one I run every day."
+tags: ["opencode", "claude-code", "ai-agents", "developer-tools", "cli"]
+---
+
+![Claude Code vs OpenCode: Why I Use OpenCode Daily](https://res.cloudinary.com/ddjovluur/image/upload/v1791378408/portfolio/blog/claude-code-vs-opencode-why-i-use-opencode.jpg)
+
+Both Claude Code and OpenCode are terminal agents that read a codebase, edit files and run commands. I use both. OpenCode is what I open every morning, and Claude Code is what I reach for when the work suits it.
+
+This post explains the differences that decided it for me: model choice, where the configuration lives, extensibility and cost. They are not benchmark scores, and they will not settle the choice for everyone.
+
+My position, stated once: I use OpenCode daily because I can pick the model per task and keep my agent configuration as files I own, and because that setup travels to any client environment without assuming one vendor's subscription. Claude Code is good, and I still use it.
+
+## The two tools in one line each
+
+[OpenCode](https://opencode.ai/docs/) is an open source coding agent. It runs as a terminal TUI, a desktop app and an IDE extension, and it connects to whichever model provider you point it at.
+
+[Claude Code](https://code.claude.com/docs/en/overview) is Anthropic's coding agent. It runs in the terminal, IDE, desktop, web and mobile, and it is tuned around Claude models.
+
+## Where they actually differ
+
+I compared them on the dimensions that change how I work, not on raw model quality, which moves every few weeks and depends on your provider.
+
+| What matters | OpenCode | Claude Code |
+| --- | --- | --- |
+| License | Open source, MIT | Proprietary |
+| Models | Any of 75+ providers, plus local models | Claude models, with cloud providers (Bedrock, Vertex, Foundry) |
+| Provider login | Bring your own API key, or OpenCode Zen and Go | Claude subscription or Anthropic API billing |
+| Configuration | `opencode.json`, `AGENTS.md`, agents as markdown, plugins, custom tools | `CLAUDE.md`, settings, hooks, skills, subagents |
+| Extensibility | Plugins, custom tools, an SDK, a server, IDE and CI integrations | Hooks, Agent SDK, MCP, subagents, GitHub and GitLab CI |
+| Surfaces | Terminal, desktop, IDE | Terminal, desktop, IDE, web, mobile |
+| Language server feedback | Built-in LSP integration | Not part of the default loop |
+| Background and scheduled work | Server mode, GitHub and GitLab integrations | Cloud sessions, background agents, routines |
+| Cost model | Pay per token through your provider | Subscription or API billing |
+
+Two things in that table need a footnote. First, opening up model choice is not free of strings: Anthropic prohibits using a Claude Pro or Max subscription inside a third-party tool like OpenCode, so there you pay per token or use a subscription the provider allows, such as ChatGPT Plus, GitHub Copilot or GitLab Duo. Second, Claude Code is no longer strictly single-vendor. Its terminal, VS Code and JetBrains surfaces support third-party platforms like Bedrock and Vertex, and it will read an `AGENTS.md` if you already have one. The difference is one of defaults: Claude Code starts inside Anthropic's world, OpenCode starts with no world at all.
+
+## Why I use OpenCode day to day
+
+### One agent, many models
+
+The single biggest reason is that model choice belongs to me. I run a cheap, fast model for renaming and small refactors, then switch the same session to a stronger one for architecture or a tricky bug. When a client has a contract that keeps code on their own infrastructure, I point OpenCode at a local model instead of sending anything out. No other tool here lets me make that decision per task, in one interface.
+
+### The configuration is files in the repo
+
+My setup lives in files I can read, review and version: an `AGENTS.md` that describes the project, an `opencode.json` for the runtime, markdown agents, and plugins. Nothing is hidden behind a hosted dashboard. When I hand a project to a client, the same configuration ships with it, and their team can read exactly what the agent was told to do.
+
+### Extensibility I can shape
+
+OpenCode exposes a server, an SDK, plugins and custom tools. I use them to wire the agent into the rest of the workflow: a custom tool that calls a project script, a plugin that adds a guardrail, a server session driven from somewhere other than my keyboard. That is how the tool bends to a client's stack instead of the other way around.
+
+### Cost I can see
+
+Because OpenCode bills through whichever provider I connect, my spending is the provider's spending. I route the cheap work to a cheap model, watch token usage in the provider's dashboard, and use a subscription I already pay for. There is no platform bill and no plan tier gating a feature.
+
+### The source is open
+
+OpenCode is MIT licensed. I can read how a tool call is sandboxed, pin a version when a client needs stability, and file a real bug instead of a support ticket. When something breaks at 6pm before a demo, I want to see the code.
+
+## What Claude Code does better
+
+The decision is not one-sided.
+
+Anthropic builds Claude Code and its models together, so the harness and the model arrive in step, and a new Claude capability tends to show up in a working agent loop here first. The surfaces are further along too: I can start a long task in the terminal, hand it to the desktop app to review diffs, kick work off from my phone, or schedule a routine that keeps running with my laptop closed. For background and scheduled work, OpenCode's server mode and CI integrations are a smaller story.
+
+Team and enterprise controls are ahead as well: managed settings, SSO, centralized billing and a support path, the things a company asks for before it lets an agent touch its repositories.
+
+## How I decide between them
+
+My rule is simple. OpenCode is the default, because model freedom and owned configuration are worth more to me on most days. I switch to Claude Code when the work is Claude-shaped and benefits from being close to the model, when I need the cloud, mobile or background surfaces, or when the team I am working with has already standardized on it.
+
+In client work the environment often decides before I do. If their code cannot leave their infrastructure, a local model through OpenCode is the answer. If their security team already runs Anthropic through Bedrock with a managed policy, Claude Code is the smoother path.
+
+## Wrapping Up
+
+Neither tool is the wrong choice, and the trade-off cuts both ways.
+
+OpenCode hands you more freedom and, with it, more to own: your provider keys, your cost tracking, your configuration upkeep. If you want a single managed bill, a support contract and one vendor to call, Claude Code is simpler and often the better fit for a team.
+
+I land on OpenCode every day because the freedom is the part I actually use: model choice per task, configuration in files I own, and a setup that travels to a client unchanged. If you want to try it, start with the [OpenCode documentation](https://opencode.ai/docs/) and read the provider setup before you commit to a billing model.

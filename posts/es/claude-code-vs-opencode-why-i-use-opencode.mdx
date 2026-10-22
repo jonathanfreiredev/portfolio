@@ -1,0 +1,83 @@
+---
+title: "Claude Code vs OpenCode: por qué uso OpenCode a diario"
+date: "2026-10-07"
+slug: "claude-code-vs-opencode-why-i-use-opencode"
+description: "Una comparación honesta de Claude Code y OpenCode: en qué se diferencian en elección de modelo, configuración y coste, y por qué OpenCode es el que uso a diario."
+tags: ["opencode", "claude-code", "ai-agents", "developer-tools", "cli"]
+---
+
+![Claude Code vs OpenCode: por qué uso OpenCode a diario](https://res.cloudinary.com/ddjovluur/image/upload/v1791378408/portfolio/blog/claude-code-vs-opencode-why-i-use-opencode.jpg)
+
+Claude Code y OpenCode son dos agentes de terminal que leen un código, editan archivos y ejecutan comandos. Uso los dos. OpenCode es lo que abro cada mañana, y Claude Code es al que recurro cuando el trabajo lo pide.
+
+Este artículo explica las diferencias que decidieron la elección en mi caso: elección de modelo, dónde vive la configuración, extensibilidad y coste. No son puntuaciones de benchmarks, y no van a resolver la decisión para todo el mundo.
+
+Mi postura, dicha una vez: uso OpenCode a diario porque puedo elegir el modelo por tarea y mantener la configuración del agente como archivos que son míos, y porque esa configuración viaja a cualquier entorno de cliente sin dar por supuesto la suscripción de un solo proveedor. Claude Code es bueno, y lo sigo usando.
+
+## Las dos herramientas en una línea cada una
+
+[OpenCode](https://opencode.ai/docs/) es un agente de código de código abierto. Corre como TUI de terminal, app de escritorio y extensión de IDE, y se conecta al proveedor de modelos que le indiques.
+
+[Claude Code](https://code.claude.com/docs/en/overview) es el agente de código de Anthropic. Corre en la terminal, el IDE, el escritorio, la web y el móvil, y está ajustado en torno a los modelos de Claude.
+
+## En qué se diferencian de verdad
+
+Los comparé en las dimensiones que cambian cómo trabajo, no en la calidad bruta del modelo, que cambia cada pocas semanas y depende de tu proveedor.
+
+| Lo que importa | OpenCode | Claude Code |
+| --- | --- | --- |
+| Licencia | Código abierto, MIT | Propietario |
+| Modelos | Cualquiera de más de 75 proveedores, más modelos locales | Modelos de Claude, con proveedores cloud (Bedrock, Vertex, Foundry) |
+| Inicio de sesión del proveedor | Tu propia API key, u OpenCode Zen y Go | Suscripción de Claude o facturación por la API de Anthropic |
+| Configuración | `opencode.json`, `AGENTS.md`, agentes en markdown, plugins, herramientas propias | `CLAUDE.md`, settings, hooks, skills, subagentes |
+| Extensibilidad | Plugins, herramientas propias, un SDK, un servidor, integraciones de IDE y CI | Hooks, Agent SDK, MCP, subagentes, CI de GitHub y GitLab |
+| Superficies | Terminal, escritorio, IDE | Terminal, escritorio, IDE, web, móvil |
+| Feedback del language server | Integración con LSP de serie | No forma parte del loop por defecto |
+| Trabajo en segundo plano y programado | Modo servidor, integraciones de GitHub y GitLab | Sesiones en la nube, agentes en segundo plano, rutinas |
+| Modelo de coste | Pago por token a través de tu proveedor | Suscripción o facturación por API |
+
+Dos cosas de esa tabla necesitan una nota. Primero, abrir la elección de modelo no sale gratis: Anthropic prohíbe usar una suscripción Claude Pro o Max dentro de una herramienta de terceros como OpenCode, así que ahí pagas por token o usas una suscripción que el proveedor sí permite, como ChatGPT Plus, GitHub Copilot o GitLab Duo. Segundo, Claude Code ya no es estrictamente de un solo proveedor. Sus superficies de terminal, VS Code y JetBrains admiten plataformas de terceros como Bedrock y Vertex, y leerá un `AGENTS.md` si ya tienes uno. La diferencia está en los valores por defecto: Claude Code arranca dentro del mundo de Anthropic, OpenCode arranca sin ningún mundo.
+
+## Por qué uso OpenCode a diario
+
+### Un agente, muchos modelos
+
+La razón principal es que la elección de modelo es mía. Uso un modelo barato y rápido para renombrar y para refactors pequeños, y luego cambio la misma sesión a uno más potente para arquitectura o para un bug complicado. Cuando un cliente tiene un contrato que mantiene el código en su propia infraestructura, apunto OpenCode a un modelo local en lugar de enviar nada fuera. Ninguna otra herramienta de esta comparación me deja tomar esa decisión por tarea, en una sola interfaz.
+
+### La configuración son archivos en el repositorio
+
+Mi configuración vive en archivos que puedo leer, revisar y versionar: un `AGENTS.md` que describe el proyecto, un `opencode.json` para el runtime, agentes en markdown y plugins. Nada queda escondido detrás de un panel alojado. Cuando entrego un proyecto a un cliente, la misma configuración viaja con él, y su equipo puede leer exactamente lo que se le dijo al agente que hiciera.
+
+### Extensibilidad que puedo moldear
+
+OpenCode expone un servidor, un SDK, plugins y herramientas propias. Los uso para conectar el agente con el resto del flujo de trabajo: una herramienta propia que llama a un script del proyecto, un plugin que añade una barrera de control, una sesión de servidor lanzada desde algo que no es mi teclado. Así la herramienta se adapta al stack de un cliente en lugar de al revés.
+
+### Coste que puedo ver
+
+Como OpenCode factura a través del proveedor que conecte, mi gasto es el gasto del proveedor. Envío el trabajo barato a un modelo barato, sigo el uso de tokens en el panel del proveedor y aprovecho una suscripción que ya pago. No hay factura de plataforma ni nivel de plan que bloquee una función.
+
+### El código es abierto
+
+OpenCode tiene licencia MIT. Puedo leer cómo se aísla una llamada a herramienta, fijar una versión cuando un cliente necesita estabilidad y abrir un bug real en lugar de un ticket de soporte. Cuando algo se rompe a las 6 de la tarde antes de una demo, quiero ver el código.
+
+## En qué es mejor Claude Code
+
+La decisión no es de un solo lado.
+
+Anthropic construye Claude Code y sus modelos juntos, así que el harness y el modelo llegan a la vez, y una capacidad nueva de Claude suele aparecer aquí primero dentro de un loop de agente que funciona. Las superficies también van por delante: puedo empezar una tarea larga en la terminal, pasarla a la app de escritorio para revisar los diffs, lanzar trabajo desde el móvil o programar una rutina que sigue corriendo con el portátil cerrado. En trabajo en segundo plano y programado, el modo servidor y las integraciones de CI de OpenCode son una historia más pequeña.
+
+Los controles de equipo y empresa también van por delante: settings gestionados, SSO, facturación centralizada y una vía de soporte, las cosas que una empresa pide antes de dejar que un agente toque sus repositorios.
+
+## Cómo decido entre ellos
+
+Mi regla es simple. OpenCode es el valor por defecto, porque la libertad de modelo y una configuración propia valen más para mí casi cualquier día. Cambio a Claude Code cuando el trabajo tiene forma de Claude y se beneficia de estar cerca del modelo, cuando necesito las superficies de nube, móvil o segundo plano, o cuando el equipo con el que trabajo ya se ha estandarizado en él.
+
+En el trabajo con clientes, muchas veces decide el entorno antes que yo. Si su código no puede salir de su infraestructura, un modelo local a través de OpenCode es la respuesta. Si su equipo de seguridad ya ejecuta Anthropic en Bedrock con una política gestionada, Claude Code es el camino más suave.
+
+## Conclusión
+
+Ninguna de las dos herramientas es la elección equivocada, y el trade-off corta en ambas direcciones.
+
+OpenCode te da más libertad y, con ella, más que asumir: tus claves de proveedor, tu control de coste, tu mantenimiento de la configuración. Si quieres una sola factura gestionada, un contrato de soporte y un único proveedor al que llamar, Claude Code es más sencillo y, a menudo, la mejor opción para un equipo.
+
+Yo acabo en OpenCode cada día porque la libertad es la parte que de verdad uso: elección de modelo por tarea, configuración en archivos que son míos y una puesta a punto que viaja a un cliente sin cambios. Si quieres probarlo, empieza por la [documentación de OpenCode](https://opencode.ai/docs/) y lee la configuración de proveedores antes de comprometerte con un modelo de facturación.

@@ -16,7 +16,11 @@ The brand system is the source of truth. Load these files before working on any 
 
 - `../brand/DESIGN.md` — visual system: colour, typography, spacing, grid, components, page sections. **Mandatory context for every task in this folder.**
 - `../brand/strategy.md` — voice, messaging, services, positioning, vocabulary rules. **Load only if the task requires brand voice, copy or positioning decisions.**
-- `../brand/BLOG.md` — blog post authoring system: file conventions, frontmatter, structure, voice, SEO and the cover image workflow. **Mandatory context for every task that writes or edits a post under `posts/`.**
+- `../brand/BLOG.md` — blog post authoring system: file conventions, frontmatter, structure, voice, SEO and the image workflow. Consult it when handling posts.
+
+## Blog posts
+
+To write or edit a post under `posts/`, load the `blog-post` skill. It reads `../brand/BLOG.md` and drives the order of work: scope, English draft, humanizer pass, translation, images and verification. Images are produced with the project tool `generate_image`, which uploads to Cloudinary under `portfolio/blog/`; its credentials live in `.env`. This pointer lives here so the workflow still applies even when `BLOG.md` is not loaded.
 
 **Direction of change.** When the brand docs and the implementation diverge, the docs win. Update the implementation to match. The brand files live in `../brand/` and are edited there, not from this project.
 
