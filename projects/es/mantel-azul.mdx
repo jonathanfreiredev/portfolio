@@ -13,7 +13,7 @@ highlights:
   - "Fracciones exactas en los ingredientes por paso, para que escalar raciones no descuadre nada"
   - "Un calendario compartido en familia para planificar las comidas de la semana"
   - "Cada turno del agente trazado con su coste, con OpenTelemetry y Langfuse"
-updatedAt: "2026-09-29"
+updatedAt: "2026-10-23"
 slug: "mantel-azul"
 ---
 
@@ -23,17 +23,165 @@ La mayoría de las apps de recetas dan por hecho que empiezas con la página en 
 
 El proyecto es personal. Lo uso yo, y quería que las recetas se leyeran con naturalidad en inglés, español y alemán, y no como una interfaz traducida.
 
-## Cómo funciona
+## Una receta es estructura y texto
 
-Mantel Azul separa lo que es una receta de cómo se lee. La estructura vive una sola vez por receta: cantidades, unidades, tiempos, nutrición, raciones, imágenes. Las palabras viven en su propio registro, indexadas por idioma y por orden. Ese corte es lo que hace que las cantidades sigan cuadrando cuando cambias las raciones, y que un traductor no pueda cambiar sin querer cuánta harina necesita un paso.
+Una receta tiene dos trabajos. Tiene que mantener las cantidades correctas cuando alguien cambia las raciones, y tiene que leerse con naturalidad cuando alguien cambia el idioma. Esos dos trabajos tiran en direcciones distintas, así que Mantel Azul los guarda por separado.
 
-Cuando guardas una receta, el servidor la traduce a todos los idiomas en una sola llamada, restaura tu redacción original en el idioma en el que escribiste y rechaza cualquier traducción en la que no cuadre el número de ingredientes o de pasos.
+Toda receta tiene un registro estructural: raciones, tiempos de preparación, cocción y reposo, nutrición, categoría, dificultad e imagen de portada. Sus ingredientes son filas con una cantidad, una unidad y un orden. Sus pasos son filas con un orden, una imagen opcional y los ingredientes que consume cada paso. Nada de eso lleva una línea de prosa.
 
-La búsqueda funciona con embeddings. Cada receta publicada se convierte en un documento, se vectoriza y se guarda en Chroma, mientras Postgres sigue siendo la fuente de verdad. Una pregunta como "algo rápido y vegano" se convierte en un vector y vuelven las recetas más cercanas. La búsqueda vectorial siempre tiene un vecino más cercano, aunque la respuesta correcta no esté en el catálogo, así que hay un umbral de similitud: 0,15 para peticiones abiertas y 0,45 cuando alguien nombra un plato concreto. Por debajo de eso, responde que no lo tiene en lugar de ofrecer algo parecido.
+Las palabras viven en `RecipeTranslation`, una fila por idioma, con el título, la descripción, los nombres de los ingredientes y el texto de los pasos. El texto se referencia por orden y no por id de base de datos, porque las filas de ingredientes y pasos se borran y se recrean en cada guardado. Un id no sobreviviría a la edición.
 
-El asistente es un agente con diez herramientas. Busca recetas, lee favoritos, lee y escribe tu plan de comidas, crea y actualiza recetas y genera una imagen de portada. Actualizar y borrar necesitan tu aprobación en el chat. Los resultados de las herramientas vuelven al modelo como resúmenes cortos mientras la interfaz pinta las tarjetas reales, así que el modelo nunca parafrasea datos que no puede ver.
+Cambiar las raciones multiplica cantidades y deja el texto quieto. Traducir cambia palabras y no puede tocar una cantidad. La página de la receta, el documento de búsqueda y las herramientas del agente leen la misma estructura, así que no pueden discrepar sobre qué es la receta. Una traducción puede estar mal redactada. No puede añadir, quitar ni reordenar un ingrediente o un paso.
 
-El coste importa aquí, porque un solo turno puede tocar varios modelos. Cada turno se registra en Langfuse a través de OpenTelemetry, las recetas que no cambian se saltan el vectorizado gracias a un hash del contenido, y el agente se detiene a los quince pasos.
+![La estructura de la receta, con cantidades, unidades, tiempos, raciones y fracciones por paso guardadas una vez sobre tres registros de idioma que solo contienen las palabras.](https://res.cloudinary.com/ddjovluur/image/upload/v1792772255/portfolio/blog/mantel-azul-structure.png)
+
+## Tres idiomas que no pueden desalinearse
+
+Cuando una receta se guarda con todo su contenido, el servidor la envía a una sola llamada estructurada al modelo y le pide los tres idiomas a la vez. El modelo devuelve el título, la descripción, los nombres de los ingredientes y el texto de los pasos en inglés, español y alemán. Una llamada por guardado, no una por campo.
+
+El idioma de origen se restaura tal cual antes de escribir nada. Si escribí la receta en español, la fila española es mi texto, no una traducción. Las otras dos filas vienen del modelo. Cambiar `sourceLocale` trata el texto enviado como un original nuevo y regenera los otros idiomas a partir de él.
+
+Después el servidor comprueba la forma. Todos los idiomas tienen que tener el mismo número de ingredientes y de pasos, en el mismo orden. Una traducción que pierde un ingrediente, junta dos pasos o reordena la lista falla el guardado antes de llegar a la base de datos. La comprobación no juzga la redacción. Rechaza una traducción que cambia la estructura.
+
+Leer sigue la misma lógica al revés. La app busca el idioma pedido, después el idioma por defecto, después el idioma en el que escribió el autor y después la primera traducción que tenga. Un idioma que falta nunca deja una página vacía.
+
+La búsqueda usa los dos caminos. La búsqueda de texto del catálogo lee todas las traducciones, así que "peruano" y "peruvian" llegan a la misma receta. La búsqueda semántica vectoriza el documento canónico y lo compara con una consulta multilingüe, así que una pregunta en español puede encontrar una receta cuyo texto canónico está en inglés.
+
+## Media cebolla, exacta
+
+Un paso rara vez usa un ingrediente entero. Usa la mitad de la harina, dos tercios de los tomates, el resto del caldo. Mantel Azul lo guarda como una fracción en el paso: `{ order, part, of }`. La cantidad entera es `1/1`, la mitad es `1/2`, dos tercios es `2/3`.
+
+Enteros, no decimales. Sumar `1/3` y `2/3` da exactamente uno, no `0,999`. El editor puede decir que un ingrediente está asignado del todo sin que una regla de redondeo decida por él.
+
+```typescript src/lib/step-ingredients.ts
+export function sumShares(usages: IngredientUsage[]): Share {
+  let sum: Share = { part: 0, of: 1 };
+
+  for (const usage of usages) {
+    sum = {
+      part: sum.part * usage.of + usage.part * sum.of,
+      of: sum.of * usage.of,
+    };
+  }
+
+  return reduceShare(sum);
+}
+```
+
+Como las filas de ingredientes se recrean en cada guardado, un `order` solo significa algo dentro de una versión de la lista. Reordenar los ingredientes dejaría cada paso apuntando a lo que se haya movido a esa posición. El guardado sigue al ingrediente por su nombre: `remapUsagesByName` normaliza mayúsculas y acentos, recoloca cada uso y descarta los que se quedaron sin ingrediente. Cuando el agente escribe un paso, nombra el ingrediente que usa. Un nombre que no coincide con nada lanza un error, así que el fallo aparece antes de traducir la receta.
+
+El escalado usa una sola ratio para las dos mitades de la página. La lista de ingredientes y las cantidades por paso se multiplican por el mismo `servingsRatio`, así que un paso que usa la mitad de la harina usa la mitad de la harina escalada. Las dos no pueden separarse porque solo hay un número.
+
+El editor puede pedirle a un modelo que proponga las asignaciones. Hace una llamada por receta, devuelve una propuesta y no escribe nada. El autor revisa el resultado y lo guarda, o lo corrige.
+
+## Un índice que puede decir que no
+
+Cada receta publicada se convierte en un documento etiquetado: título, descripción, categoría, dificultad, raciones, tiempo total, etiquetas, ingredientes con sus cantidades, pasos numerados y nutrición. El documento se vectoriza con `text-embedding-3-large` de OpenAI y se guarda en Chroma con distancia coseno. Postgres sigue siendo la fuente de verdad. Chroma guarda el vector, el documento y un conjunto pequeño de metadatos: autor, estado de publicación, tiempo total y un hash del contenido.
+
+Una pregunta se convierte en un vector y vuelven los ids de las recetas más cercanas. Después esos ids se hidratan desde Postgres, en el orden en que los devolvió la búsqueda, y los ids que ya no existen se descartan. El índice puede estar desactualizado. La base de datos decide qué existe.
+
+La búsqueda por vecinos más cercanos siempre tiene vecinos, y ahí está el problema. Pide un plato que la colección no tiene y el almacén vectorial devolverá igualmente cinco recetas cercanas en el espacio de embeddings. La búsqueda tiene dos umbrales. Las peticiones abiertas, las que en realidad están explorando ("ideas para cenar", "algo rápido"), usan `0,15`. Las peticiones concretas ("una receta de bibimbap", "postres de chocolate") usan `0,45`. Por debajo del umbral, la herramienta no devuelve nada y el asistente dice que la colección no tiene ese plato.
+
+Los números salieron de medir el índice real. Las recetas que de verdad eran lo que se pedía puntuaban entre `0,55` y `0,70`. El vecino más cercano de un plato que faltaba se quedaba en `0,40` o menos. El umbral vive en ese hueco.
+
+| Petición | Umbral | Por debajo |
+| --- | --- | --- |
+| Abierta, explorando ("ideas para cenar") | 0,15 | Vuelven las recetas más cercanas |
+| Concreta ("una receta de bibimbap") | 0,45 | La búsqueda no devuelve nada |
+
+![Una pregunta se convierte en un vector, pasa una puerta de similitud en 0,45, se hidrata desde Postgres y se pinta como una tarjeta de receta, mientras un camino más flojo en 0,15 queda abierto para explorar.](https://res.cloudinary.com/ddjovluur/image/upload/v1792772280/portfolio/blog/mantel-azul-retrieval.png)
+
+La paginación se hace por exclusión, no por offset. Quien llama pasa los ids que ya mostró en `excludeIds`, y la consulta pide un resultado de más, más un hueco por cada id excluido. "Ver más" devuelve las siguientes recetas distintas y se mantiene estable cuando el catálogo cambia entre llamadas.
+
+Indexar es aburrido a propósito. Una receta cuyo documento no ha cambiado conserva su embedding: `indexRecipe` compara el hash guardado y actualiza solo los metadatos. Un fallo de Chroma durante un guardado se registra y se ignora, porque una caída del vector no debería impedir guardar una receta. El índice se puede reconstruir con `pnpm rag:index`. La herramienta de búsqueda del agente llama a un procedimiento del servidor, y el ámbito `mine` se resuelve desde la sesión, nunca desde un argumento que el modelo pueda elegir.
+
+## Diez herramientas y dos frenos
+
+El asistente es un `ToolLoopAgent` con diez herramientas. Lee etiquetas, busca recetas por significado, lista favoritos, lee una receta y lee el plan de comidas. En la escritura, crea, actualiza y borra recetas, planifica comidas y genera una imagen de portada. El bucle se detiene a los quince pasos, suficientes para leer un calendario, buscar dos veces y escribir un plan.
+
+Las herramientas de actualizar y borrar necesitan aprobación. El modelo puede preparar el cambio, pero no puede aplicarlo. El chat muestra la aprobación, la respuesta vuelve por `addToolApprovalResponse` y `sendAutomaticallyWhen` continúa el mismo turno cuando llega. El agente se construye por petición, porque sus instrucciones llevan la fecha de hoy, el nombre del hogar y las imágenes en juego.
+
+```typescript src/lib/agent.ts
+const MAX_AGENT_STEPS = 15;
+
+return new ToolLoopAgent({
+  model: openai("gpt-6-luna"),
+  tools: {
+    getTags: toolGetTags,
+    searchRecipes: toolSearchRecipes,
+    getFavouriteRecipes: toolGetFavouriteRecipes,
+    getOneRecipe: toolGetOneRecipe,
+    getMealPlan: toolGetMealPlan,
+    createRecipe: createToolCreateRecipe({
+      attachedImageUrl,
+      generatedImage,
+      previousImageUrl: generatedImageUrl,
+    }),
+    updateRecipe: createToolUpdateRecipe({ attachedImageUrl }),
+    deleteRecipe: toolDeleteRecipe,
+    planMeals: toolPlanMeals,
+    generateRecipeImage: createToolGenerateRecipeImage({
+      generatedImage,
+    }),
+  },
+  stopWhen: isStepCount(MAX_AGENT_STEPS),
+  toolApproval: {
+    updateRecipe: "user-approval",
+    deleteRecipe: "user-approval",
+  },
+  instructions: buildInstructions(context),
+});
+```
+
+Los resultados de las herramientas toman dos formas. La página recibe el objeto completo y pinta la tarjeta real de la receta, con su imagen y su enlace. El modelo recibe un resumen de texto corto mediante `toModelOutput`: el título, la categoría, el tiempo, las etiquetas y los ids que necesita para la siguiente llamada. Nunca se le pide repetir una receta que solo vio como resumen, y la tarjeta sigue siendo la respuesta.
+
+![Un agente rodeado de sus herramientas, con una puerta de aprobación antes de editar y borrar, un contador de quince pasos y dos salidas: resúmenes cortos para el modelo y tarjetas completas de receta para la página.](https://res.cloudinary.com/ddjovluur/image/upload/v1792772303/portfolio/blog/mantel-azul-agent-loop.png)
+
+El prompt prohíbe inventar recetas e ids, y la escritura lo impone. La planificación de comidas solo acepta ids que ya existen y que quien llama puede ver. Los valida antes de la transacción y escribe todas las comidas o ninguna, hasta cincuenta en una llamada. Un plan que referencia una receta invisible falla sin escribir las otras cuarenta y nueve.
+
+## Una foto es evidencia, no la receta
+
+El camino de la imagen empieza en el navegador. Una foto HEIC de un iPhone se convierte a JPEG, se comprime a WebP por debajo de un megabyte y 2560 píxeles en el lado más largo, y se sube a Cloudinary. El modelo recibe la URL y la imagen.
+
+Lee un plato emplatado, una tarjeta escrita a mano, un menú o ingredientes sobre una encimera. Con una tarjeta escrita a mano transcribe lo que dice la foto, nombra las partes que no puede leer y las pide. No rellena los huecos.
+
+Una foto solo se convierte en portada cuando muestra el plato. Una tarjeta de receta, un menú, un póster o una captura no, aunque sea lo que arrancó la receta. Si no hay una foto usable, el asistente genera una portada con `gpt-image-2.5-flare` a 1024 por 1024 y la sube a Cloudinary. La distinción está en el prompt y en las flags, no en el gusto del modelo.
+
+La URL no tiene que pasar por el modelo. `createRecipe` recibe `useAttachedImage` cuando el usuario adjuntó el plato, o `reuseGeneratedImage` cuando la receta es la que ilustró un mensaje anterior. La app resuelve la URL a partir de la flag. La herramienta de imagen deja la imagen generada en un contenedor por petición, y la herramienta de receta la lee de ahí. Nunca se le pide al modelo que escriba una URL en la receta, y una imagen de un mensaje anterior solo se reutiliza cuando el agente dice explícitamente que pertenece a este plato.
+
+El dictado tiene la misma forma. Un clip por dictado, no una petición por pausa, porque el plan gratuito del proveedor limita peticiones, no minutos. La grabadora se detiene a los dos minutos, envía el clip a `whisper-large-v3` de Groq con el idioma activo como pista y coloca el texto al final de lo que ya esté escrito. La onda se dibuja en un canvas a partir de un búfer del analizador guardado en un ref, así que los niveles no vuelven a renderizar React. Si la pestaña desaparece o alguien se lleva el micrófono, la grabación se detiene y dice por qué.
+
+## Cada turno deja recibo
+
+`instrumentation.ts` registra el SDK de OpenTelemetry y un procesador de spans de Langfuse una vez por instancia del servidor. `registerTelemetry` es global, así que un solo registro captura todas las llamadas al modelo de la app: el turno del agente, los embeddings de una búsqueda, las traducciones de un guardado y la generación de imágenes, incluidas las llamadas anidadas dentro de una herramienta.
+
+Next ejecuta `after(() => flushTelemetry())` cuando termina la respuesta. El procesador agrupa spans, y una función serverless se congela cuando termina el stream, así que sin ese volcado el último turno de cada conversación no se trazaría en ningún sitio. La llamada de imagen se observa a mano porque el SDK de AI no emite un span para `generateImage`; su uso de tokens se registra antes de la subida, así que una subida fallida no esconde lo que costó el modelo.
+
+El trazado es opcional. Sin las claves, `register` sale antes y la app arranca como antes. Un clon nuevo y un build de CI no necesitan una cuenta de Langfuse.
+
+El coste tiene cuatro controles. El agente se detiene a los quince pasos. Una receta cuyo documento no ha cambiado no se vuelve a vectorizar. Una imagen generada antes en una conversación solo se reutiliza cuando pertenece al mismo plato. Y un guardado traduce una vez, no una por campo. Un solo turno puede tocar el agente, un embedding, una traducción y un modelo de imagen, así que la traza es cómo sé cuál gastó el dinero.
+
+## Compartir un calendario es la parte fácil
+
+Un usuario pertenece como máximo a un hogar. Una invitación se dirige a un email, lleva un token, caduca a los catorce días y tiene un estado. Una invitación nueva para la misma dirección revoca la anterior si sigue pendiente. Quien la recibe tiene que iniciar sesión con un email que coincida; el token por sí solo no basta.
+
+Si el email de la invitación falla al enviarse, la fila se borra. Una invitación que nadie recibe no se queda por ahí.
+
+Una comida guarda su `householdId` en la fila. No se deriva del hogar actual de quien la creó. Si alguien se va, las comidas se quedan con el hogar y quien se fue deja de verlas. Una comida sin hogar es privada para quien la creó. La visibilidad es una consulta: las comidas compartidas de mi hogar más mis comidas privadas.
+
+Solo quien creó una comida puede moverla entre compartida y privada. Otro miembro que hiciera privada una comida compartida la escondería del resto del hogar. El endpoint de reordenación sigue la misma regla: valida cada id contra la visibilidad antes de escribir las posiciones nuevas en una transacción.
+
+Salir del hogar reasigna la propiedad cuando quien se va era el propietario, y borra el hogar cuando se va el último miembro. Las invitaciones y las comidas caen con él.
+
+## Borrar una cuenta toca cuatro sitios
+
+Better Auth borra al usuario, y la base de datos arrastra en cascada las sesiones, cuentas, recetarios, chat y comidas. El resto es el trabajo. `beforeDelete` reasigna la propiedad del hogar y limpia los me gusta que dejó el usuario, recalculando el `likesCount` de cada receta afectada. Borra las recetas que nunca publicó, con sus imágenes de Cloudinary y sus registros vectoriales, y revoca las invitaciones pendientes para su email. `afterDelete` elimina los hogares que se quedaron sin miembros.
+
+El borrado toca cuatro sitios: las filas relacionales, los contadores desnormalizados, el almacenamiento de imágenes y el índice vectorial. Una cascada maneja filas. No maneja un contador, un archivo de imagen, un registro vectorial ni una invitación que hay que revocar por email.
+
+Las recetas publicadas sobreviven. Son contenido público que otra gente puede haber marcado, guardado o planificado, así que la cuenta se va y la receta se queda. Las recetas sin publicar no tienen audiencia cuando el autor desaparece, así que se borran con sus imágenes y sus entradas del índice.
+
+Las invitaciones se comparan sin distinguir mayúsculas, porque `HouseholdInvite.email` se guarda en minúsculas mientras que `User.email` conserva las mayúsculas que escribió el usuario. Esa comparación es lo que impide que una invitación vieja la acepte una cuenta nueva con la misma dirección.
 
 ## Lo que hay
 
@@ -43,27 +191,3 @@ El coste importa aquí, porque un solo turno puede tocar varios modelos. Cada tu
 - Dar me gusta, guardar recetas en recetarios y compartirlas.
 - Hablar con el asistente. Lee fotos y dictado, busca en tu colección y planifica comidas.
 - Crear un hogar, invitar a gente por email y compartir un calendario semanal con comidas que se reordenan arrastrando.
-
-## Detalles de ingeniería
-
-### Traducciones que no pueden corromper la receta
-
-Como los ingredientes y los pasos viven en dos sitios, solo uno de ellos es texto. Las cantidades, las unidades y el orden están en la estructura; la redacción está en el registro de traducción. Al guardar se reconstruyen las traducciones en una sola llamada y se comprueba la estructura, así que una traducción que pierde un ingrediente se rechaza antes de llegar a la base de datos.
-
-### Fracciones que cuadran
-
-Un paso puede usar parte de un ingrediente, guardado como fracción y no como decimal: `{ part, of }`. Sumar 1/3 y 2/3 da exactamente 1, no 0,999. Cuando reordenas la lista de ingredientes, las referencias de los pasos se recolocan por nombre, y las referencias a un ingrediente borrado se eliminan en lugar de apuntar en silencio al que no toca.
-
-### Un umbral de relevancia
-
-Un almacén vectorial siempre devuelve vecinos, y eso es un problema cuando pides un plato que no tienes. El umbral separa las peticiones abiertas de las concretas, y salió de medir la distancia: las coincidencias reales puntuaban entre 0,55 y 0,70, mientras que el vecino más cercano de un plato que faltaba se quedaba en 0,40 o menos. El "ver más" además pagina excluyendo los ids ya vistos, lo que mantiene la lista estable cuando cambia el catálogo.
-
-### Borrar una cuenta en cuatro sistemas
-
-Un borrado toca la base de datos, Cloudinary, el índice vectorial y las invitaciones pendientes. El flujo reasigna la propiedad del hogar, recalcula los me gusta de las recetas que sobreviven, elimina y desindexa las recetas sin publicar con sus imágenes, revoca las invitaciones pendientes y limpia los hogares vacíos. Es el tipo de operación que deja contadores huérfanos si no la planeas.
-
-## Qué haría distinto
-
-Escribir tests de la lógica que decide resultados: traducciones, ingredientes por paso, umbrales de búsqueda. Es donde un error queda escondido más tiempo.
-
-Tratar los prompts y los ajustes de recuperación como parte del producto, versionados y evaluados, no como constantes enterradas en el código.

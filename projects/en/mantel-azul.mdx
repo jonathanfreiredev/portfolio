@@ -13,7 +13,7 @@ highlights:
   - "Exact fractions for per-step ingredients, so scaling servings never drifts"
   - "A shared household calendar for planning the week's meals"
   - "Every agent turn traced with its cost, through OpenTelemetry and Langfuse"
-updatedAt: "2026-09-29"
+updatedAt: "2026-10-23"
 slug: "mantel-azul"
 ---
 
@@ -23,17 +23,165 @@ Most recipe apps assume you start from a blank page. Cooking doesn't work that w
 
 The project is personal. I use it, and I wanted recipes to read naturally in English, Spanish and German instead of feeling like translated UI.
 
-## How it works
+## A recipe is structure and text
 
-Mantel Azul keeps what a recipe is separate from how it reads. The structure lives once per recipe: quantities, units, times, nutrition, servings, images. The words live in their own record, keyed by locale and by order. That split is why the amounts stay right when you change the servings, and why a translator can't accidentally change how much flour a step needs.
+A recipe has two jobs. It has to keep the amounts right when someone changes the servings, and it has to read naturally when someone changes the language. Those jobs pull in different directions, so Mantel Azul stores them apart.
 
-When you save a recipe, the server translates it into every locale in one call, restores your original wording for the language you wrote in, and rejects any translation where the ingredient or step count doesn't match.
+Every recipe has one structural record: servings, preparation, cooking and resting times, nutrition, category, difficulty and cover image. Its ingredients are rows with a quantity, a unit and an order. Its steps are rows with an order, an optional image, and the ingredients each step consumes. None of that carries a line of prose.
 
-Search runs on embeddings. Every published recipe becomes a document, gets embedded, and goes into Chroma, while Postgres stays the source of truth. A question like "something quick and vegan" turns into a vector and the closest recipes come back. Vector search always has a closest neighbour, even when the right answer isn't in the corpus, so the search has a similarity floor: 0.15 for open requests and 0.45 when someone names a specific dish. Below that, the search says it doesn't have the dish instead of offering something close.
+The words live in `RecipeTranslation`, one row per locale, with the title, the description, the ingredient names and the step text. The text is keyed by order rather than by database id, because the ingredient and step rows are deleted and recreated on every save. An id would not survive the edit.
 
-The assistant is an agent with ten tools. It searches recipes, reads favourites, reads and writes your meal plan, creates and updates recipes, and generates a cover image. Update and delete need your approval in the chat. Tool results come back to the model as short summaries while the interface renders the real recipe cards, so the model never paraphrases data it can't see.
+Changing the servings multiplies quantities and leaves the text alone. Translating changes words and cannot touch an amount. The recipe page, the search document and the agent's tools all read the same structure, so they cannot disagree about what the recipe is. A translation can still be wrong in wording. It cannot add, remove or reorder an ingredient or a step.
 
-Cost matters here, because a single turn can hit several models. Each turn is logged to Langfuse through OpenTelemetry, unchanged recipes skip re-embedding thanks to a content hash, and the agent stops after fifteen steps.
+![The recipe's structure, with quantities, units, times, servings and step fractions held once above three language records that contain only the words.](https://res.cloudinary.com/ddjovluur/image/upload/v1792772255/portfolio/blog/mantel-azul-structure.png)
+
+## Three languages that cannot drift apart
+
+When a recipe is saved with its full content, the server sends it to one structured model call and asks for all three locales at once. The model returns the title, description, ingredient names and step descriptions for English, Spanish and German. One call per save, not one per field.
+
+The source language is restored verbatim before anything is written. If I wrote the recipe in Spanish, the Spanish row is my text, not a translation of it. The other two rows come from the model. Changing `sourceLocale` treats the submitted text as a new original and regenerates the other locales from it.
+
+Then the server checks the shape. Every locale must have the same number of ingredients and steps, in the same order. A translation that drops an ingredient, merges two steps or reorders the list fails the save before it reaches the database. The check does not judge the wording. It refuses a translation that changes the structure.
+
+Reading follows the same logic in reverse. The app looks for the requested locale, then the default, then the language the author wrote in, then the first translation it has. A missing locale never leaves a page empty.
+
+Search uses both paths. The catalog's text search reads every translation, so `peruano` and `peruvian` land on the same recipe. Semantic search embeds the canonical document and matches it with a multilingual query, so a question in Spanish can find a recipe whose canonical text is English.
+
+## Half an onion, exactly
+
+A step rarely uses a whole ingredient. It uses half the flour, two thirds of the tomatoes, the rest of the stock. Mantel Azul stores that as a fraction on the step: `{ order, part, of }`. The whole amount is `1/1`, half is `1/2`, two thirds is `2/3`.
+
+Integers, not decimals. Adding `1/3` and `2/3` gives exactly one, not `0.999`. The editor can say an ingredient is fully assigned without a rounding rule deciding for it.
+
+```typescript src/lib/step-ingredients.ts
+export function sumShares(usages: IngredientUsage[]): Share {
+  let sum: Share = { part: 0, of: 1 };
+
+  for (const usage of usages) {
+    sum = {
+      part: sum.part * usage.of + usage.part * sum.of,
+      of: sum.of * usage.of,
+    };
+  }
+
+  return reduceShare(sum);
+}
+```
+
+Because the ingredient rows are recreated on every save, an `order` only means something within one version of the list. Reordering the ingredients would leave every step pointing at whatever moved into that slot. The save follows the ingredient by name instead: `remapUsagesByName` normalizes case and accents, re-points each usage, and drops the ones whose ingredient is gone. When the agent writes a step, it names the ingredient it uses. A name that matches nothing throws, so the mistake surfaces before the recipe is translated.
+
+Scaling uses one ratio for both halves of the page. The ingredient list and the per-step amounts multiply by the same `servingsRatio`, so a step that uses half the flour uses half of the scaled flour. The two cannot drift apart because there is only one number.
+
+The editor can ask a model to propose the assignments. It runs one call per recipe, returns a proposal, and writes nothing. The author reviews the result and saves it, or fixes it.
+
+## A search that can say no
+
+Every published recipe becomes a labelled document: title, description, category, difficulty, servings, total time, tags, ingredients with their amounts, numbered steps and nutrition. The document is embedded with OpenAI's `text-embedding-3-large` and stored in Chroma with cosine distance. Postgres remains the source of truth. Chroma holds the vector, the document and a small metadata set: author, published state, total time and a hash of the content.
+
+A question becomes a vector and the closest recipe ids come back. The ids are then hydrated from Postgres, in the order the search returned them, and ids that no longer exist are dropped. The index can be stale. The database decides what exists.
+
+Nearest-neighbour search always has neighbours, which is the problem. Ask for a dish the collection does not have and a vector store will still return five recipes that are nearby in the embedding space. The search has two floors. Open requests, the ones that are really browsing (`ideas for dinner`, `something quick`), use `0.15`. Specific requests (`a bibimbap recipe`, `chocolate desserts`) use `0.45`. Below the floor, the tool returns nothing and the assistant says the collection does not have the dish.
+
+The numbers came from measuring the live index. Recipes that really were what was asked for scored between `0.55` and `0.70`. The closest neighbour of a missing dish stayed at or below `0.40`. The floor sits in the gap.
+
+| Request | Floor | Below it |
+| --- | --- | --- |
+| Open, browsing (`ideas for dinner`) | 0.15 | The closest recipes still come back |
+| Specific (`a bibimbap recipe`) | 0.45 | The search returns nothing |
+
+![A question becomes a vector, passes a similarity gate at 0.45, is hydrated from Postgres and rendered as a recipe card, while a looser 0.15 path stays open for browsing.](https://res.cloudinary.com/ddjovluur/image/upload/v1792772280/portfolio/blog/mantel-azul-retrieval.png)
+
+Pagination is done by exclusion, not offset. The caller passes the ids it has already shown in `excludeIds`, and the query over-fetches by one plus one slot per excluded id. `Show me more` returns the next best distinct recipes and stays stable when the corpus changes between calls.
+
+Indexing is deliberately boring. A recipe whose document has not changed keeps its embedding: `indexRecipe` compares the stored content hash and updates only the metadata. A Chroma failure during a save is logged and swallowed, because a vector outage should not stop someone from saving a recipe. The index can be rebuilt with `pnpm rag:index`. The agent's search tool calls a server procedure, and the `mine` scope is resolved from the session, never from an argument the model can choose.
+
+## Ten tools and two brakes
+
+The assistant is a `ToolLoopAgent` with ten tools. It reads tags, searches recipes by meaning, lists favourites, reads a single recipe and reads the meal plan. On the write side, it creates, updates and deletes recipes, plans meals and generates a cover image. The loop stops at fifteen steps, which is enough to read a calendar, search twice and write a plan.
+
+The update and delete tools require approval. The model can prepare the change, but it cannot apply it. The chat shows the approval, the answer goes back through `addToolApprovalResponse`, and `sendAutomaticallyWhen` continues the same turn when the answer arrives. The agent is built per request, because its instructions carry today's date, the household name and the images in play.
+
+```typescript src/lib/agent.ts
+const MAX_AGENT_STEPS = 15;
+
+return new ToolLoopAgent({
+  model: openai("gpt-6-luna"),
+  tools: {
+    getTags: toolGetTags,
+    searchRecipes: toolSearchRecipes,
+    getFavouriteRecipes: toolGetFavouriteRecipes,
+    getOneRecipe: toolGetOneRecipe,
+    getMealPlan: toolGetMealPlan,
+    createRecipe: createToolCreateRecipe({
+      attachedImageUrl,
+      generatedImage,
+      previousImageUrl: generatedImageUrl,
+    }),
+    updateRecipe: createToolUpdateRecipe({ attachedImageUrl }),
+    deleteRecipe: toolDeleteRecipe,
+    planMeals: toolPlanMeals,
+    generateRecipeImage: createToolGenerateRecipeImage({
+      generatedImage,
+    }),
+  },
+  stopWhen: isStepCount(MAX_AGENT_STEPS),
+  toolApproval: {
+    updateRecipe: "user-approval",
+    deleteRecipe: "user-approval",
+  },
+  instructions: buildInstructions(context),
+});
+```
+
+Tool results take two shapes. The page receives the full object and renders the real recipe card, with its image and link. The model receives a short text summary through `toModelOutput`: the title, the category, the time, the tags and the ids it needs for the next call. It is never asked to repeat a recipe it only saw as a summary, and the card stays the answer.
+
+![An agent surrounded by its tools, with an approval gate before edits and deletes, a step counter at fifteen, and two outputs: short summaries for the model and full recipe cards for the page.](https://res.cloudinary.com/ddjovluur/image/upload/v1792772303/portfolio/blog/mantel-azul-agent-loop.png)
+
+The prompt forbids invented recipes and invented ids, and the write path enforces it. Meal planning accepts only ids that already exist and are visible to the caller. It validates them before the transaction and writes all the meals or none, up to fifty in one call. A plan that references one invisible recipe fails without writing the other forty-nine.
+
+## A photo is evidence, not the recipe
+
+The image path starts in the browser. A HEIC photo from an iPhone is converted to JPEG, compressed to WebP under one megabyte and 2560 pixels on the longest edge, then uploaded to Cloudinary. The model receives the URL and the image itself.
+
+It reads a plated dish, a handwritten card, a menu, or ingredients on a counter. For a handwritten card it transcribes what the photo says, names the parts it cannot read, and asks for them. It does not fill the gaps.
+
+A photo only becomes the cover when it shows the dish. A recipe card, a menu, a poster or a screenshot cannot, even when it is the thing that started the recipe. If there is no usable photo, the assistant generates a cover with `gpt-image-2.5-flare` at 1024 by 1024 and uploads it to Cloudinary. The distinction is in the prompt and in the flags, not in the model's taste.
+
+The URL does not have to travel through the model. `createRecipe` takes `useAttachedImage` when the user attached the dish, or `reuseGeneratedImage` when the recipe is the one an earlier message illustrated. The app resolves the URL from the flag. A generated image is left in a per-request holder by the image tool, and the recipe tool reads it from there. The model is never asked to type a URL into the recipe, and an image from an earlier message is reused only when the agent explicitly says it belongs to this dish.
+
+Dictation takes the same shape. One clip per dictation, not one request per pause, because the provider's free plan limits requests, not minutes. The recorder stops at two minutes, sends the clip to Groq's `whisper-large-v3` with the active locale as a hint, and puts the text at the end of whatever is already typed. The waveform is drawn on a canvas from an analyser buffer held in a ref, so the levels never re-render React. If the tab goes away or the microphone is taken, the recording stops and says why.
+
+## Every turn leaves a receipt
+
+`instrumentation.ts` registers the OpenTelemetry SDK and a Langfuse span processor once per server instance. `registerTelemetry` is global, so one registration captures every model call in the app: the agent turn, the embeddings behind a search, the translations on save, and the image generation, including the calls nested inside a tool.
+
+Next runs `after(() => flushTelemetry())` once the response finishes. The processor batches spans, and a serverless function freezes when the stream ends, so without that flush the last turn of every conversation would be traced nowhere. The image call is observed by hand because the AI SDK does not emit a span for `generateImage`; its token usage is recorded before the upload, so a failed upload does not hide what the model cost.
+
+Tracing is optional. Without the keys, `register` returns early and the app boots as before. A fresh clone and a CI build do not need a Langfuse account.
+
+Cost has four controls. The agent stops at fifteen steps. A recipe whose document has not changed is not re-embedded. An image generated earlier in a conversation is reused only when it belongs to the same dish. And a save translates once, not once per field. A single turn can touch the agent, an embedding, a translation and an image model, so the trace is how I know which one spent the money.
+
+## Sharing a calendar is the easy part
+
+A user belongs to at most one household. An invitation is addressed to an email, carries a token, expires after fourteen days and has a status. A new invitation for the same address revokes the previous pending one. The invitee has to sign in with a matching email; the token alone is not enough.
+
+If the invitation email fails to send, the row is deleted. An invitation nobody receives is not left behind.
+
+A meal stores its `householdId` on the row. It is not derived from the creator's current household. If someone leaves, the meals stay with the household and the leaver stops seeing them. A meal with no household is private to its creator. Visibility is one query: the shared meals of my household plus my own private meals.
+
+Only the creator can move a meal between shared and private. Another member making a shared meal private would hide it from the rest of the household. The reorder endpoint follows the same rule: it validates every entry id against visibility before it writes the new positions in a transaction.
+
+Leaving reassigns ownership when the leaver owned the household, and deletes the household when the last member leaves. Invitations and meals cascade with it.
+
+## Deleting an account touches four places
+
+Better Auth deletes the user, and the database cascades the sessions, accounts, cookbooks, chat and meals. The rest is the work. `beforeDelete` reassigns household ownership and clears the likes the user left behind, recounting the `likesCount` of every affected recipe. It deletes the recipes the user never published, with their Cloudinary images and vector records, and revokes the pending invitations for their email. `afterDelete` removes households left without members.
+
+The deletion touches four places: the relational rows, the denormalized counters, the image bucket and the vector index. A cascade handles rows. It does not handle a counter, an image asset, a vector record or an invitation that has to be revoked by email.
+
+Published recipes survive. They are public content that other people may have liked, saved or planned, so the account goes and the recipe stays. Unpublished recipes have no audience once the author is gone, so they are removed with their images and their index entries.
+
+Invitations are matched case-insensitively, because `HouseholdInvite.email` is stored lowercased while `User.email` keeps the casing the user typed. A lowercase comparison is what stops an old invitation from being accepted by a new account with the same address.
 
 ## What shipped
 
@@ -43,27 +191,3 @@ Cost matters here, because a single turn can hit several models. Each turn is lo
 - Like recipes, save them into cookbooks, and share them.
 - Chat with the assistant. It reads photos and dictation, searches your collection, and plans meals.
 - Create a household, invite people by email, and share a week calendar with drag-to-reorder meals.
-
-## Engineering highlights
-
-### Translations that can't corrupt the recipe
-
-Because ingredients and steps live in two places, only one of them is text. Quantities, units and order sit on the structure; the wording sits in the translation record. A save rebuilds the translations in a single call and runs a structure check, so a translation that drops an ingredient is rejected before it reaches the database.
-
-### Ingredient fractions that add up
-
-A step can use part of an ingredient, stored as a fraction rather than a decimal: `{ part, of }`. Adding 1/3 and 2/3 gives exactly 1, not 0.999. When you reorder the ingredient list, the step references are remapped by ingredient name, and references to a deleted ingredient are dropped instead of silently pointing at the wrong one.
-
-### A relevance floor for retrieval
-
-A vector store always returns neighbours, which is a problem when the user asks for a dish you don't have. The floor separates open requests from specific ones, and it came from measuring the gap: real matches scored between 0.55 and 0.70, while the nearest neighbour of a missing dish sat at 0.40 or lower. "Show me more" also pages by excluding the ids you've seen, which keeps the list stable as the corpus changes.
-
-### Deleting an account across four systems
-
-One delete touches the database, Cloudinary, the vector index and pending invites. The flow reassigns household ownership, recounts likes on recipes that survive, removes and de-indexes unpublished recipes with their images, revokes pending invites, and cleans up empty households. It's the kind of operation that quietly leaves orphaned counters behind if you don't plan it.
-
-## What I'd do differently
-
-Write tests for the logic that decides outcomes: translations, per-step ingredients, retrieval thresholds. That's where a bug stays hidden longest.
-
-Treat prompts and retrieval settings as product surfaces, versioned and evaluated, not as constants buried in the code.
