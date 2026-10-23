@@ -90,6 +90,14 @@
       "title": "Projects",
       "text": "Products I've built and shipped. Each card opens a full case study.",
       "items": {
+        "mcp-stack": {
+          "title": "MCPStack · Agent-Native Template",
+          "description": "A full-stack template where AI agents are users of the product: one identity, an authorization layer shared by the API and the agent door, and an MCP server behind a consent screen."
+        },
+        "genblocks": {
+          "title": "GenBlocks · Judge-Gated Component Library",
+          "description": "A public library of UI components generated from a brief, where a separate agent decides whether each one is good enough to publish."
+        },
         "mantel-azul": {
           "title": "Mantel Azul · AI Cooking Assistant",
           "description": "A multilingual recipe app with an AI cooking assistant. Turn a photo or a handwritten card into a recipe, search your own collection by meaning, and plan the week with your household."

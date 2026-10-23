@@ -90,6 +90,14 @@
       "title": "Proyectos",
       "text": "Productos que he construido y lanzado. Cada tarjeta abre un caso de estudio completo.",
       "items": {
+        "mcp-stack": {
+          "title": "MCPStack · Plantilla full-stack para agentes",
+          "description": "Una plantilla full-stack donde los agentes de IA son usuarios del producto: una identidad, una capa de autorización compartida por la API y la puerta de los agentes, y un servidor MCP detrás de una pantalla de consentimiento."
+        },
+        "genblocks": {
+          "title": "GenBlocks · Biblioteca de componentes verificada por un juez",
+          "description": "Una biblioteca pública de componentes de UI generados a partir de un brief, donde un agente separado decide si cada uno es lo bastante bueno para publicarse."
+        },
         "mantel-azul": {
           "title": "Mantel Azul · Asistente de cocina con IA",
           "description": "Una app de recetas multilingüe con un asistente de cocina con IA. Convierte una foto o una tarjeta escrita a mano en una receta, busca por significado en tu propia colección y planifica la semana en familia."

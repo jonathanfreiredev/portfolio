@@ -1,0 +1,152 @@
+---
+title: "MCPStack"
+tagline: "Una base donde los agentes de IA actúan como tus usuarios, por una puerta hecha para ellos."
+description: "MCPStack es una plantilla full-stack para productos con agentes: una identidad, cuatro capas de autorización y un servidor MCP al que los agentes llegan después de que tú los apruebes."
+role: "Solo, diseño e ingeniería"
+timeline: "Once semanas, de julio a octubre de 2026"
+context: "Proyecto propio"
+statusLabel: "En producción"
+highlights:
+  - "Un solo token abre dos puertas, y un único claim decide si quien llama es una persona o un agente"
+  - "El servidor MCP corre como servicio propio y comparte con la API todas las reglas del dominio"
+  - "Un agente se registra solo y espera una pantalla de consentimiento que puedes revocar desde tu perfil"
+  - "Quien no es miembro recibe un 404, así que un código de error nunca confirma que una organización existe"
+  - "Un agente del playground se detiene a media ejecución para pedir aprobación y retoma la misma ejecución cuando respondes"
+  - "La landing despierta la demo dormida solo mientras alguien la está mirando"
+updatedAt: "2026-10-23"
+slug: "mcp-stack"
+---
+
+Todos los productos están incorporando un agente. La caja de chat y la primera llamada al modelo llevan una semana. El resto es lo que nunca sale en la demo: quién es el agente, qué puede tocar, quién aprobó ese acceso y cómo lo retiras cuando el cliente se va.
+
+MCPStack es una plantilla full-stack donde un agente de IA es un usuario del producto. Trae las piezas que cuesta dejar bien: identidad con Supabase, una capa de autorización que comparten las dos puertas, un servidor MCP y la pantalla de consentimiento que aprueba una persona. No hay ningún proveedor de modelos en las dependencias, porque el modelo nunca fue lo difícil.
+
+Lo construí primero para mí. GenBlocks, la biblioteca de componentes de UI generados, corre sobre esta plantilla, y esa fue la prueba que importaba: un producto real encima de la base, sin reescribirla. Casi todo lo que sigue es arquitectura, porque ahí están las decisiones.
+
+## La parte que nadie construye
+
+Una función de agente suele empezar con una clave en una variable de entorno. Funciona, y entonces llegan las preguntas. ¿Para qué usuario está actuando? ¿Qué pasa cuando dos clientes comparten base de datos? ¿Cómo revocas un agente sin rotar una clave que usa todo el producto? ¿Quién aprobó ese acceso y dónde está escrito?
+
+Un token de servicio no responde a nada de eso. Es todo o nada por construcción, y cada atajo alrededor se convierte en un proceso manual la primera vez que alguien lo pide. La alternativa es tratar al agente como un usuario: se autentica como la persona para la que trabaja, lleva sus permisos y llega al producto por una interfaz pensada para máquinas.
+
+La interfaz es MCP, y el trabajo está en las capas que la rodean.
+
+## Un token, dos puertas
+
+Supabase Auth es el proveedor de identidad. Gestiona las credenciales, la verificación por email, el login social, las sesiones y el servidor OAuth, y firma un JWT asimétrico. El backend no guarda contraseñas ni emite tokens. Verifica la firma contra el JWKS del proyecto y comprueba `iss`, `aud` y `exp`. La comprobación es bloqueante, porque un fallo de caché descarga el juego de claves por red, así que el camino async la ejecuta en un hilo aparte. Las claves se cachean, así que la mayoría de las peticiones verifican en local.
+
+Hay dos formas de conseguir un token. Inicias sesión, y la app de Next.js guarda la sesión en una cookie. O apruebas un agente, y el flujo OAuth de Supabase le entrega un token a un cliente como Claude Code, Cursor, opencode o n8n.
+
+Los dos tokens tienen la misma forma. Los separa un único claim. Un token emitido para un cliente OAuth lleva `client_id`; el de tu propio login no. La API solo acepta los que no lo llevan, y responde un 403 cuando llega el token de un agente. Ese 403 es deliberado: el token es válido, volver a autenticarse daría el mismo y un cliente no debería reintentar. El servidor MCP acepta los dos, porque una persona también puede llamar a una tool.
+
+![Un solo token emitido por Supabase que llega a dos puertas, la API detrás de la app de Next.js y el servidor MCP que usan los agentes, ambas hasta los mismos servicios de dominio y PostgreSQL, con la API rechazando el token de un agente.](https://res.cloudinary.com/ddjovluur/image/upload/v1792760470/portfolio/blog/mcp-stack-two-doors-editorial.png)
+
+Las dos puertas son servicios separados. El servidor MCP no es una ruta de la API. Tiene su propio puerto, verifica los tokens con el mismo código y llama a los mismos servicios de dominio. Ese detalle es lo que evita que las dos puertas se separen: una regla que se añade a un servicio aparece en las dos, y una tool no puede hacer nada que la API no haría. La comprobación de la puerta es una dependencia de FastAPI, no una costumbre: cada ruta protegida pide el usuario de primera parte, y esa dependencia es donde se rechaza `client_id`. El único endpoint público, la ejecución del playground, pide un token opcional y también rechaza el de un agente, porque esta API nunca actúa con uno, ni siquiera para reenviarlo al servidor MCP.
+
+## Cuatro preguntas, cuatro capas
+
+Toda petición pasa por cuatro preguntas, y cada una pertenece a una capa distinta. Cuando dos de ellas viven en el mismo sitio, la autorización se duplica y luego se olvida.
+
+![Cuatro capas de autorización apiladas: identidad, la puerta, el rol y la tool, cada una con la pregunta que responde y lo que la decide.](https://res.cloudinary.com/ddjovluur/image/upload/v1792760615/portfolio/blog/mcp-stack-four-layers-editorial.png)
+
+La identidad va primero. Supabase dice quién llama. El primer token válido crea un perfil local ligado al `sub` del token, y el insert se ejecuta con `ON CONFLICT DO NOTHING`, así que dos peticiones a la vez no convierten una condición de carrera en un 500.
+
+La puerta decide qué tipo de cliente atiende, y esa es la comprobación de `client_id` de la sección anterior. No es una comprobación de permisos.
+
+El rol es la única capa con permisos finos. Cada fila del dominio pertenece a una organización, y una membresía concede un rol dentro de ella. Toda la política es una tabla:
+
+```python backend/app/authz/permissions.py
+ROLE_PERMISSIONS = {
+    MembershipRole.OWNER: frozenset({
+        Permission.ORGANIZATION_READ,
+        Permission.ORGANIZATION_UPDATE,
+    }),
+    MembershipRole.MEMBER: frozenset({
+        Permission.ORGANIZATION_READ,
+    }),
+}
+```
+
+Denegar por defecto: un rol que la tabla no lista no concede nada. Quien no es miembro recibe un 404 en lugar de un 403, porque un 403 confirma que la organización existe. Un miembro cuyo rol no alcanza recibe un 403. Las dos respuestas salen de una sola dependencia, así que ningún endpoint inventa la suya. Los endpoints no resuelven una organización por su cuenta. Dependen de una factoría, `require_membership(Permission.ORGANIZATION_UPDATE)`, y reciben la membresía solo cuando pasan las dos reglas, así que llegar a una organización sin nombrar el permiso no es posible. El servicio lanza un error de dominio en lugar de uno HTTP, porque el mismo código corre detrás de MCP, y la API lo traduce en el borde. Una restricción de la base de datos rechaza un rol que la tabla de políticas no conoce.
+
+La tool valida los argumentos contra un esquema, resuelve quién llama desde el token y devuelve datos tipados. No hay ninguna comprobación de permisos ahí. Si me encuentro escribiendo un `if` sobre quién puede hacer algo dentro de una tool, la regla pertenece al servicio que esa tool llama.
+
+## La puerta a la que llaman los agentes
+
+El servicio MCP corre con FastMCP y el transporte streamable HTTP. Es stateless a propósito. Los clientes MCP no reenvían cookies, así que un balanceador no puede fijar un cliente a la instancia que guarda su sesión. Stateless significa que cualquier instancia puede responder.
+
+Esa decisión quita algo. Sin sesión no hay back-channel, así que una tool no puede detenerse a media llamada y preguntar al cliente. Preguntar tiene que ir al revés: la tool devuelve la pregunta, la llamada termina y la siguiente petición lleva la respuesta. El protocolo eliminó el back-channel en su revisión de 2026, así que esta es la forma sobre la que construir. El servicio publica los metadatos que necesita un cliente OAuth en `/.well-known/oauth-protected-resource/mcp`, sin autenticación, y verifica los tokens con el mismo verificador que la API.
+
+El repositorio trae una sola tool, `whoami`, y es a propósito. Una plantilla con doce tools te enseña a copiar doce tools. Una enseña el patrón:
+
+```python backend/app/mcp/tools.py
+@mcp.tool
+async def whoami() -> CallerProfile:
+    """Return the profile of the user whose token is calling this tool."""
+    access = get_access_token()
+    claims = parse_claims(access.claims)
+
+    async with async_session_maker() as session:
+        user = await get_or_create_user(session, claims)
+
+    return CallerProfile(
+        id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+    )
+```
+
+Quien llama sale del token, nunca de un argumento. Los argumentos los elige un modelo, y a un modelo se le puede convencer de mentir. El tipo de retorno es el esquema de salida de la tool, así que el cliente recibe datos que puede leer en lugar de una frase que debe obedecer. Los nombres publicados tampoco cambian: un cambio incompatible publica un nombre nuevo al lado del viejo. Importar el módulo de tools es lo que las registra, y el decorador devuelve la función sin tocarla, así que la misma función sigue siendo llamable en un test.
+
+## Entrar cuesta una pantalla
+
+A un cliente le basta la URL. Llama al servidor, recibe un 401 que nombra los metadatos del recurso protegido, los lee, se registra solo mediante dynamic client registration y abre el navegador. La persona inicia sesión si hace falta y entonces ve la pantalla de consentimiento. La pantalla es una página del frontend, porque el authorization path de Supabase apunta ahí. Necesita el `authorization_id` que Supabase añade a la redirección y muestra un error sin él. La decisión es un form POST normal, así que la pantalla funciona sin JavaScript, y la cookie de sesión es `SameSite=Lax`, que es lo que impide que un POST de otro sitio apruebe una concesión.
+
+![Los cinco pasos que da un agente para entrar: llama al servidor, recibe un desafío, se registra solo, espera tu aprobación y después actúa como tú.](https://res.cloudinary.com/ddjovluur/image/upload/v1792761249/portfolio/blog/mcp-stack-handshake-editorial-v3.png)
+
+La pantalla dice qué se está concediendo de verdad. El agente actuará con tu acceso, no con una cuenta de pruebas más limitada, y el texto lo dice en lugar de insinuar menos de lo que el token puede hacer. Esa pantalla es el único sitio donde una persona ve la decisión antes de que ocurra. Dos límites son estructurales. La concesión es todo o nada: un agente actúa como tú, y no puedes darle lectura sobre una organización y nada más. Los scopes serían la siguiente capa, y pertenecen a la tabla de políticas que comparte la API, no a las tools. Y Supabase no soporta resource indicators, así que un token no está atado al servidor MCP. La API lo compensa rechazando tokens de agente, lo que deja la comprobación del claim haciendo el trabajo que debería hacer una audiencia atada.
+
+Los permisos aprobados viven en la página de perfil, donde se pueden desconectar. Revocar elimina el permiso y el cliente tiene que volver a pedirlo. No invalida un token ya emitido, que sigue siendo válido hasta que caduca. Es el precio de la verificación stateless, y prefiero escribirlo a esconderlo.
+
+## Un playground que se detiene a preguntar
+
+La landing tiene un playground, porque una demo que se puede ver vale más que cuatro párrafos de instrucciones. Corre un agente LangGraph de verdad con tres tools: una lee el reloj, otra detiene la ejecución para pedir permiso y la tercera pertenece al servidor MCP.
+
+Las decisiones son una tupla, no una llamada al modelo:
+
+```python backend/app/demo/graph.py
+SCRIPTED_PLAN = (
+    {"name": "current_time", "args": {}},
+    {
+        "name": "ask_for_approval",
+        "args": {"action": "call the MCP server as you"},
+    },
+    {"name": "whoami", "args": {}},
+)
+```
+
+Un plan escrito hace la ejecución sin coste y repetible, y la página dice en voz alta que ahí no está pensando nada. El loop es el de la librería: `ToolNode` ejecuta cada llamada y `tools_condition` decide si hay otra ronda, así que no hay un dispatcher escrito a mano que mantener en sintonía. Una tool que falla se captura y se queda en la traza en lugar de terminar la ejecución, porque la página tiene que enseñar el fallo que vio. Lo que enseña es la maquinaria. La tool que pregunta usa `interrupt`, el grafo guarda dónde iba, la página te pone la pregunta y la misma ejecución continúa cuando respondes. Nada de en medio se pierde y la pregunta no se hace dos veces.
+
+El caso que más me gusta es el anónimo. Sin token no hay catálogo que pedirle al servidor, así que el plan llama a la tool por su nombre y la puerta la rechaza. La página enseña ese rechazo al lado de una forma de entrar. Una ruta que exigiera token escondería la mitad de la historia que merece la pena contar.
+
+## Dormir a propósito
+
+La demo corre en una plataforma que apaga los servicios inactivos, que es lo que la mantiene gratis. Despertarla pasa a formar parte del producto. La landing llama a `/warmup` al montar, y solo mientras la pestaña está visible. Nadie espera en una pestaña oculta, y preguntar mantendría dos contenedores vivos para un público que no existe.
+
+Un clic que llega antes de que los servicios estén arriba reintenta. Una respuesta a una ejecución detenida no se reintenta, porque repetir una respuesta la aplicaría dos veces.
+
+Dos decisiones del backend salen del mismo presupuesto. El engine usa `NullPool`, porque un pool con conexiones abiertas es un goteo de tráfico que mantiene despierta una plataforma que quiere dormir. Y la API corre en una sola instancia, porque una ejecución que se detuvo a preguntar vive en el proceso, y una segunda instancia respondería que esa ejecución no existe.
+
+El primer visitante de un periodo inactivo espera, y la página le dice que la demo está despertando en lugar de fallar.
+
+## Lo que hay dentro
+
+Un clon se lleva el ciclo completo, no un diagrama:
+
+- Registro, login, verificación por email, recuperación de contraseña, cambio de contraseña y borrado de cuenta, con la identidad de Supabase eliminada además del perfil.
+- Un perfil, organizaciones, membresías y la tabla de políticas, aplicados en el servidor.
+- El servidor MCP con una tool funcionando, la pantalla de consentimiento OAuth y una lista de aplicaciones conectadas que puedes desconectar.
+- El playground, con una ejecución que se detiene y se reanuda.
+- Sondas de liveness, readiness y warm-up, Docker Compose, un workflow de CI por app, 93 tests de backend, 76 tests unitarios de frontend y 8 tests end-to-end.
+
+Es MIT, está desplegado y es más pequeño de lo que suena. Las organizaciones todavía no tienen pantallas. Existen en el esquema y en la API, que es suficiente para una plantilla y lo primero que construiría en un producto.

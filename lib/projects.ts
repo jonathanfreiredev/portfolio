@@ -11,6 +11,8 @@ const FALLBACK_LOCALE: AppLocale = routing.defaultLocale;
 export type Locale = AppLocale;
 
 export const PROJECT_SLUGS = [
+  "mcp-stack",
+  "genblocks",
   "mantel-azul",
   "wandace",
   "modern-nextjs-stack",
@@ -41,9 +43,43 @@ export type ProjectMeta = {
 };
 
 export const PROJECT_META: Record<ProjectSlug, ProjectMeta> = {
+  "mcp-stack": {
+    slug: "mcp-stack",
+    order: 1,
+    status: "live",
+    cover: "portfolio/mcp-stack-bg",
+    logo: "portfolio/mcp-stack-logo",
+    url: "https://mcpstack.jonathanfreire.com",
+    repo: "https://github.com/jonathanfreiredev/mcp-stack",
+    stack: [
+      "Next.js",
+      "FastAPI",
+      "Supabase Auth",
+      "MCP",
+      "LangGraph",
+      "PostgreSQL",
+    ],
+  },
+  genblocks: {
+    slug: "genblocks",
+    order: 2,
+    status: "live",
+    cover: "portfolio/genblocks-bg",
+    logo: "portfolio/genblocks-logo",
+    url: "https://genblocks.jonathanfreire.com",
+    repo: "https://github.com/jonathanfreiredev/genblocks",
+    stack: [
+      "Next.js",
+      "FastAPI",
+      "LangGraph",
+      "Modal",
+      "Chroma",
+      "PostgreSQL",
+    ],
+  },
   "mantel-azul": {
     slug: "mantel-azul",
-    order: 1,
+    order: 3,
     status: "live",
     cover: "portfolio/mantel-azul-bg",
     logo: "portfolio/mantel-azul-logo",
@@ -53,7 +89,7 @@ export const PROJECT_META: Record<ProjectSlug, ProjectMeta> = {
   },
   wandace: {
     slug: "wandace",
-    order: 2,
+    order: 4,
     status: "live",
     cover: "portfolio/wandace-bg",
     logo: "portfolio/wandace-logo",
@@ -63,7 +99,7 @@ export const PROJECT_META: Record<ProjectSlug, ProjectMeta> = {
   },
   "modern-nextjs-stack": {
     slug: "modern-nextjs-stack",
-    order: 3,
+    order: 5,
     status: "open-source",
     cover: "portfolio/modern-nextjs-stack-bg",
     logo: "portfolio/logo-modern-nextjs-stack",
@@ -73,7 +109,7 @@ export const PROJECT_META: Record<ProjectSlug, ProjectMeta> = {
   },
   foodie: {
     slug: "foodie",
-    order: 4,
+    order: 6,
     status: "archived",
     cover: "portfolio/foodie-bg",
     logo: "portfolio/logo-foodie",

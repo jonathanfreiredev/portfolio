@@ -17,6 +17,38 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
+    id: "mcp-stack",
+    title: "MCPStack · Agent-Native Template",
+    description:
+      "A full-stack template where AI agents are users of the product: one identity, an authorization layer shared by the API and the agent door, and an MCP server behind a consent screen.",
+    imagePublicId: "portfolio/mcp-stack-bg",
+    logoPublicId: "portfolio/mcp-stack-logo",
+    techStack: [
+      "Next.js",
+      "FastAPI",
+      "Supabase Auth",
+      "MCP",
+      "LangGraph",
+      "PostgreSQL",
+    ],
+  },
+  {
+    id: "genblocks",
+    title: "GenBlocks · Judge-Gated Component Library",
+    description:
+      "A public library of UI components generated from a brief, where a separate agent decides whether each one is good enough to publish.",
+    imagePublicId: "portfolio/genblocks-bg",
+    logoPublicId: "portfolio/genblocks-logo",
+    techStack: [
+      "Next.js",
+      "FastAPI",
+      "LangGraph",
+      "Modal",
+      "Chroma",
+      "PostgreSQL",
+    ],
+  },
+  {
     id: "mantel-azul",
     title: "Mantel Azul · AI Cooking Assistant",
     description:

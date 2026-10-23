@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
+import remarkGfm from "remark-gfm";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -155,7 +156,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               components={mdxComponents}
               options={{
                 mdxOptions: {
-                  remarkPlugins: [remarkUnwrapImages, remarkCodeMetaToTitle],
+                  remarkPlugins: [remarkGfm, remarkUnwrapImages, remarkCodeMetaToTitle],
                   rehypePlugins: [
                     [rehypePrettyCode, rehypePrettyCodeOptions],
                     rehypeCodeTitleToData,

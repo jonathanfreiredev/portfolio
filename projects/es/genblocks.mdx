@@ -1,0 +1,145 @@
+---
+title: "GenBlocks"
+tagline: "Una biblioteca pública de componentes de UI donde un bloque generado solo se publica si un juez independiente lo aprueba."
+description: "GenBlocks es una biblioteca de componentes de UI e imágenes de stock generados a partir de un brief: un agente construye cada uno y un juez separado decide si es lo bastante bueno para publicarse."
+role: "Solo, diseño e ingeniería"
+timeline: "Octubre de 2026"
+context: "Proyecto propio"
+statusLabel: "En producción"
+highlights:
+  - "Dos agentes con un muro en medio: el constructor ve el render, el juez nunca vio la conversación"
+  - "Cada dimensión de la rúbrica tiene su propio listón, así que una media alta no tapa una débil"
+  - "La rúbrica es un documento versionado, y cada nota lleva estampada la versión del texto que la produjo"
+  - "El spec elige el tipo entre la taxonomía de la biblioteca y los cinco bloques más cercanos al brief"
+  - "Las imágenes pasan una puerta de personas y otra de seguridad antes del juez, y no se guardan antes"
+  - "Un intento fallido se queda público con su render, sus notas y el motivo del juez"
+updatedAt: "2026-10-23"
+slug: "genblocks"
+---
+
+GenBlocks es una biblioteca pública de componentes de UI e imágenes de stock generados a partir de un brief. Describes el bloque que quieres, un agente lo escribe como un proyecto pequeño, y el resultado entra en la biblioteca o falla con su motivo al lado.
+
+Cualquier generador puede decir eso. La afirmación aquí es más estrecha y más difícil de fingir: un segundo agente, que nunca vio la conversación y no puede tocar el artefacto, lee el resultado y decide si es lo bastante bueno. Las notas, el informe del sandbox y el render son públicos en la página del item. Un intento que no llega sigue visible con la misma evidencia, menos la publicación.
+
+Lo construí sobre MCPStack, la plantilla del proyecto anterior. La identidad, el modelo de autorización y el servidor MCP ya estaban resueltos ahí, así que este proyecto empieza en la puerta y gasta el esfuerzo en lo que pasa por ella. Casi todo lo que sigue es la arquitectura de IA: cómo un brief se convierte en una decisión, cómo un constructor ve su propio trabajo y cómo un juez se mantiene independiente de lo que califica.
+
+## El modelo nunca fue el problema
+
+Pídele a un modelo que construya un componente y lo hará. Pídele que diga si el componente es bueno y obtienes una opinión sobre su propio trabajo, que es la señal menos útil del sistema. Un generador que se detiene cuando el modelo dice que ha terminado te pide confiar en el modelo dos veces: una para construir y otra para puntuar.
+
+La alternativa es poner un segundo agente al final, sin memoria de lo que pasó y sin capacidad de cambiar el resultado. Lee el artefacto como lo haría un lector, lo puntúa contra una rúbrica y sus números deciden. Todo lo demás en GenBlocks existe para que ese veredicto signifique algo: el sandbox que renderiza el bloque, los checks que informa, los ficheros que recibe el juez, y la página que conserva el intento después.
+
+## Un brief, cuatro etapas
+
+Un brief llega desde el chat, la API o un cliente MCP. Los tres llaman a la misma función, así que ninguno puede saltarse los filtros previos. Un acierto exacto de caché devuelve el bloque terminado sin gastar cupo. Después vienen el cupo del mes, la moderación de texto y una política de imágenes que rechaza un brief que pide personas u ofrece una reescritura sin ellas.
+
+![Un brief que pasa los filtros, el spec, el constructor y el juez, y después se divide en un bloque publicado o un intento fallido que sigue visible.](https://res.cloudinary.com/ddjovluur/image/upload/v1792763003/portfolio/blog/genblocks-pipeline-v2.png)
+
+Después, cuatro etapas. El spec archiva el brief en uno de los 25 tipos de bloque. El constructor escribe el proyecto y lo mira hasta quedarse sin miradas. El juez puntúa el intento terminado. El runner lo publica o deja escrito por qué no.
+
+Cada etapa escribe su paso en Postgres mientras ocurre, así que la página de la tarea es el registro de la ejecución y no un resumen reconstruido después. Un intento por ejecución: reintentar es una decisión de una persona con el brief delante, no algo que el sistema haga solo.
+
+## El spec lee la biblioteca antes de decidir
+
+¿Qué tipo de bloque es este? Un modelo responde, pero no solo. La recuperación encuentra los cinco bloques publicados más cercanos al brief, y sus tipos son evidencia de cómo archiva la biblioteca. La taxonomía dice qué tipos existen. El modelo elige un slug de esa lista, con un motivo, y una respuesta fuera de la lista falla la ejecución en lugar de inventar una categoría.
+
+El texto es determinista: el título es la primera cláusula del brief y la descripción es el brief. Nunca fueron decisiones de criterio, y dejar que un modelo las redacte solo añadiría variación al campo que una persona lee en la biblioteca.
+
+La misma recuperación protege de los duplicados. Un brief a una distancia medida de un bloque publicado (0,50) se responde con ese bloque en lugar de arrancar una ejecución. Quien ha visto la coincidencia puede pedir su propia versión, y esa se paga como cualquier otra.
+
+Los embeddings vienen del modelo multimodal de Voyage y viven en Chroma, mientras Postgres sigue siendo la fuente de verdad. Cuando el índice o el embedder están caídos, la búsqueda cae a texto y la ejecución continúa. La recuperación mejora el producto, no es una dependencia que pueda pararlo.
+
+## El constructor tiene ojos
+
+El constructor es un agente LangGraph con un conjunto pequeño de tools: escribir y leer ficheros, listar el proyecto, leer una skill, mirar y pedirle una imagen a la librería. Solo puede escribir bajo `src/`, con el punto de entrada fijo. El montaje y la hoja de estilos global pertenecen al scaffold, y editarlos sería cambiar la regla con la que se le mide.
+
+![Un bucle de tres pasos: escribir solo ficheros fuente, mirar el render a cuatro anchos y dos temas, arreglar lo que muestra el render, hasta seis miradas.](https://res.cloudinary.com/ddjovluur/image/upload/v1792762059/portfolio/blog/genblocks-loop.png)
+
+`look` es la parte que cambia el bucle. Compila el proyecto en un sandbox de Modal y devuelve el informe del checker con dos renders, el bloque en una página clara y en la oscura a la que cambia el sitio, como imágenes dentro del resultado de la tool. El modelo las lee, arregla lo que ve y vuelve a mirar.
+
+El presupuesto cuenta miradas, no turnos del modelo. Seis por defecto, y una mirada puede gastar cuatro turnos. Leer una skill o escribir un fichero cuesta tokens; el sandbox y el render cuestan dinero, así que es lo que cuenta el presupuesto. Cuando se acaban las miradas, `look` lo dice y el agente tiene que terminar con lo que tiene.
+
+Dos detalles mantienen el bucle honesto. Una mirada a un proyecto sin cambios no reconstruye nada: devuelve el render anterior y dice que nada cambió, que es el bucle sorprendiéndose a sí mismo dando vueltas. Y los checks estáticos corren dentro del bucle, antes del sandbox, así que un proyecto que intenta llegar a la red o a un host no aprobado se rechaza mientras el agente sigue ahí para arreglarlo.
+
+## El juez nunca vio la conversación
+
+![Dos agentes separados por un muro: el constructor tiene la conversación, sus tools, los ficheros y el render; el juez ve el brief, todos los ficheros, el informe del sandbox y los dos renders, sin tools y sin memoria de la conversación.](https://res.cloudinary.com/ddjovluur/image/upload/v1792762142/portfolio/blog/genblocks-two-rooms.png)
+
+El juez es una llamada al modelo sin tools y sin bucle. No puede editar el artefacto, no ve el chat que produjo el brief y corre después de que el sandbox se haya cerrado. Recibe el brief, todos los ficheros del proyecto, el informe del sandbox y los dos renders. Se le dice qué encontraron los checks, no cuánto vale: si un check de layout fallido importa es exactamente el juicio que se le pide.
+
+El artefacto es evidencia, nunca instrucción. Una línea dentro del código que le diga al juez que ignore la rúbrica o que cambie una nota es contenido que juzgar, y el encuadre lo dice antes de que lleguen los ficheros. Eso dejó de ser teórico en el momento en que desconocidos pueden escribir briefs.
+
+La respuesta tiene una forma que el código puede leer: una nota y un comentario por dimensión, más un resumen. Se pide con function calling en lugar de JSON schema estricto, porque la respuesta es un mapa con las dimensiones como claves, y un schema estricto necesitaría una lista fija, lo que pondría las dimensiones de la rúbrica en dos sitios. La respuesta se valida igualmente: una dimensión que no se pidió, o una que falta, falla la ejecución en lugar de convertirse en un cero en un panel.
+
+El constructor y el juez corren el mismo modelo. Lo que los separa es la estructura: tools, memoria y la capacidad de cambiar lo que se está puntuando. La mitad estable del prompt del juez va primero y el intento después, porque el input cacheado cuesta una décima parte.
+
+## El listón es por dimensión
+
+Un bloque se puntúa en render, accesibilidad, visual, copy y cumplimiento. Cada dimensión tiene su listón:
+
+| Dimensión | Listón |
+| --- | --- |
+| render | 85 |
+| accesibilidad | 80 |
+| visual | 75 |
+| copy | 75 |
+| cumplimiento | 85 |
+
+La media nunca decide. Un bloque con 92 en cuatro dimensiones y 70 en una no se publica, porque la media escondería justo el fallo que un lector notaría. El veredicto guardado es la lista de dimensiones que no llegaron, y un bloque se publica solo cuando esa lista está vacía. Una imagen se puntúa con una rúbrica más corta (visual, ajuste al prompt y cumplimiento), con el ajuste al prompt en 75.
+
+Al juez nunca se le dicen los umbrales. Un juez que sabe dónde está el listón puntúa mirando el listón, y el veredicto deja de ser una lectura independiente. Escribe números; el código decide qué superan.
+
+```python backend/app/judge/scoring.py
+def missed(dimension: str, score: int) -> bool:
+    threshold = threshold_for(dimension)
+    return threshold is not None and score < threshold
+```
+
+La rúbrica es un documento que el juez lee, y su versión es un hash de su texto y de su lista de dimensiones. Editar la rúbrica cambia la versión, y cada intento guarda la versión que lo puntuó, así que una nota de hace un año puede leerse contra las palabras que la produjeron. Los nombres de las dimensiones son un contrato en tres sitios, el schema del juez, la base de datos y las etiquetas del frontend, y los tests de los dos lados afirman la misma lista. Una dimensión que un lado inventara sería una fila que se lee como un cero.
+
+Los umbrales viven en settings y no en la rúbrica, porque son calibración. Se mueven cuando las generaciones reales muestran que deben moverse, y moverlos no reescribe lo que dice la rúbrica.
+
+## Las imágenes pasan dos puertas antes del juez
+
+![El camino de la imagen en cinco pasos: el prompt se comprueba, la imagen se genera, se filtra por personas y seguridad, se puntúa con su propia rúbrica y se archiva en la librería; una imagen rechazada nunca se guarda.](https://res.cloudinary.com/ddjovluur/image/upload/v1792763200/portfolio/blog/genblocks-picture-path-v3.png)
+
+Las imágenes de stock las genera FLUX, de Black Forest Labs, con una API asíncrona: la petición se encola, se sondea, y la muestra terminada se descarga y se descarta, porque la URL del proveedor caduca y nunca estuvo pensada para servirse a nadie. Los bytes se decodifican, se acotan y se recodifican antes de que los vea otro servicio, lo que es a la vez un límite de seguridad y una factura.
+
+Después, dos puertas. Un modelo de visión rechaza cualquier imagen con una persona o una figura humana, porque la librería tiene una regla visual y un filtro de prompt no puede garantizar lo que hizo el generador. La moderación busca las categorías que la biblioteca no publica. Solo una imagen que pasa las dos llega al juez, y solo una que el juez aprueba llega a Cloudinary. Una imagen rechazada nunca recibe una dirección que se pueda servir.
+
+La librería se consulta antes que el proveedor. Un bloque pide una imagen por descripción, y si la librería de imágenes ya tiene una cercana la reutiliza en lugar de pagar dos veces por la misma escena. El mismo prompt dos veces se rechaza, porque la librería responde a un prompt con una imagen casi igual, y una banda de tres que resultó ser una sola imagen recortada de tres formas es lo que el juez detectó la primera vez que esto corrió de verdad. Un bloque puede usar cuatro imágenes, y pasan a la librería pública de imágenes, así que un bloque posterior puede empezar con lo que este ya pagó.
+
+## El sandbox es donde un agente puede escribir código
+
+El harness es un agente escribiendo ficheros, así que la pregunta interesante no es si puede construir un componente, sino qué puede hacer el código. La respuesta es un sandbox que no guarda nada que merezca la pena robar y no puede llegar a nada que merezca la pena alcanzar.
+
+Antes del sandbox, dos checks estáticos leen el código y el bundle: una inyección de script o una llamada a la red es fatal, y también lo es un recurso de un host que el sitio no controla. Dentro, el proyecto pasa por el type checker, el linter y el build, y después por Playwright a cuatro anchos (390, 834, 1024 y 1440) en tema claro y oscuro. Axe corre en los dos. Los tamaños táctiles, la visibilidad del foco y el movimiento reducido se comprueban en la página real, y un bloque que hace scroll lateral en un móvil falla en el ancho que lo mostró.
+
+La página compilada se pliega en un único documento HTML, con un tope de dos megabytes, y se sirve en un iframe de origen opaco con `connect-src 'none'` y `form-action 'none'`. Una persona puede escribir en un formulario, enviarlo y ver una animación. Nada llega a este sitio, a la sesión ni a la red. El bloque es código generado, así que el diseño asume que es hostil y le quita lo que la hostilidad podría usar.
+
+## El asistente propone, nunca encola
+
+La biblioteca también tiene un chat, y es un segundo sitio donde hay que impedir que la IA actúe por su cuenta. El asistente es un agente LangGraph que se sirve por server-sent events, con tools para leer la biblioteca, buscarla, leer un bloque, comprobar un brief y preparar uno.
+
+Cada tool de escritura prepara una propuesta y devuelve `queued: false`. La persona ve el brief, el tamaño y la categoría, y un botón lo encola. El asistente no puede gastar el cupo del mes decidiendo por ti, lo que también significa que una inyección de prompt en un brief no tiene a qué llegar: lo peor que puede hacer es proponer una tarea que una persona rechaza.
+
+Los mismos servicios están detrás de doce tools MCP para agentes externos. Ahí una escritura sí encola, porque el permiso se concedió en la pantalla de consentimiento OAuth, y toda tool sigue pasando por la misma moderación, el mismo cupo y la misma protección contra duplicados que la web.
+
+## El registro sobrevive a la ejecución
+
+Postgres es la fuente de verdad de tareas, pasos, ficheros, notas y checks. Cada etapa escribe su paso mientras corre, así que la página de la tarea puede enseñar una ejecución en marcha, una que falló y una que un reinicio interrumpió. Nada de una ejecución vive solo en el contexto del modelo.
+
+Ese registro es lo que hace que un intento fallido merezca quedarse. Tiene un render, las notas y el comentario del juez, y sigue visible. Una biblioteca que solo enseña aciertos es una biblioteca que no se puede auditar. Langfuse es una copia opcional de la traza, nunca la fuente de verdad, así que el producto funciona con él apagado.
+
+El worker es una función de Modal, no el proceso de la API. La API lo despierta cuando se encola una tarea, un cron de quince minutos es la red de seguridad, y la toma de una tarea usa `FOR UPDATE SKIP LOCKED`, así que dos workers nunca toman la misma.
+
+## Lo que hay dentro
+
+- La biblioteca y la página de detalle: prompt, ficheros, notas y comentarios del juez, checks del sandbox y la vista previa en vivo.
+- La página de la tarea, incluidos los intentos que fallaron y el motivo.
+- El chat con propuestas y confirmación, más doce tools MCP para agentes externos.
+- La librería de stock, con reutilización y su propia rúbrica.
+- Un cupo mensual, una caché exacta y un guard de duplicados.
+- 627 tests de backend entre unitarios e integración, con tokens de Supabase falsificados y un Postgres real.
+
+La identidad, la autorización y el servidor MCP vienen de MCPStack. Todo lo que hay desde el spec es nuevo: el enrutado por taxonomía, el constructor con su bucle de renders, el juez y su rúbrica, el pipeline de imágenes y el registro que mantiene públicos los intentos fallidos.

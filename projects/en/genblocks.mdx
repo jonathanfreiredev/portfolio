@@ -1,0 +1,145 @@
+---
+title: "GenBlocks"
+tagline: "A public library of UI components where a generated block ships only if an independent judge clears it."
+description: "GenBlocks is a library of UI components and stock images generated from a brief: an agent builds each one, and a separate judge decides whether it is good enough to publish."
+role: "Solo, design and engineering"
+timeline: "October 2026"
+context: "Personal project"
+statusLabel: "Live"
+highlights:
+  - "Two agents with a wall between them: the builder sees the render, the judge never saw the conversation"
+  - "Every dimension of the rubric has its own bar, so a high average cannot carry a weak one"
+  - "The rubric is a versioned document, and every score is stamped with the version of the text that produced it"
+  - "The spec picks a type from the library's taxonomy and the five blocks nearest to the brief"
+  - "Pictures pass a person gate and a safety gate before the judge, and are never stored before that"
+  - "A failed attempt stays public with its render, its scores and the judge's reason"
+updatedAt: "2026-10-23"
+slug: "genblocks"
+---
+
+GenBlocks is a public library of UI components and stock images generated from a brief. You describe the block you want, an agent writes it as a small project, and the result either joins the library or fails with its reason attached.
+
+Every generator can claim that. The claim here is narrower and harder to fake: a second agent, which never saw the conversation and cannot touch the artifact, reads the result and decides whether it is good enough. The scores, the sandbox report and the render are public on the item page. An attempt that misses stays visible with the same evidence, minus the publish.
+
+I built it on MCPStack, the template from the previous project. Identity, the authorization model and the MCP server were already solved there, so this project starts at the door and spends its effort on what comes through it. Most of what follows is the AI architecture: how a brief becomes a decision, how a builder sees its own work, and how a judge stays independent of the thing it grades.
+
+## The model was never the problem
+
+Ask a model to build a component and it will. Ask it whether the component is good and you get an opinion about its own work, which is the least useful signal in the system. A generator that stops when the model says it is done asks you to trust the model twice: once to build, and once to grade.
+
+The alternative is to put a second agent at the end, with no memory of what happened and no ability to change the result. It reads the artifact the way a reader would, scores it against a rubric, and its numbers decide. Everything else in GenBlocks exists to make that verdict mean something: the sandbox that renders the block, the checks it reports, the files the judge receives, and the page that keeps the attempt afterwards.
+
+## One brief, four stages
+
+A brief arrives from the chat, the API or an MCP client. All three call the same function, so none of them can skip the gates. An exact cache hit returns the finished block without spending quota. The month's allowance comes next, then text moderation and an image policy that refuses a brief asking for people or offers a rewrite without them.
+
+![A brief passing the gates, the spec, the builder and the judge, then splitting into a published block or a failed attempt that stays visible.](https://res.cloudinary.com/ddjovluur/image/upload/v1792763003/portfolio/blog/genblocks-pipeline-v2.png)
+
+Then four stages. The spec files the brief under one of the 25 block types. The builder writes the project and looks at it until it runs out of looks. The judge scores the finished attempt. The runner publishes it, or writes down why it did not.
+
+Each stage records its step in Postgres as it happens, so the task page is a record of the run rather than a summary reconstructed afterwards. One attempt per run: a retry is a person's decision with the brief in front of them, not something the system does on its own.
+
+## The spec reads the library before it decides
+
+Which type of block is this? A model answers, but not alone. Retrieval finds the five published blocks nearest to the brief, and their types are evidence of how the library files things. The taxonomy says which types exist. The model chooses one slug from that list, with a reason, and an answer outside the list fails the run instead of inventing a category.
+
+The copy is deterministic: the title is the brief's first clause and the description is the brief. Those were never judgment calls, and letting a model word them would add variance to the field a person scans in the library.
+
+The same retrieval guards against duplicates. A brief within a measured distance of a published block (0.50) is answered with that block instead of starting a run. A person who has seen the match can still ask for their own version, and that one is paid for like any other.
+
+Embeddings come from Voyage's multimodal model and live in Chroma, while Postgres remains the source of truth. When the index or the embedder is down, search falls back to text and the run continues. Retrieval is an improvement to the product, not a dependency that can stop it.
+
+## The builder has eyes
+
+The builder is a LangGraph agent with a small set of tools: write and read files, list the project, read a skill, look, and ask the library for a picture. It may write only under `src/`, with the entry point fixed. The mount and the global stylesheet belong to the scaffold, and editing them would mean changing the ruler it is measured with.
+
+![A loop of three steps: write only source files, look at the render at four widths and two themes, fix what the render shows, for up to six looks.](https://res.cloudinary.com/ddjovluur/image/upload/v1792762059/portfolio/blog/genblocks-loop.png)
+
+`look` is the part that changes the loop. It builds the project in a Modal sandbox and returns the checker's report with two renders, the block on a light page and on the dark one the site switches to, as images inside the tool result. The model reads them, fixes what it sees, and looks again.
+
+The budget counts looks, not model turns. Six is the default, and one look can spend four model turns. Reading a skill or writing a file costs tokens; the sandbox and the render cost money, so they are what the budget counts. When the looks are gone, `look` says so and the agent has to finish with what it has.
+
+Two details keep the loop honest. A look at an unchanged project does not rebuild anything: it returns the previous render and says nothing changed, which is the loop catching itself going round. And the static checks run inside the loop, before the sandbox, so a project that reaches for the network or an unapproved host is refused while the agent is still there to fix it.
+
+## The judge never saw the conversation
+
+![Two agents separated by a wall: the builder has the conversation, its tools, the files and the render; the judge sees the brief, every file, the sandbox report and both renders, with no tools and no memory of the conversation.](https://res.cloudinary.com/ddjovluur/image/upload/v1792762142/portfolio/blog/genblocks-two-rooms.png)
+
+The judge is one model call with no tools and no loop. It cannot edit the artifact, it does not see the chat that produced the brief, and it runs after the sandbox has closed. It receives the brief, every file of the project, the sandbox report and both renders. It is told what the checks found, not what that is worth: whether a failed layout check matters is exactly the judgment being asked for.
+
+The artifact is evidence, never instruction. A line inside the code that tells the judge to ignore the rubric or change a score is content to judge, and the frame says so before the files arrive. That stopped being a theoretical concern the moment strangers could write briefs.
+
+The answer has a shape the code can read: one score and one note per dimension, plus a summary. It is requested through function calling rather than strict JSON schema, because the answer is a map keyed by dimension names, and a strict schema would need a fixed list of keys, which would put the rubric's dimensions in two places. The answer is validated anyway: a dimension that was not asked for, or a missing one, fails the run instead of becoming a zero in a panel.
+
+The builder and the judge run the same model. What separates them is structure: tools, memory, and the ability to change what is being scored. The stable half of the judge's prompt goes first and the attempt after it, because cached input is a tenth of the price.
+
+## The gate is per dimension
+
+A block is scored on render, accessibility, visual, copy and compliance. Each dimension has its own bar:
+
+| Dimension | Bar |
+| --- | --- |
+| render | 85 |
+| accessibility | 80 |
+| visual | 75 |
+| copy | 75 |
+| compliance | 85 |
+
+The average is never the decision. A block that scores 92 in four dimensions and 70 in one does not publish, because the mean would hide exactly the failure a reader would notice. The stored verdict is the list of dimensions that missed, and a block publishes only when that list is empty. An image is scored on a shorter rubric (visual, prompt fit and compliance), with prompt fit at 75.
+
+The judge is never told the thresholds. A judge that knows where the bar is scores to the bar, and the verdict stops being an independent reading. It writes numbers; the code decides what they clear.
+
+```python backend/app/judge/scoring.py
+def missed(dimension: str, score: int) -> bool:
+    threshold = threshold_for(dimension)
+    return threshold is not None and score < threshold
+```
+
+The rubric itself is a document the judge reads, and its version is a hash of its text and its dimension list. Editing the rubric changes the version, and every attempt stores the version that scored it, so a number from a year ago can be read against the words that produced it. The dimension names are a contract in three places, the judge's schema, the database and the frontend labels, and the tests on both sides assert the same list. A dimension one side invented would be a row that reads as a zero.
+
+The thresholds live in settings rather than in the rubric, because they are calibration. They move when real generations show they should, and moving them does not rewrite what the rubric says.
+
+## Pictures have two gates before the judge
+
+![The picture path in five steps: the prompt is checked, the image is generated, screened for people and safety, judged on its own rubric and filed in the library; a refused picture is never stored.](https://res.cloudinary.com/ddjovluur/image/upload/v1792763200/portfolio/blog/genblocks-picture-path-v3.png)
+
+Stock pictures are generated by Black Forest Labs' FLUX through an asynchronous API: a request is queued, polled, and the finished sample is downloaded and discarded, because the provider's URL expires and was never meant to be served to anyone. The bytes are decoded, bounded and re-encoded before another service sees them, which is both a safety limit and a bill.
+
+Then two gates. A vision model refuses any picture with a person or a human-like figure, because the library has one visual rule and a prompt filter cannot guarantee what the generator made. Moderation looks for the categories the library does not publish. Only a picture that clears both goes to the judge, and only a picture the judge passes reaches Cloudinary. A refused picture never gets an address that could be served.
+
+The library is checked before the provider. A block asks for a picture by description, and if the image library already holds a close match it reuses that picture instead of paying for the same scene twice. The same prompt twice is refused, because the library answers a prompt with nearly the same image, and a band of three that turned out to be one picture cropped three ways is the kind of thing the judge catches the first time it runs for real. A block may use four pictures, and they join the public image library, so a later block can start with what this one already paid for.
+
+## The sandbox is where an agent is allowed to write code
+
+The harness is an agent writing files, which means the interesting question is not whether it can build a component but what the code is allowed to do. The answer is a sandbox that holds nothing worth stealing and can reach nothing worth reaching.
+
+Before the sandbox, two static checks read the source and the bundle: a script injection or a call to the network is fatal, and so is an asset from a host the site does not control. Inside, the project goes through the type checker, the linter and the build, then Playwright at four widths (390, 834, 1024 and 1440) in a light and a dark theme. Axe runs in both. Touch targets, focus visibility and reduced motion are checked on the real page, and a block that scrolls sideways on a phone fails on the width that showed it.
+
+The built page is folded into one HTML document, capped at two megabytes, and served in an iframe on an opaque origin with `connect-src 'none'` and `form-action 'none'`. A visitor can type in a form, submit it and watch an animation. Nothing reaches this site, the session or the network. The block is generated code, so the design assumes it is hostile and removes what hostility could use.
+
+## The assistant proposes, it never queues
+
+The library also has a chat, and it is a second place where the AI has to be stopped from acting on its own. The assistant is a LangGraph agent streamed over server-sent events, with tools to read the library, search it, read a block, check a brief and prepare one.
+
+Every write tool prepares a proposal and returns `queued: false`. The person sees the brief, the size and the category, and a button queues it. The assistant cannot spend the month's quota by deciding for you, which also means a prompt injection in a brief has nothing to reach: the worst it can do is propose a task a person declines.
+
+The same services sit behind twelve MCP tools for external agents. A write there does queue, because the permission was granted at the OAuth consent screen, and every tool still goes through the same moderation, quota and duplicate checks as the web app.
+
+## The record outlives the run
+
+Postgres is the source of truth for tasks, steps, files, scores and checks. Each stage writes its step while it runs, so the task page can show a run that is still going, one that failed, and one that a restart interrupted. Nothing about a run lives only in the model's context.
+
+That record is why a failed attempt is worth keeping. It has a render, the scores and the judge's note, and it stays visible. A library that only shows successes is a library you cannot audit. Langfuse is an optional copy of the trace, never the source of truth, so the product works with it switched off.
+
+The worker is a Modal function, not the API process. The API wakes it when a task is queued, a fifteen-minute schedule is the safety net, and a claim uses `FOR UPDATE SKIP LOCKED`, so two workers never take the same task.
+
+## What ships
+
+- The library and the item page: prompt, files, judge scores and notes, sandbox checks and the live preview.
+- The task page, including attempts that failed and the reason.
+- The chat with proposals and confirmation, plus twelve MCP tools for external agents.
+- The stock library, with reuse and its own rubric.
+- A monthly quota, an exact cache and a duplicate guard.
+- 627 backend tests across the unit and integration suites, with forged Supabase tokens and a real Postgres.
+
+Identity, authorization and the MCP server come from MCPStack. Everything from the spec onward is new: the taxonomy routing, the builder with its render loop, the judge and its rubric, the picture pipeline, and the record that keeps failed attempts public.
